@@ -1,0 +1,134 @@
+---
+title: "LDA"
+author: "Léopold MAURICE"
+format: pdf
+editor: visual
+---
+
+# Set up
+```{r}
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+```
+
+
+```{r}
+pacman::p_load(tidyverse,
+               lubridate,
+               here,
+               knitr,
+               quanteda,
+               quanteda.textstats,
+               stm,
+               topicmodels,
+               LDAvis,
+               ldatuning
+            )
+
+# Some little helps from the internet
+source("../src/helpers/lda_reports.R")
+```
+
+
+# Mise en place et pre processing
+
+```{r}
+read.csv("../data/raw/BASE_CCNE_vf.csv") -> CCNEAvis
+```
+
+
+```{r}
+load("cairn_abstracts_socio4.RData")
+seed = 1968
+ar$abstract <- str_replace_all(ar$abstract, "[']", " ")
+ar |> tibble::rowid_to_column("ID") -> ar
+cp <- corpus(ar$abstract, 
+             docvars = ar |> select(auteurs, 
+                                    titre, soustitre, revue, issue, year) |> as.data.frame(), 
+             docnames = ar$ID)
+tk <- tokens(cp, remove_punct = TRUE, remove_numbers = TRUE)
+dfm <- dfm(tk)
+toremove <- c(stopwords("french"))
+dfm <- dfm_remove(dfm, toremove)
+```
+
+```{r}
+textstat_frequency(dfm, n=100) |> select(feature) |> as.list()|> dput()
+```
+```{r}
+toremove <- c(stopwords("fr"),
+              c("article", 
+                "entre", 
+                "d’une", 
+                "plus", 
+                "comme", 
+                "partir", 
+                "d’un", 
+                "a", 
+                "montre",
+                "dont", "ainsi", "aussi", 
+"deux", "années", "analyse", "l’article", "comment",
+"permet", "tout", 
+"alors", "l’analyse", "cas", "depuis", "fait", 
+"part", "si", "faire", "manière", "recherche", "contexte", 
+"propose", "être", "auprès", 
+"trois", "travers", "bien", "met", "selon", "question","notamment", "partie", "peut", "elles", "différents", "souvent", "différentes", 
+"moins", "formation", "non", "façon"))
+dfm <- dfm_remove(dfm, toremove)
+
+```
+
+### On peut complexifier le pre processing
+
+# LDA
+
+## Topics modelling
+
+```{r}
+tm_data <- quanteda::convert(dfm, to = "topicmodels")
+tm_lda <- LDA(tm_data, k = 20, method = "Gibbs", 
+               control = list(seed = seed))
+```
+```{r}
+terms(tm_lda, 10) %>% kable()
+```
+
+## Décider de K:
+
+### ldatuning
+
+```{r ldatuning, cache=TRUE}
+tp_nb <- FindTopicsNumber(tm_data, topics = seq(5, 30), 
+                          metrics = c("Griffiths2004", "CaoJuan2009", 
+                                      "Arun2010", "Deveaud2014"),
+                          method = "Gibbs")
+```
+
+```{r ldatuning_plot}
+FindTopicsNumber_plot(tp_nb)
+```
+
+```{r ldatuning_plot_kable}
+kable(tp_nb)
+```
+
+## Shiny
+
+```{r}
+tm_data <- quanteda::convert(dfm, to = "topicmodels")
+tm_lda <- LDA(tm_data, k = 18, method = "Gibbs", 
+               control = list(seed = seed))
+```
+
+
+```{r}
+lda_js <- topicmodels2LDAvis(tm_lda) # issu de ldareports
+serVis(lda_js)
+```
+
+```{r}
+toLDAvis(stm_lda, stm_data$documents)
+
+```
+
+
+
