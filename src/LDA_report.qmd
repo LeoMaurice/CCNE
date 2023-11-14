@@ -12,6 +12,7 @@ knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 
 
 ```{r}
+if (!require("pacman")) install.packages("pacman"); library(pacman)
 pacman::p_load(tidyverse,
                lubridate,
                here,
@@ -22,68 +23,193 @@ pacman::p_load(tidyverse,
                topicmodels,
                LDAvis,
                ldatuning,
-               readr
+               readr,
+               quanteda.textplots,
+               ggprism
             )
 
 # Some little helps from the internet
 source("../src/helpers/lda_reports.R")
+
+seed = 1968
+set.seed(seed)
 ```
 
 
-# Mise en place et pre processing
+# Pre-processing
+## tokenisation
 
 ```{r}
 BASE_CCNE <- read_delim("../data/exterior/BASE_CCNE_vf_1.tsv", 
     delim = "\t", escape_double = FALSE, 
     col_types = cols(Date = col_date(format = "%d/%m/%Y"), 
         Date2 = col_date(format = "%Y-%m-%d")), 
-    trim_ws = TRUE)
+    trim_ws = TRUE)|>
+  select(Num_avis,
+         Date,
+         Titre,
+         txt_tot3,
+         Annee)|>
+  rename(num_avis=Num_avis,
+         avis = txt_tot3)
 
+BASE_CCNE$avis <- str_replace_all(BASE_CCNE$avis, "[']", " ")
+BASE_CCNE$avis <- str_replace_all(BASE_CCNE$avis, "[’]", " ")
+
+
+BASE_CCNE |> tibble::rowid_to_column("ID") -> BASE_CCNE
+cp <- corpus(BASE_CCNE$avis, 
+             docvars = BASE_CCNE |> select(
+                                    avis, Titre, Annee, Date) |> as.data.frame(), 
+             docnames = BASE_CCNE$num_avis)
+# tokenisation
+tk <- tokens(cp, remove_punct = TRUE, remove_numbers = TRUE)
 ```
 
+## Processing tokens
 
 ```{r}
-load("cairn_abstracts_socio4.RData")
-seed = 1968
-ar$abstract <- str_replace_all(ar$abstract, "[']", " ")
-ar |> tibble::rowid_to_column("ID") -> ar
-cp <- corpus(ar$abstract, 
-             docvars = ar |> select(auteurs, 
-                                    titre, soustitre, revue, issue, year) |> as.data.frame(), 
-             docnames = ar$ID)
-tk <- tokens(cp, remove_punct = TRUE, remove_numbers = TRUE)
+kwic(tk, "don", window=3)
+```
+
+RMQ : tous les dons correspondent il a un seul phénomène ? qui est celui du don comme acte gratuit. Perso je pense qu'il vaut mieux séparer car don de XXX réfère à un acte particulier. don seul réfère peut etre plus facilement alors au don en soit.
+
+On pourrait essayer de faire la distinction de même entre les synonymes pour :
+- code
+- personne : humaine, agée, handicapée, handicapée mentale
+
+Choix : 
+V1 : don divisé en plusieurs catégories mais pas le terme personne. car je pense que quand on écrit personne handicapée. On désigne deux choses en un : d'une part la qualité de personne en soi, d'autre part le handicap.
+
+Faut il inverser suppression des pluriels et choix des pattern ?
+
+```{r}
+# equivalence between differents words (or multiples words)
+important_expressions <- dictionary(list(
+    vntr = c("variable number of tandem repeat", "variable number tandem repeat"),
+    ccne = c("comité national consultatif d éthique",
+             "comité national d éthique",
+             "comité consultatif d éthique",
+             "comité d éthique",
+             "comité consultatif national d éthique"),
+    fin_de_vie = c("fin de vie"),
+    #personne_humaine = c("personne humaine","personnes humaines"),
+    #personne_agé = c("personne agée","personnes agées"),
+    cellule_souche = c("cellule souche","cellules souches"),
+    don_d_organe = c("don d organe","don d organes",
+                     "dons d organe","dons d organes"),
+    don_de_sang = c("don du sang","don de sang",
+                    "dons du sang","dons de sang"),
+    don_gamète = c("don d ovocyte", "don de gamète", "don d embryon",
+                   "don d ovocytes", "don de gamètes", "don d embryons", 
+                   "don de l embryon", "don de la gamète", "don de l ovocyte", 
+                   "don de ces ovocytes", "don de ses ovocytes", "don de sperme", 
+                   "don du sperme", "don de spermes",
+                   "dons d ovocyte", "dons de gamète", "dons d embryon",
+                   "dons d ovocytes", "dons de gamètes", "dons d embryons", 
+                   "dons de l embryon", "dons de la gamète", "dons de l ovocyte", 
+                   "dons de ces ovocytes", "dons de ses ovocytes", "dons de sperme", 
+                   "dons du sperme", "dons de spermes")
+))
+
+# suppression pluriel, genre
+
+tk <- tokens_compound(tk, pattern = important_expressions, case_insensitive = TRUE)
+
+replacement_dict <- dictionary(list(
+  embryon = c("embryon*"),
+  parent = c("parent*"),
+  enfant = c("enfant*"),
+  éthique = c("éthiques"),
+  médical = c("médical*"),
+  droit = c("droits"),
+  don = c("dons"),
+  femme = c("femmes"),
+  malade = c("malades"),
+  patient = c("patients"),
+  humain = c("humain*"), # risque de négliger les distinctions de genre ?
+  personne = c("personnes","personne"),
+  cellule = c("cellules"),
+  test = c("tests"),
+  génétique = c("génétiques"),
+  problème = c("problèmes"),
+  risque = c("risques"),
+  question = c("questions"),
+  résultat = c("résultats")
+))
+
+tk <- tokens_lookup(tk, replacement_dict, exclusive = FALSE)
+
+# numbers and dates tokenisation
+
+number_pattern <- "\\b\\d+\\b"
+
+# Define a pattern to match dates (simple example, you may need to adjust based on your date format)
+date_pattern <- "\\b\\d{4}-\\d{2}-\\d{2}\\b"
+
+# Replace numbers and dates with labels
+tk <- tokens_replace(tk, pattern = date_pattern, replacement = "$DATE$")
+tk <- tokens_replace(tk, pattern = number_pattern, replacement = "$NUMBER$")
+
+# DFM format
 dfm <- dfm(tk)
-toremove <- c(stopwords("french"))
+
+# remove stop words, V1
+toremove <- c(stopwords("fr"), stopwords("en"),
+              c("être", "a", "plus", "peut", "comme", 
+              "d’une", "cas", "d’un", 
+              "si", "entre", "fait", "non", "doit", 
+              "dont", "aussi", 
+              "ainsi", "tout", "faire", "donc", 
+              "très", "°", "peuvent", "chez", 
+              "bien", "où", "toute",
+              "autres", "elles", 
+              "moins", "in", "après", 
+              "encore", "notamment", "certains", 
+              "alors", "pourrait", "mise",
+              "part", "autre","tous", "possible",
+              "exemple", "n’est", "avoir", "souvent","of",">","<","+","u","NA"),
+              c("qu’il", "avant", 
+              "c’est", "certaines", 
+              "selon", "celle", 
+              "doivent", "déjà", 
+              "celui", "lors", "plusieurs", 
+              "sous", "toujours", 
+              "depuis", "toutes", "concernant", 
+              "devrait", "seulement",
+              "faut", "telle",
+              "également", "cependant", "façon", "fois",
+              "prendre", "point", "nécessaire", 
+              "p", "partir", "donner",
+              "dès", "ni", "nouvelles",
+              "aujourd","hui","agit",
+              "objet","place","projet",
+              "deux"
+              )
+)
 dfm <- dfm_remove(dfm, toremove)
+
 ```
 
 ```{r}
 textstat_frequency(dfm, n=100) |> select(feature) |> as.list()|> dput()
 ```
 ```{r}
-toremove <- c(stopwords("fr"),
-              c("article", 
-                "entre", 
-                "d’une", 
-                "plus", 
-                "comme", 
-                "partir", 
-                "d’un", 
-                "a", 
-                "montre",
-                "dont", "ainsi", "aussi", 
-"deux", "années", "analyse", "l’article", "comment",
-"permet", "tout", 
-"alors", "l’analyse", "cas", "depuis", "fait", 
-"part", "si", "faire", "manière", "recherche", "contexte", 
-"propose", "être", "auprès", 
-"trois", "travers", "bien", "met", "selon", "question","notamment", "partie", "peut", "elles", "différents", "souvent", "différentes", 
-"moins", "formation", "non", "façon"))
-dfm <- dfm_remove(dfm, toremove)
-
+kwic(tk, "comité", window=4)
 ```
 
+
+```{r}
+palette <-ggprism::prism_color_pal("winter_bright")(9)
+textplot_wordcloud(dfm, min_count = 750, random_order = FALSE, rotation = 0.25,
+                   color = palette)
+```
+
+
 ### On peut complexifier le pre processing
+
+AJOUTER UNE LEMMATIZATION ? pour éviter ce que j'ai déjà fait ?
+2.  supprimer les mots très rares, a minima les hapax (une occurrence dans le corpus);
 
 # LDA
 
@@ -91,38 +217,73 @@ dfm <- dfm_remove(dfm, toremove)
 
 ```{r}
 tm_data <- quanteda::convert(dfm, to = "topicmodels")
-tm_lda <- LDA(tm_data, k = 20, method = "Gibbs", 
+tm_lda <- LDA(tm_data, k = 14, method = "Gibbs", 
                control = list(seed = seed))
 ```
 ```{r}
-terms(tm_lda, 10) %>% kable()
+terms(tm_lda, 10) |> kable()
 ```
 
-## Décider de K:
-
-### ldatuning
+### Décider de K avec LDAtuning
 
 ```{r ldatuning, cache=TRUE}
-tp_nb <- FindTopicsNumber(tm_data, topics = seq(5, 30), 
+tp_nb <- FindTopicsNumber(tm_data, topics = seq(5, 20), 
                           metrics = c("Griffiths2004", "CaoJuan2009", 
                                       "Arun2010", "Deveaud2014"),
                           method = "Gibbs")
 ```
 
 ```{r ldatuning_plot}
-FindTopicsNumber_plot(tp_nb)
+FindTopicsNumber_plot(tp_nb)+
+  theme_prism()+
+  scale_colour_prism("winter_bright")
+  
 ```
 
 ```{r ldatuning_plot_kable}
 kable(tp_nb)
 ```
 
-## Shiny
+## Avec STM
+
+## Faire tourner le modèle: première implémentation avec stm
+
+```{r}
+stm_data <- convert(dfm, to = "stm")
+
+stm_lda <- stm(documents = stm_data$documents, 
+               vocab = stm_data$vocab,
+               K=14, 
+               seed = seed, verbose = FALSE)
+```
+
+### exclusivité et cohérence
+```{r}
+K <- seq(10, 20)
+diag <- searchK(stm_data$documents, stm_data$vocab, 
+                K, 
+                verbose=FALSE)
+```
+
+```{r}
+map(diag$results, unlist) |> 
+  bind_cols() |> 
+  ggplot(aes(exclus, semcoh, label = K)) +
+    geom_point() +
+    geom_label() +
+  theme_prism()
+```
+
+
+## Interpréter
+
+### Words by topics : LDAvis
 
 ```{r}
 tm_data <- quanteda::convert(dfm, to = "topicmodels")
-tm_lda <- LDA(tm_data, k = 18, method = "Gibbs", 
+tm_lda <- LDA(tm_data, k = 14, method = "Gibbs", 
                control = list(seed = seed))
+# toLDAvis(stm_lda, stm_data$documents)
 ```
 
 
@@ -131,10 +292,25 @@ lda_js <- topicmodels2LDAvis(tm_lda) # issu de ldareports
 serVis(lda_js)
 ```
 
+### Topics by documents
 ```{r}
-toLDAvis(stm_lda, stm_data$documents)
-
+View(posterior(tm_lda)$topics)
 ```
 
+## Analyse
 
+### Graph par années
 
+```{r}
+full_stm <- stm_data$meta |> 
+  bind_cols(stm_lda$theta |> 
+              as_tibble() |> 
+              rename_with(~str_replace(.x, "V", "tp_"), starts_with("V")))
+full_stm |> select(Annee, starts_with("tp")) |>
+  pivot_longer(-Annee) |> 
+  group_by(Annee, name) |> 
+  summarize(m = mean(value)) |> 
+  ggpubr::ggscatter(x="Annee", y = "m", facet.by = "name", xlab = "Année",ylab = "Mean Prevalence")+
+  geom_line()+
+  theme_prism()
+```
