@@ -21,7 +21,8 @@ pacman::p_load(tidyverse,
                stm,
                topicmodels,
                LDAvis,
-               ldatuning
+               ldatuning,
+               readr
             )
 
 # Some little helps from the internet
@@ -32,7 +33,12 @@ source("../src/helpers/lda_reports.R")
 # Mise en place et pre processing
 
 ```{r}
-read.csv("../data/raw/BASE_CCNE_vf.csv") -> CCNEAvis
+BASE_CCNE <- read_delim("../data/exterior/BASE_CCNE_vf_1.tsv", 
+    delim = "\t", escape_double = FALSE, 
+    col_types = cols(Date = col_date(format = "%d/%m/%Y"), 
+        Date2 = col_date(format = "%Y-%m-%d")), 
+    trim_ws = TRUE)
+
 ```
 
 
