@@ -54,7 +54,8 @@ sig_text <- function(lda,corpus,nb=1,topic_range=1:length(unique(topics(lda)))) 
 }
 
 ## https://gist.github.com/trinker/477d7ae65ff6ca73cace
-topicmodels2LDAvis <- function(x, ...){
+topicmodels2LDAvis <- function(x, reorder.topics = FALSE, ...){
+  print(reorder.topics)
   post <- topicmodels::posterior(x)
   if (ncol(post[["topics"]]) < 3) stop("The model must contain > 2 topics")
   mat <- x@wordassignments
@@ -63,7 +64,8 @@ topicmodels2LDAvis <- function(x, ...){
     theta = post[["topics"]],
     vocab = colnames(post[["terms"]]),
     doc.length = slam::row_sums(mat, na.rm = TRUE),
-    term.frequency = slam::col_sums(mat, na.rm = TRUE)
+    term.frequency = slam::col_sums(mat, na.rm = TRUE),
+    reorder.topics = FALSE
   )
 }
 

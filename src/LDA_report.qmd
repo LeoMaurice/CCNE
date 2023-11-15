@@ -35,11 +35,11 @@ bibliography: references.bib
 ---
 
 # Set up
+
 ```{r}
 #| eval: true
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 ```
-
 
 ```{r}
 #| eval: true
@@ -67,8 +67,8 @@ seed = 1968
 set.seed(seed)
 ```
 
-
 # Pre-processing
+
 ## tokenisation
 
 ```{r}
@@ -95,10 +95,11 @@ BASE_CCNE |> tibble::rowid_to_column("ID") -> BASE_CCNE
 cp <- corpus(BASE_CCNE$avis, 
              docvars = BASE_CCNE |> select(
                                     avis, Titre, Annee, Date) |> as.data.frame(), 
-             docnames = BASE_CCNE$num_avis)
+             docnames = BASE_CCNE$ID)
 # tokenisation
 tk <- tokens(cp, remove_punct = TRUE, remove_numbers = TRUE)
 ```
+
 ```{r}
 #| eval: true
 #| output: true
@@ -109,12 +110,9 @@ kwic(tk, "don", window=3) |> sample()
 
 RMQ : tous les dons correspondent il a un seul phénomène ? qui est celui du don comme acte gratuit. Perso je pense qu'il vaut mieux séparer car don de XXX réfère à un acte particulier. don seul réfère peut etre plus facilement alors au don en soit.
 
-On pourrait essayer de faire la distinction de même entre les synonymes pour :
-- code
-- personne : humaine, agée, handicapée, handicapée mentale
+On pourrait essayer de faire la distinction de même entre les synonymes pour : - code - personne : humaine, agée, handicapée, handicapée mentale
 
-Choix : 
-V1 : don divisé en plusieurs catégories mais pas le terme personne. car je pense que quand on écrit personne handicapée. On désigne deux choses en un : d'une part la qualité de personne en soi, d'autre part le handicap.
+Choix : V1 : don divisé en plusieurs catégories mais pas le terme personne. car je pense que quand on écrit personne handicapée. On désigne deux choses en un : d'une part la qualité de personne en soi, d'autre part le handicap.
 
 Faut il inverser suppression des pluriels et choix des pattern ?
 
@@ -224,7 +222,7 @@ toremove <- c(stopwords("fr"), stopwords("en"),
               "dès", "ni", "nouvelles",
               "aujourd","hui","agit",
               "objet","place","projet",
-              "deux"
+              "deux","ment","e"
               )
 )
 dfm <- dfm_remove(dfm, toremove)
@@ -234,10 +232,10 @@ dfm <- dfm_remove(dfm, toremove)
 ```{r}
 textstat_frequency(dfm, n=100) |> select(feature) |> as.list()|> dput()
 ```
+
 ```{r}
 kwic(tk, "comité", window=4)
 ```
-
 
 ```{r}
 #| eval: true
@@ -250,11 +248,10 @@ textplot_wordcloud(dfm, min_count = 750, random_order = FALSE, rotation = 0.25,
                    color = palette)
 ```
 
-
 ### On peut complexifier le pre processing
 
-1. Lemmatization ? pour éviter ce que j'ai déjà fait avec les pluriels ? : meh en français
-2. Supprimer les mots très rares, a minima les hapax (une occurrence dans le corpus);
+1.  Lemmatization ? pour éviter ce que j'ai déjà fait avec les pluriels ? : meh en français
+2.  Supprimer les mots très rares, a minima les hapax (une occurrence dans le corpus);
 
 # LDA
 
@@ -288,6 +285,7 @@ kable(tp_nb)
 %### Avec STM
 
 ### exclusivité et cohérence
+
 ```{r}
 K <- seq(10, 20)
 diag <- searchK(stm_data$documents, stm_data$vocab, 
@@ -308,9 +306,8 @@ map(diag$results, unlist) |>
 
 ```{r}
 #| eval: true
-num_topic = 14
+num_topic = 11
 ```
-
 
 ### implémanté avec topicmodels
 
@@ -342,7 +339,7 @@ stm_data <- convert(dfm, to = "stm")
 
 stm_lda <- stm(documents = stm_data$documents, 
                vocab = stm_data$vocab,
-               K=14, 
+               K=num_topic, 
                seed = seed, verbose = FALSE)
 
 stm_lda$beta$logbeta[[1]] %>% 
@@ -359,6 +356,27 @@ toLDAvis(stm_lda, stm_data$documents)
 ```
 
 ## Analyse
+
+### Topics by documents
+
+```{r}
+
+posterior(tm_lda)$topics |> 
+  as.data.frame() |>
+  rename_all(~ paste0("topic ", .)) |>
+  tibble::rowid_to_column("ID") |>
+  left_join(BASE_CCNE, by="ID") -> tm_metadata
+```
+
+```{r}
+top3_per_topic <- tm_metadata |>
+  pivot_longer(cols = starts_with("topic "), names_to = "topic", values_to = "prevalence") |>
+  group_by(topic) |>
+  top_n(3, prevalence) |> 
+  arrange("topic") |>
+  select("topic","prevalence","Date","num_avis","Titre") |>
+  View()
+```
 
 ### Graph par années
 
