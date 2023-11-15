@@ -1,17 +1,49 @@
 ---
-title: "LDA"
-author: "Léopold MAURICE"
-format: pdf
-editor: visual
+title: "Housing & Political Communication"
+author: "Léopold MAURICE, MZES,Universität Mannheim/ENSAE"
+date: "2023-07-11"
+output:
+	html_document:
+	toc: yes
+	pdf_document: default
+	project: Housing & Political Communication
+supervision: Dr. Denis COHEN, MZES, Universität Mannheim
+format:
+	html:
+	toc: true
+	number-sections: true
+	colorlinks: true
+	geometry:
+		- top=10mm
+		- left=20mm
+		- right=20mm
+		- bottom = 10mm
+		- heightrounded
+	highlight-style: github
+	fontfamily: libertinus
+	documentclass: report
+execute:
+	eval: false
+	message: false
+	warning: false
+	echo: false
+	output: true
+	error: true
+	editor: visual
+citation_package: biblatex
+bibliography: references.bib
 ---
 
 # Set up
 ```{r}
+#| eval: true
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 ```
 
 
 ```{r}
+#| eval: true
+
 if (!require("pacman")) install.packages("pacman"); library(pacman)
 pacman::p_load(tidyverse,
                lubridate,
@@ -40,6 +72,8 @@ set.seed(seed)
 ## tokenisation
 
 ```{r}
+#| eval: true
+
 BASE_CCNE <- read_delim("../data/exterior/BASE_CCNE_vf_1.tsv", 
     delim = "\t", escape_double = FALSE, 
     col_types = cols(Date = col_date(format = "%d/%m/%Y"), 
@@ -65,11 +99,12 @@ cp <- corpus(BASE_CCNE$avis,
 # tokenisation
 tk <- tokens(cp, remove_punct = TRUE, remove_numbers = TRUE)
 ```
-
-## Processing tokens
-
 ```{r}
-kwic(tk, "don", window=3)
+#| eval: true
+#| output: true
+#| fig-cap: Examples de contexte autour du mot 'don'
+#| label: tbl-contexte_don
+kwic(tk, "don", window=3) |> sample()
 ```
 
 RMQ : tous les dons correspondent il a un seul phénomène ? qui est celui du don comme acte gratuit. Perso je pense qu'il vaut mieux séparer car don de XXX réfère à un acte particulier. don seul réfère peut etre plus facilement alors au don en soit.
@@ -84,6 +119,8 @@ V1 : don divisé en plusieurs catégories mais pas le terme personne. car je pen
 Faut il inverser suppression des pluriels et choix des pattern ?
 
 ```{r}
+#| eval: true
+
 # equivalence between differents words (or multiples words)
 important_expressions <- dictionary(list(
     vntr = c("variable number of tandem repeat", "variable number tandem repeat"),
@@ -109,7 +146,10 @@ important_expressions <- dictionary(list(
                    "dons d ovocytes", "dons de gamètes", "dons d embryons", 
                    "dons de l embryon", "dons de la gamète", "dons de l ovocyte", 
                    "dons de ces ovocytes", "dons de ses ovocytes", "dons de sperme", 
-                   "dons du sperme", "dons de spermes")
+                   "dons du sperme", "dons de spermes"),
+    santé_publique = c("santé publique"),
+    sécurité_sociale = c("sécurité sociale"),
+    assurance_maladie = c("assurance_maladie")
 ))
 
 # suppression pluriel, genre
@@ -200,6 +240,11 @@ kwic(tk, "comité", window=4)
 
 
 ```{r}
+#| eval: true
+#| output: true
+#| fig-cap: Mots les plus fréquents dans le corpus
+#| fig-subcap: La taille est proportionnelle à la fréquence
+#| label: fig-wordcloud
 palette <-ggprism::prism_color_pal("winter_bright")(9)
 textplot_wordcloud(dfm, min_count = 750, random_order = FALSE, rotation = 0.25,
                    color = palette)
@@ -208,32 +253,28 @@ textplot_wordcloud(dfm, min_count = 750, random_order = FALSE, rotation = 0.25,
 
 ### On peut complexifier le pre processing
 
-AJOUTER UNE LEMMATIZATION ? pour éviter ce que j'ai déjà fait ?
-2.  supprimer les mots très rares, a minima les hapax (une occurrence dans le corpus);
+1. Lemmatization ? pour éviter ce que j'ai déjà fait avec les pluriels ? : meh en français
+2. Supprimer les mots très rares, a minima les hapax (une occurrence dans le corpus);
 
 # LDA
 
-## Topics modelling
+## Find number of topics
+
+### Métriques
+
+%### using topicmodels
 
 ```{r}
+#| eval: true
+#| output: true
+#| fig-cap: Evolution des différentes métriques en fonction du nombre de topics
+#| fig-subcap: Commenter métriques/résultats
+#| label: fig-lda-metrics
 tm_data <- quanteda::convert(dfm, to = "topicmodels")
-tm_lda <- LDA(tm_data, k = 14, method = "Gibbs", 
-               control = list(seed = seed))
-```
-```{r}
-terms(tm_lda, 10) |> kable()
-```
-
-### Décider de K avec LDAtuning
-
-```{r ldatuning, cache=TRUE}
 tp_nb <- FindTopicsNumber(tm_data, topics = seq(5, 20), 
                           metrics = c("Griffiths2004", "CaoJuan2009", 
                                       "Arun2010", "Deveaud2014"),
                           method = "Gibbs")
-```
-
-```{r ldatuning_plot}
 FindTopicsNumber_plot(tp_nb)+
   theme_prism()+
   scale_colour_prism("winter_bright")
@@ -244,18 +285,7 @@ FindTopicsNumber_plot(tp_nb)+
 kable(tp_nb)
 ```
 
-## Avec STM
-
-## Faire tourner le modèle: première implémentation avec stm
-
-```{r}
-stm_data <- convert(dfm, to = "stm")
-
-stm_lda <- stm(documents = stm_data$documents, 
-               vocab = stm_data$vocab,
-               K=14, 
-               seed = seed, verbose = FALSE)
-```
+%### Avec STM
 
 ### exclusivité et cohérence
 ```{r}
@@ -274,27 +304,58 @@ map(diag$results, unlist) |>
   theme_prism()
 ```
 
-
-## Interpréter
-
-### Words by topics : LDAvis
+## First model : classic LDA
 
 ```{r}
-tm_data <- quanteda::convert(dfm, to = "topicmodels")
-tm_lda <- LDA(tm_data, k = 14, method = "Gibbs", 
+#| eval: true
+num_topic = 14
+```
+
+
+### implémanté avec topicmodels
+
+```{r}
+#| eval: true
+#| output: true
+#| fig-cap: Top 10 mots par topic, estimation pour 14 topic avec topicmodels
+#| label: kbl-lda-tm
+tm_lda <- LDA(tm_data, k = num_topic, method = "Gibbs", 
                control = list(seed = seed))
-# toLDAvis(stm_lda, stm_data$documents)
+terms(tm_lda, 10) |> kable()
 ```
 
-
 ```{r}
-lda_js <- topicmodels2LDAvis(tm_lda) # issu de ldareports
-serVis(lda_js)
+tm_lda_js <- topicmodels2LDAvis(tm_lda) # issu de ldareports
+serVis(tm_lda_js)
 ```
 
-### Topics by documents
+### implémanté avec STM
+
 ```{r}
-View(posterior(tm_lda)$topics)
+#| eval: true
+#| output: true
+#| fig-cap: Top 10 mots par topic, estimation pour 14 topic avec stm
+#| label: kbl-lda-tm
+
+
+stm_data <- convert(dfm, to = "stm")
+
+stm_lda <- stm(documents = stm_data$documents, 
+               vocab = stm_data$vocab,
+               K=14, 
+               seed = seed, verbose = FALSE)
+
+stm_lda$beta$logbeta[[1]] %>% 
+  t() %>% 
+  as_tibble() %>% 
+  mutate(word = stm_lda$vocab, .before = V1) %>% 
+  rename_with(~str_replace(.x, "V", "tp_"), starts_with("V")) %>% 
+  mutate(across(starts_with("tp_"), ~exp(.x)))
+
+```
+
+```{r}
+toLDAvis(stm_lda, stm_data$documents)
 ```
 
 ## Analyse
@@ -302,6 +363,10 @@ View(posterior(tm_lda)$topics)
 ### Graph par années
 
 ```{r}
+#| eval: true
+#| output: true
+#| fig-cap: Mean topic prevalence in the corpus by years
+#| label: fig-lda-time
 full_stm <- stm_data$meta |> 
   bind_cols(stm_lda$theta |> 
               as_tibble() |> 
@@ -313,4 +378,16 @@ full_stm |> select(Annee, starts_with("tp")) |>
   ggpubr::ggscatter(x="Annee", y = "m", facet.by = "name", xlab = "Année",ylab = "Mean Prevalence")+
   geom_line()+
   theme_prism()
+```
+
+### Topic prevalence by topics
+
+```{r}
+#| eval: true
+#| output: true
+#| fig-cap: Topic Prevalence by documents
+#| label: fig-lda-prevalence_doc
+stm_lda$theta %>% 
+  as_tibble() %>% 
+  rename_with(~str_replace(.x, "V", "tp_"), starts_with("V"))
 ```

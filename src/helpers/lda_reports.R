@@ -67,3 +67,27 @@ topicmodels2LDAvis <- function(x, ...){
   )
 }
 
+
+stm2LDAvis <- function(stm_model) {
+  # Extract number of topics from the STM model
+  num_topics <- stm_model$K
+  
+  # Extract topic-term matrix
+  topic_term_matrix <- as.matrix(terms(stm_model, K = num_topics))
+  
+  # Extract document-topic matrix
+  document_topic_matrix <- as.data.frame(theta(stm_model))
+  
+  # Create JSON for LDAvis
+  json_data <- createJSON(
+    lambda = topic_term_matrix,
+    theta = document_topic_matrix,
+    doc.labels = rownames(document_topic_matrix),
+    vocab = colnames(topic_term_matrix),
+    term.frequency = rowSums(topic_term_matrix),
+    plot.opts = list(width = 800, height = 400)
+  )
+  
+  return(json_data)
+}
+
