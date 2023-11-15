@@ -1,38 +1,48 @@
 ---
-title: "Housing & Political Communication"
-author: "Léopold MAURICE, MZES,Universität Mannheim/ENSAE"
+title: "CCNE LDA"
+author: "Léopold MAURICE, ENSAE"
 date: "2023-07-11"
-output:
-	html_document:
-	toc: yes
-	pdf_document: default
-	project: Housing & Political Communication
-supervision: Dr. Denis COHEN, MZES, Universität Mannheim
+project: CCNE
+supervision: Pr. Emmanuel Didier, CMH/ENS/EHESS
+output-ext: html
 format:
-	html:
-	toc: true
-	number-sections: true
-	colorlinks: true
-	geometry:
-		- top=10mm
-		- left=20mm
-		- right=20mm
-		- bottom = 10mm
-		- heightrounded
-	highlight-style: github
-	fontfamily: libertinus
-	documentclass: report
+  html:
+    toc: true
+    number-sections: true
+    colorlinks: true
+    geometry:
+      - top=10mm
+      - left=20mm
+      - right=20mm
+      - bottom=10mm  
+      - heightrounded
+    highlight-style: github
+    fontfamily: libertinus
+    documentclass: report
+    fig-width: 8
+    fig-height: 8
+  pdf:
+    documentclass: report
+    papersize: a4
+    toc: true
+    toc-depth: 4
+    number-sections: true
+    number-depth: 3
+    colorlinks: true
+    fig-width: 8
+    fig-height: 8
+    keep-tex: false
 execute:
-	eval: false
-	message: false
-	warning: false
-	echo: false
-	output: true
-	error: true
-	editor: visual
-citation_package: biblatex
-bibliography: references.bib
+  eval: false
+  message: false
+  warning: false
+  echo: false
+  output: true
+  error: true
+editor: visual
 ---
+
+citation_package: biblatex bibliography: references.bib
 
 # Set up
 
@@ -57,7 +67,9 @@ pacman::p_load(tidyverse,
                ldatuning,
                readr,
                quanteda.textplots,
-               ggprism
+               ggprism,
+               RJSONIO,
+               ggrepel
             )
 
 # Some little helps from the internet
@@ -313,26 +325,33 @@ num_topic = 11
 
 ```{r}
 #| eval: true
-#| output: true
-#| fig-cap: Top 10 mots par topic, estimation pour 14 topic avec topicmodels
-#| label: kbl-lda-tm
+
 tm_lda <- LDA(tm_data, k = num_topic, method = "Gibbs", 
                control = list(seed = seed))
 terms(tm_lda, 10) |> kable()
 ```
 
+
+
 ```{r}
-tm_lda_js <- topicmodels2LDAvis(tm_lda) # issu de ldareports
+#| output: true
+#| fig-cap: Top 10 mots par topic, estimation pour 14 topic avec topicmodels
+#| label: tbl-lda-tm
+report_topics_table(tm_lda)
+```
+
+```{r}
+tm_lda_js <- topicmodels2LDAvis(tm_lda, reorder.topics = FALSE) # issu de ldareports
 serVis(tm_lda_js)
 ```
 
 ### implémanté avec STM
 
 ```{r}
-#| eval: true
+#| eval: false
 #| output: true
 #| fig-cap: Top 10 mots par topic, estimation pour 14 topic avec stm
-#| label: kbl-lda-tm
+#| label: tbl-lda-stm
 
 
 stm_data <- convert(dfm, to = "stm")
@@ -352,16 +371,65 @@ stm_lda$beta$logbeta[[1]] %>%
 ```
 
 ```{r}
-toLDAvis(stm_lda, stm_data$documents)
+toLDAvis(stm_lda, stm_data$documents,reorder.topics = FALSE)
 ```
 
 ## Analyse
 
+### Multidimensional Scaling
+
+```{r}
+#| eval: true
+RJSONIO::fromJSON(tm_lda_js) -> tm_lda_ldavis
+tm_lda_ldavis[["topic.order"]] -> ordre_ldavis
+RJSONIO::fromJSON(tm_lda_js)[["mdsDat"]] |> 
+  as.data.frame() |>
+  rename(order = topics)|>
+  mutate(topics = ordre_ldavis[order])-> tm_msd
+```
+
+```{r}
+ggpubr::ggscatter(tm_msd,x="x",y="y", size = "Freq", 
+                  xlab = "PC1", ylab = "PC2",
+                  alpha=0.6,color = "#00AFBB",
+                  label = "topics",
+                  label.rectangle = TRUE)+
+  scale_x_continuous(limits = symmetric_limits) +
+  scale_y_continuous(limits = symmetric_limits) +
+  geom_quadrant_lines(linetype = "solid") +
+  scale_size_area(max_size=12,limits=c(0,41), breaks = c(0,2,6,10,40))+
+  theme_minimal()
+```
+
+```{r}
+#| eval: true
+#| output: true
+#| fig-cap: Intertopic Distance Map (PCA, multidimensional scaling)
+#| fig-subcap: Marker size is proportionnal to topic prevalence
+ggplot(tm_msd, aes(x = x, y = y, label = topics)) +
+  geom_point(aes(size = Freq), alpha = 0.6, color = "#00AFBB") +
+  geom_label(
+    box.padding = 0.3,
+    point.padding = 0.1,
+    size = 3,
+    color = "black",
+    nudge_x = -0.02,
+    nudge_y = 0.00
+  )+
+  scale_x_continuous(limits = symmetric_limits) +
+  scale_y_continuous(limits = symmetric_limits) +
+  geom_quadrant_lines(linetype = "solid") +
+  scale_size_area(max_size = 20, limits = c(0, 41), breaks = c(0, 2, 6, 10, 40)) +
+  theme_minimal()
+```
+
 ### Topics by documents
 
 ```{r}
+#| eval: true
 
-posterior(tm_lda)$topics |> 
+post <- posterior(tm_lda)
+post$topics |> 
   as.data.frame() |>
   rename_all(~ paste0("topic ", .)) |>
   tibble::rowid_to_column("ID") |>
@@ -369,13 +437,22 @@ posterior(tm_lda)$topics |>
 ```
 
 ```{r}
-top3_per_topic <- tm_metadata |>
+#| eval: true
+#| output: true
+#| fig-cap: TOP3 documents where each topics is the more relevant
+#| label: tbl-lda-top3doc
+
+ordre_topics <- data.frame(topic = paste("topic", ordre_ldavis), ordre = 1:length(ordre_ldavis))
+
+tm_metadata |>
   pivot_longer(cols = starts_with("topic "), names_to = "topic", values_to = "prevalence") |>
+  left_join(ordre_topics, by = "topic")|> 
   group_by(topic) |>
   top_n(3, prevalence) |> 
-  arrange("topic") |>
-  select("topic","prevalence","Date","num_avis","Titre") |>
-  View()
+  ungroup()|>
+  arrange(ordre, desc(prevalence)) |>
+  select("topic","num_avis","Titre","prevalence","Date","ordre") |>
+  rename(Topic = topic, Prevalence = prevalence, "N° Avis"=num_avis)
 ```
 
 ### Graph par années
@@ -385,6 +462,22 @@ top3_per_topic <- tm_metadata |>
 #| output: true
 #| fig-cap: Mean topic prevalence in the corpus by years
 #| label: fig-lda-time
+
+tm_metadata|>
+  select(Annee, starts_with("topic")) |>
+  pivot_longer(-Annee, names_to = "topic") |>
+  left_join(ordre_topics, by = "topic")|> 
+  group_by(Annee, topic, ordre) |> 
+  summarize(moyenne = mean(value)) |> 
+  ggpubr::ggscatter(x="Annee", y = "moyenne", facet.by = "ordre", panel.labs = list(ordre = paste("topic",ordre_ldavis)), xlab = "Année",ylab = "Mean Prevalence")+
+  geom_line()+
+  theme_prism()
+```
+
+%### with STM
+
+```{r}
+
 full_stm <- stm_data$meta |> 
   bind_cols(stm_lda$theta |> 
               as_tibble() |> 
@@ -396,16 +489,4 @@ full_stm |> select(Annee, starts_with("tp")) |>
   ggpubr::ggscatter(x="Annee", y = "m", facet.by = "name", xlab = "Année",ylab = "Mean Prevalence")+
   geom_line()+
   theme_prism()
-```
-
-### Topic prevalence by topics
-
-```{r}
-#| eval: true
-#| output: true
-#| fig-cap: Topic Prevalence by documents
-#| label: fig-lda-prevalence_doc
-stm_lda$theta %>% 
-  as_tibble() %>% 
-  rename_with(~str_replace(.x, "V", "tp_"), starts_with("V"))
 ```
