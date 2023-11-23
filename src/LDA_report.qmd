@@ -47,11 +47,6 @@ citation_package: biblatex bibliography: references.bib
 # Set up
 
 ```{r}
-#| eval: false
-knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
-```
-
-```{r}
 #| eval: true
 
 if (!require("pacman")) install.packages("pacman"); library(pacman)
@@ -70,7 +65,8 @@ pacman::p_load(tidyverse,
                ggprism,
                ggpmisc,
                RJSONIO,
-               ggrepel
+               ggrepel,
+               ggcorrplot
             )
 
 # Some little helps from the internet
@@ -79,10 +75,9 @@ source("../src/helpers/lda_reports.R")
 seed = 1968
 set.seed(seed)
 ```
-
 # Pre-processing
 
-## tokenisation
+## Premiers prétraitements
 
 ```{r}
 #| eval: true
@@ -103,7 +98,14 @@ BASE_CCNE <- read_delim("../data/exterior/BASE_CCNE_vf_1.tsv",
 BASE_CCNE$avis <- BASE_CCNE$avis|>
   str_replace_all("[']", " ") |>
   str_replace_all("[’]", " ") |>
-  str_replace_all("[`]", " ")
+  str_replace_all("[`]", " ") |>
+  str_replace_all("\r", " ") |>
+  str_replace_all("\n", " ") |>
+  str_replace_all("[,]",".") # pour certains chiffres
+
+BASE_CCNE$Titre <- BASE_CCNE$Titre|>
+  str_replace_all("\r", " ") |>
+  str_replace_all("\n", " ")
 
 # numbers and dates tokenisation
 
@@ -114,28 +116,29 @@ date_pattern <- "\\b(?:\\d{4}-\\d{2}-\\d{2}|\\d{2}-\\d{2}-\\d{4}|\\d{4}-\\d{2}|\
 
 
 # Replace numbers and dates with labels
-BASE_CCNE$avis <- BASE_CCNE$avis |>
-  gsub(pattern = date_pattern, replacement = "date_token")|>
-  gsub(pattern = number_pattern, replacement = "number_token")
+ BASE_CCNE$avis <- BASE_CCNE$avis |>
+   gsub(pattern = date_pattern, replacement = "date")
+#   gsub(pattern = number_pattern, replacement = "number_token")
 
-BASE_CCNE |> tibble::rowid_to_column("ID") -> BASE_CCNE
+BASE_CCNE |> tibble::rowid_to_column("ID") |>
+  mutate(full_doc_name = paste(num_avis,Titre,sep = "_"))-> BASE_CCNE
 cp <- corpus(BASE_CCNE$avis, 
              docvars = BASE_CCNE |> select(
                                     avis, Titre, Annee, Date) |> as.data.frame(), 
              docnames = BASE_CCNE$ID)
 # tokenisation
-tk <- tokens(cp, remove_punct = TRUE, remove_numbers = TRUE)
+tk_original <- tokens(cp, remove_punct = TRUE, remove_numbers = TRUE)
 ```
-## N-grams avant stopwords removed
+## Contexte autour des mots
 
 ```{r}
 #| eval: true
 #| output: true
-#| fig-cap: "Examples de contexte suivant le mot 'don'"
+#| tbl-cap: Examples de contexte suivant le mot don
 #| label: tbl-contexte_don
 
 
-kwic(tk, "don", window=2) |> 
+kwic(tk_original, "don", window=2) |> 
   as.data.frame() |> 
   select("post") |> 
   table() |>
@@ -146,84 +149,56 @@ kwic(tk, "don", window=2) |>
 ```{r}
 #| eval: true
 #| output: true
-#| fig-cap: "Examples de contexte suivant le mot 'personne'"
+#| tbl-cap: Examples de contexte suivant le mot 'personne'
 #| label: tbl-contexte_personne
 
 
-kwic(tk, "personne", window=2) |> 
+kwic(tk_original, "personne", window=2) |> 
   as.data.frame() |> 
   select("post") |> 
   table() |>
   sort(decreasing = TRUE) |>
-  head(15)
+  head(10)
 ```
+
 ```{r}
 #| eval: true
 #| output: true
-#| fig-cap: "Examples de contexte précédant le mot 'personne'"
-#| label: tbl-contexte_personne
+#| tbl-cap: Examples de contexte précédant le mot 'personne'
+#| label: tbl-contexte_pre_personne
 
 
-kwic(tk, "personne", window=4) |> 
+kwic(tk_original, "personne", window=4) |> 
   as.data.frame() |> 
   select("pre") |> 
   table() |>
   sort(decreasing = TRUE) |>
-  head(15)
+  head(10)
 ```
 
 ```{r}
-#| eval: true
+#| eval: false
 #| output: true
-#| fig-cap: "Examples de contexte suivant le mot 'comité'"
-#| label: tbl-contexte_comité
-
-
-kwic(tk, "comité", window=4) |> 
-  as.data.frame() |> 
-  select("post") |> 
-  table() |>
-  sort(decreasing = TRUE) |>
-  head(15)
-```
-
-```{r}
-#| eval: true
-#| output: true
-#| fig-cap: "Examples de contexte suivant le mot 'code'"
+#| tbl-cap: Examples de contexte suivant le mot 'code'
 #| label: tbl-contexte_code
 
 
-kwic(tk, "code", window=4) |> 
+kwic(tk_original, "code", window=4) |> 
   as.data.frame() |> 
   select("post") |> 
   table() |>
   sort(decreasing = TRUE) |>
-  head(15)
+  head(10)
 ```
 
 ```{r}
-#| eval: true
+#| eval: false
 #| output: true
-#| fig-cap: "Examples de contexte suivant le mot 'non-commercialisation'"
-#| label: tbl-contexte_non-commercialisation
-
-
-kwic(tk, "non-commercialisation", window=3) |> 
-  as.data.frame() |> 
-  select("post") |> 
-  table() |>
-  sort(decreasing = TRUE) |>
-  head(15)
-```
-```{r}
-#| eval: true
-#| output: true
-#| fig-cap: "Examples de contexte suivant les mots'essai', 'expérience', 'expérimentation'"
+#| fig-cap: Examples de contexte suivant les mots 'essai', 'expérience', 'expérimentation'
 #| label: tbl-contexte_exp
 
 
-kwic(tk, c("essai","expérience","expérimentation", "essais","expériences","expérimentations"), window=3) |> 
+kwic(tk_original, c("essai","expérience","expérimentation", "essais","expériences","expérimentations"), window=3) |> 
   as.data.frame() |> 
   select("post") |> 
   table() |>
@@ -231,13 +206,22 @@ kwic(tk, c("essai","expérience","expérimentation", "essais","expériences","ex
   head(15)
 ```
 
-RMQ : tous les dons correspondent il a un seul phénomène ? qui est celui du don comme acte gratuit. Perso je pense qu'il vaut mieux séparer car don de XXX réfère à un acte particulier. don seul réfère peut etre plus facilement alors au don en soit.
+```{r}
+#| eval: true
+#| output: true
+#| tbl-cap: Examples de contexte suivant le mot 'droit'
+#| label: tbl-contexte_droit_bis
 
-On pourrait essayer de faire la distinction de même entre les synonymes pour : - code - personne : humaine, agée, handicapée, handicapée mentale
 
-Choix : V1 : don divisé en plusieurs catégories mais pas le terme personne. car je pense que quand on écrit personne handicapée. On désigne deux choses en un : d'une part la qualité de personne en soi, d'autre part le handicap.
+kwic(tk_original, "droit", window=3) |> 
+  as.data.frame() |> 
+  select("post") |> 
+  table() |>
+  sort(decreasing = TRUE) |>
+  head(30)
+```
 
-Faut il inverser suppression des pluriels et choix des pattern ?
+## Création DFM
 
 ```{r}
 #| eval: true
@@ -260,13 +244,34 @@ important_expressions <- dictionary(list(
              "ce comité",
              "ccne",
              "ccné"),
-    fin_de_vie = c("fin de vie"),
-    #personne_humaine_potentielle = c("personne humaine potentielles",
-    #                                 "personnes humaines potentielles"),
-    #personne_humaine = c("personne humaine","personnes humaines"),
-    #personne_agée = c("personne agée","personnes agées"),
-    #personne_handicapee_mentale = c("personne handicapée mentale",
-    #                                "personnes handicapées mentales")
+    fin_de_vie = c("fin de vie", "fin de la vie"),
+    personne_humaine_potentielle = c("personne humaine potentielles",
+                                     "personnes humaines potentielles"),
+    personne_agée = c("personne agée","personnes agées"),
+    personne_handicapée_mentale = c("personne handicapée mentale",
+                                    "personnes handicapées mentales",
+                                    "personne atteinte d handicap mental",
+                                    "personne atteinte d handicaps mentaux",
+                                    "personnes atteintes d handicaps mentaux",
+                                    "personnes atteintes d handicap mental",
+                                    "personne atteinte de maladie mentale",
+                                    "personne atteinte de maladies mentales",
+                                    "personnes atteintes de maladie mentale",
+                                    "personnes atteintes de maladies mentales"),
+    personne_malade = c("personne malade",
+                        "personnes malades",
+                        "personne atteinte de maladie",
+                        "personne atteinte de maladies",
+                        "personnes atteintes de maladie",
+                        "personnes atteintes de maladies"),
+    personne_handicapée = c("personne handicapée",
+                            "personnes handicapées",
+                            "personne atteinte d handicap",
+                            "personne atteinte d handicaps",
+                            "personnes atteintes d handicaps",
+                            "personnes atteintes d handicap"),
+    personne_confiance = c("personne de confiance",
+                           "personnes de confiance"),
     cellule_souche = c("cellule souche","cellules souches"),
     don_d_organe = c("don d organe","don d organes",
                      "dons d organe","dons d organes",
@@ -293,7 +298,7 @@ important_expressions <- dictionary(list(
     sécurité_sociale = c("sécurité sociale"),
     assurance_maladie = c("assurance_maladie"),
     ricoeur = c("ricoeur", "ricœur"),
-    pma = c("amp","pma",
+    pma = c("amp","pma","PMA","AMP",
             "assistance médicale à la procréation",
             "assistances médicales à la procréation",
             "procréation médicalement assistée",
@@ -302,13 +307,25 @@ important_expressions <- dictionary(list(
             "gestation pour autrui"),
     vie_privée = c("vie privée",
                    "vies privées"),
-    CRISPR-Cas9 = c("CRISPR-Cas9",
+    CRISPR_Cas9 = c("CRISPR-Cas9",
+                    "crispr cas",
+                    "crispr-cas",
+                    "crispr-cas9",
+                    "crispr cas9",
+                    "crispr",
                     "CRISPR Cas9",
                     "CRISPR Cas",
                     "CRISPR-Cas",
                     "CRISPR",
                     "Cas9"),
     vih = c("vih","sida"),
+    avortement = c("IVG","ivg",
+                   "avortement",
+                   "avortements",
+                   "interruptions de grossesses",
+                   "interruption de grossesse",
+                   "interruption de grossesses",
+                   "interruptions de grossesse"),
     fiv = c("fertilisation in vitro",
             "fiv",
             "fivete",
@@ -323,7 +340,7 @@ important_expressions <- dictionary(list(
 
 # suppression pluriel, genre
 
-tk <- tokens_compound(tk, pattern = important_expressions, case_insensitive = TRUE)
+tk <- tokens_compound(tk_original, pattern = important_expressions, case_insensitive = TRUE)
 
 replacement_dict <- dictionary(list(
   embryon = c("embryon*"),
@@ -333,8 +350,10 @@ replacement_dict <- dictionary(list(
   médical = c("médical*"),
   droit = c("droits"),
   don = c("dons"),
+  gène = c("gènes"),
   femme = c("femmes"),
   malade = c("malades"),
+  médecin = c("médecins"),
   patient = c("patients"),
   humain = c("humain*"), # risque de négliger les distinctions de genre ?
   personne = c("personnes","personne"),
@@ -349,7 +368,7 @@ replacement_dict <- dictionary(list(
 
 tk <- tokens_lookup(tk, replacement_dict, exclusive = FALSE)
 
-# remove stop words, V1
+# remove stop words
 toremove <- c(stopwords("fr"), stopwords("en"),
               c("number_token", "number_token-number_token"),
               c("être", "a", "plus", "peut", "comme", 
@@ -383,17 +402,13 @@ toremove <- c(stopwords("fr"), stopwords("en"),
               "deux","ment","e"
               )
 )
-
+tk <- tokens_remove(tk,toremove)
 # DFM format
 dfm <- dfm(tk) |>
   dfm_lookup(important_expressions, exclusive = FALSE) |>
   dfm_remove(toremove) |>
-  dfm_trim(min_termfreq = 10)
+  dfm_trim(min_termfreq = 1)
 
-```
-
-```{r}
-textstat_frequency(dfm, n=100) |> select(feature) |> as.list()|> dput()
 ```
 
 ## Statistique descriptive
@@ -422,44 +437,94 @@ plot(clust, xlab = "Distance", ylab = NULL)
 ### Evolution de mots choisies
 
 ```{r}
-important_words <- c("personne", 
+#| eval: true
+#| output: true
+#| fig-cap: Evolution de certains mots au cours du temps
+#| label: fig-word_time
+#| 
+important_words <- c("personne",
                      "nature",
                      "société",
-                     "solidarité", 
+                     "solidarité",
                      "autonomie",
                      "dignité",
                      "liberté",
                      "consentement",
-                     "non-commercialisation",
-                     "avortement",
-                     "pma",
-                     "gpa",
-                     "essai",
-                     "vih",
-                     "épidémie",
-                     "cellule_souche",
-                     "génétique", 
-                     "ricoeur",
-                     "belmont"
+                     "non-commercialisation"
                      )
-word_counts <- colSums(dfm[, important_words])
 
-# Calculate total word counts in each document
-total_words <- rowSums(dfm)
+# word_person <- c("personne",
+#                  "personne handicapée mentale",
+#                  "personne handicapée",
+#                  "enfant",
+#                  "parent",
+#                  "humain",
+#                  "père",
+#                  "mère",
+#                  "homme",
+#                  "femme",
+#                  "journaliste",
+#                  "médecin",
+#                  "personne humain")
 
-# Calculate frequencies
-word_frequencies <- word_counts / total_words
+tk |>
+  tokens_keep(pattern = important_words) |>
+  dfm() |>
+  textstat_frequency(groups = Annee) |>
+ggpubr::ggscatter(x="group", y = "frequency", facet.by = "feature", xlab = "Année",ylab = "Word Frequency")+
+    #geom_line()+
+    theme_prism()
+```
+### Contexte without stopwords
 
-# Create a data frame for plotting
-plot_data <- data.frame(document = seq_along(documents), frequency = word_frequencies)
+```{r}
+#| eval: true
+#| output: true
+#| tbl-cap: Examples de contexte suivant le mot 'personne'
+#| label: tbl-contexte_personne_bis
 
+
+kwic(tk, "personne", window=3) |> 
+  as.data.frame() |> 
+  select("post") |> 
+  table() |>
+  sort(decreasing = TRUE) |>
+  head(10)
 ```
 
+```{r}
+#| eval: true
+#| output: true
+#| tbl-cap: Examples de contexte précédant le mot 'personne'
+#| label: tbl-contexte_pre_personne_bis
+
+
+kwic(tk, "personne", window=2) |> 
+  as.data.frame() |> 
+  select("pre") |> 
+  table() |>
+  sort(decreasing = TRUE) |>
+  head(10)
+```
+
+```{r}
+#| eval: true
+#| output: true
+#| tbl-cap: Examples de contexte suivant le mot 'droit'
+#| label: tbl-contexte_droit_bis
+
+
+kwic(tk, "droit", window=3) |> 
+  as.data.frame() |> 
+  select("post") |> 
+  table() |>
+  sort(decreasing = TRUE) |>
+  head(10)
+```
 
 ## On peut complexifier le pre processing
 
 1.  Lemmatization ? pour éviter ce que j'ai déjà fait avec les pluriels ? : meh en français
-2.  Supprimer les mots très rares, a minima les hapax (une occurrence dans le corpus);
 
 # LDA
 
@@ -467,7 +532,22 @@ plot_data <- data.frame(document = seq_along(documents), frequency = word_freque
 
 ### Métriques
 
-%### using topicmodels
+```{r}
+#| eval: true
+
+load("../data/report/LDA_report_20231123_V3_metrics.RData")
+tm_data <- quanteda::convert(dfm, to = "topicmodels")
+
+```
+
+```{r}
+#| eval: false
+tp_nb <- FindTopicsNumber(tm_data, topics = seq(5, 20), 
+                          metrics = c("Griffiths2004", "CaoJuan2009", 
+                                      "Arun2010", "Deveaud2014"),
+                          method = "Gibbs")
+```
+
 
 ```{r}
 #| eval: true
@@ -475,11 +555,7 @@ plot_data <- data.frame(document = seq_along(documents), frequency = word_freque
 #| fig-cap: Evolution des différentes métriques en fonction du nombre de topics
 #| fig-subcap: Commenter métriques/résultats
 #| label: fig-lda-metrics
-tm_data <- quanteda::convert(dfm, to = "topicmodels")
-tp_nb <- FindTopicsNumber(tm_data, topics = seq(5, 20), 
-                          metrics = c("Griffiths2004", "CaoJuan2009", 
-                                      "Arun2010", "Deveaud2014"),
-                          method = "Gibbs")
+
 FindTopicsNumber_plot(tp_nb)+
   theme_prism()+
   scale_colour_prism("winter_bright")
@@ -490,16 +566,14 @@ FindTopicsNumber_plot(tp_nb)+
 kable(tp_nb)
 ```
 
-%### Avec STM
-
-### exclusivité et cohérence
+### Exclusivité et cohérence sémantique
 
 ```{r}
-#| eval: true
+#| eval: false
 
 stm_data <- convert(dfm, to = "stm")
 
-K <- seq(10, 20)
+K <- seq(5, 20)
 diag <- searchK(stm_data$documents, stm_data$vocab, 
                 K, 
                 verbose=FALSE)
@@ -518,18 +592,24 @@ map(diag$results, unlist) |>
   theme_prism()
 ```
 
-## First model : classic LDA
+```{r}
+save(tp_nb,K,diag, file = "../data/report/LDA_report_20231123_V3_metrics.RData")
+```
 
 ```{r}
 #| eval: true
-num_topic = 11
+num_topic = 8
 ```
+
+## First model : classic LDA
 
 ### implémanté avec topicmodels
 
 ```{r}
 #| eval: true
 #| output: false
+
+tm_data <- quanteda::convert(dfm, to = "topicmodels")
 
 tm_lda <- LDA(tm_data, k = num_topic, method = "Gibbs", 
                control = list(seed = seed))
@@ -553,36 +633,7 @@ report_topics_table(tm_lda)
 serVis(tm_lda_js)
 ```
 
-### implémanté avec STM
-
-```{r}
-#| eval: false
-#| output: true
-#| fig-cap: Top 10 mots par topic, estimation pour 14 topic avec stm
-#| label: tbl-lda-stm
-
-
-stm_data <- convert(dfm, to = "stm")
-
-stm_lda <- stm(documents = stm_data$documents, 
-               vocab = stm_data$vocab,
-               K=num_topic, 
-               seed = seed, verbose = FALSE)
-
-stm_lda$beta$logbeta[[1]] %>% 
-  t() %>% 
-  as_tibble() %>% 
-  mutate(word = stm_lda$vocab, .before = V1) %>% 
-  rename_with(~str_replace(.x, "V", "tp_"), starts_with("V")) %>% 
-  mutate(across(starts_with("tp_"), ~exp(.x)))
-
-```
-
-```{r}
-toLDAvis(stm_lda, stm_data$documents,reorder.topics = FALSE)
-```
-
-## Analyse
+## Analyse 1er modèle
 
 ### Multidimensional Scaling
 
@@ -597,17 +648,11 @@ RJSONIO::fromJSON(tm_lda_js)[["mdsDat"]] |>
 ```
 
 ```{r}
-#| eval: false
-ggpubr::ggscatter(tm_msd,x="x",y="y", size = "Freq", 
-                  xlab = "PC1", ylab = "PC2",
-                  alpha=0.6,color = "#00AFBB",
-                  label = "topics",
-                  label.rectangle = TRUE)+
-  scale_x_continuous(limits = symmetric_limits) +
-  scale_y_continuous(limits = symmetric_limits) +
-  geom_quadrant_lines(linetype = "solid") +
-  scale_size_area(max_size=12,limits=c(0,41), breaks = c(0,2,6,10,40))+
-  theme_minimal()
+#| eval: true
+#| echo: true
+#| output: true
+print("ordre LDAvis")
+print(ordre_ldavis)
 ```
 
 ```{r}
@@ -648,7 +693,7 @@ post$topics |>
 ```{r}
 #| eval: true
 #| output: true
-#| fig-cap: TOP3 documents where each topics is the more relevant
+#| fig-cap: TOP1 documents where each topics is the more relevant
 #| label: tbl-lda-top3doc
 
 ordre_topics <- data.frame(topic = paste("topic", ordre_ldavis), ordre = 1:length(ordre_ldavis))
@@ -657,12 +702,13 @@ tm_metadata |>
   pivot_longer(cols = starts_with("topic "), names_to = "topic", values_to = "prevalence") |>
   left_join(ordre_topics, by = "topic")|> 
   group_by(topic) |>
-  top_n(3, prevalence) |> 
+  top_n(1, prevalence) |> 
   ungroup()|>
   arrange(ordre, desc(prevalence)) |>
   select("topic","num_avis","Titre","prevalence","Date","ordre") |>
   rename(Topic = topic, Prevalence = prevalence, "N° Avis"=num_avis) |>
-  kable()
+  head(num_topic) |>
+  kable(caption = "Most relevant doc by topic")
 ```
 
 ### Graph par années
@@ -674,18 +720,18 @@ tm_metadata |>
 #| label: fig-lda-time
 
 name_topic <- list(ordre = paste("topic",ordre_ldavis))
-name_topic <- list(ordre = c(
-                "éthique",
-                "fin de vie",
-                "système de soins",
-                "données",
-                "cellule souche",
-                "science et nature",
-                "test génétique",
-                "procréation",
-                "substance et cognition",
-                "VIH",
-                "chirurgie"))
+# name_topic <- list(ordre = c(
+#                 "éthique",
+#                 "fin de vie",
+#                 "système de soins",
+#                 "données",
+#                 "cellule souche",
+#                 "science et nature",
+#                 "test génétique",
+#                 "procréation",
+#                 "substance et cognition",
+#                 "VIH",
+#                 "chirurgie"))
 
 tm_metadata|>
   select(Annee, starts_with("topic")) |>
@@ -698,19 +744,97 @@ tm_metadata|>
   theme_prism()
 ```
 
-%### with STM
+## 2nd model Structural Topic Modelling
 
 ```{r}
+#| eval: true
+
+stm_data <- convert(dfm, to = "stm")
+
+stm_lda <- stm(dfm,
+               K=num_topic, 
+               #prevalence =~ s(Annee),
+               seed = seed, verbose = FALSE)
+```
+
+```{r}
+toLDAvis(stm_lda, stm_data$documents,reorder.topics = FALSE)
+
+```
+
+```{r}
+#| eval: true
+#| output: true
+#| fig-cap: Mean STM topic prevalence in the corpus by years
+#| label: fig-stm-time
 
 full_stm <- stm_data$meta |> 
   bind_cols(stm_lda$theta |> 
               as_tibble() |> 
-              rename_with(~str_replace(.x, "V", "tp_"), starts_with("V")))
-full_stm |> select(Annee, starts_with("tp")) |>
+              rename_with(~str_replace(.x, "V", "topic "), starts_with("V")))
+full_stm |> select(Annee, starts_with("topic ")) |>
   pivot_longer(-Annee) |> 
   group_by(Annee, name) |> 
   summarize(m = mean(value)) |> 
-  ggpubr::ggscatter(x="Annee", y = "m", facet.by = "name", xlab = "Année",ylab = "Mean Prevalence")+
+  mutate(topic_number = as.integer(str_extract(name, "\\d+"))) |>
+  ggpubr::ggscatter(x="Annee", y = "m", 
+                    facet.by = "topic_number",
+                    xlab = "Année",ylab = "Mean Prevalence")+
   geom_line()+
   theme_prism()
 ```
+```{r}
+#| eval: true
+#| output: true
+#| echo: true
+#| fig-cap: STM label words
+#| label: fig-stm-label
+
+labelTopics(stm_lda)
+
+```
+
+```{r}
+#| eval: true
+#| output: true
+#| echo: true
+#| fig-cap: STM label words
+#| label: fig-stm-plot
+
+plot(stm_lda, type = "summary")
+
+```
+
+```{r}
+plot(stm_lda, type = "perspectives", topics = c(1,2))
+```
+
+
+
+```{r}
+#| eval: true
+#| output: true
+#| echo: true
+#| fig-cap: STM correlation between topics
+#| label: fig-stm-corr_plot
+
+
+corrmat <- topicCorr(stm_lda)
+plot(corrmat)
+```
+```{r}
+#| eval: true
+#| output: true
+#| echo: true
+#| fig-cap: STM correlation matrix between topics
+#| label: fig-stm-corr_mat
+ggcorrplot(corrmat$cor)
+```
+rajouter l'impact des métadonnées et leurs impacts
+
+```{r}
+findThoughts(stm_lda, texts = BASE_CCNE$avis,meta = BASE_CCNE |> select(-avis), topics = 1:num_topic) -> thoughts
+
+plot(thoughts$index)
+```
+
