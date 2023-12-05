@@ -47,3 +47,11 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+# HTML
+*.html
+*.js
+*.css
+*.woff
+*.min.js
+*.png
