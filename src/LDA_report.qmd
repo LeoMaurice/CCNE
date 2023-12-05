@@ -66,7 +66,14 @@ pacman::p_load(tidyverse,
                ggpmisc,
                RJSONIO,
                ggrepel,
-               ggcorrplot
+               ggcorrplot,
+               pdftools,
+               #pdftk, pas dispo
+               #tabulizer,
+               tesseract,
+               stringr,
+               openxlsx,
+               readxl
             )
 
 # Some little helps from the internet
@@ -79,23 +86,102 @@ set.seed(seed)
 
 ## Premiers prétraitements
 
+Extraction des textes des avis
+
+```{r}
+rescrap_texte = FALSE
+
+if(rescrap_texte){
+  # Définir le chemin vers le dossier contenant les fichiers PDF
+  dossier_avis <- "../data/raw/avis"
+  
+  # Liste des fichiers PDF dans le dossier
+  liste_fichiers <- list.files(path = dossier_avis, pattern = "\\.pdf$", full.names = TRUE)
+  
+  # Initialiser un data.frame vide
+  base_avis_ccne <- data.frame(num = integer(), avis = character(), 
+                               nom_fichier = character(), nb_pages = integer(),
+                               stringsAsFactors = FALSE)
+  
+  # Boucle pour lire chaque fichier PDF et extraire le texte
+  for (fichier in liste_fichiers) {
+    # Extraire le numéro du fichier
+    numero <- as.integer(strsplit(strsplit(basename(fichier), " ")[[1]][2], ".pdf")[[1]])
+    list_bugged <- c(69,70,71,72,76,77,78,79,80,83,84,86,89)
+    if(numero %in% list_bugged){
+      texte <- pdf_ocr_text(fichier)
+    } else{
+      texte <- pdf_text(fichier)
+    }
+    
+
+    nombre_page <- pdf_info(fichier)$pages
+
+    texte <- paste(texte, collapse = " ")
+    
+    # Ajouter les données au data.frame
+    base_avis_ccne <- base_avis_ccne |>
+      bind_rows(data.frame(num = numero, 
+                           avis = texte,
+                           nom_fichier = basename(fichier),
+                           nb_pages = nombre_page,
+                           stringsAsFactors = FALSE))
+  }
+  saveRDS(base_avis_ccne, "../data/intermediate/base_avis_ccne.rds")
+} else {
+  readRDS("../data/intermediate/base_avis_ccne.rds") -> base_avis_ccne
+}
+
+```
+
+
 ```{r}
 #| eval: true
 
-BASE_CCNE <- read_delim("../data/exterior/BASE_CCNE_vf_1.tsv", 
-    delim = "\t", escape_double = FALSE, 
-    col_types = cols(Date = col_date(format = "%d/%m/%Y"), 
-        Date2 = col_date(format = "%Y-%m-%d")), 
-    trim_ws = TRUE)|>
-  select(Num_avis,
-         Date,
-         Titre,
-         txt_tot3,
-         Annee)|>
-  rename(num_avis=Num_avis,
-         avis = txt_tot3)
+# base_avis_ccne <- read_delim("../data/exterior/base_avis_ccne_vf_1.tsv", 
+#     delim = "\t", escape_double = FALSE, 
+#     col_types = cols(Date = col_date(format = "%d/%m/%Y"), 
+#         Date2 = col_date(format = "%Y-%m-%d")), 
+#     trim_ws = TRUE)|>
+#   select(Num_avis,
+#          Date,
+#          Titre,
+#          txt_tot3,
+#          Annee)|>
+#   rename(num_avis=Num_avis,
+#          avis = txt_tot3)
 
-BASE_CCNE$avis <- BASE_CCNE$avis|>
+list_saisine_obligatoire <- c(
+  "PR", #président
+  "PM", #Premier Minsitre
+  "MS", #ministère et secrétariat santé et autres appelations (solidarité, affaire social)
+  "DGS", #direction générale de la santé
+  "Parlement", #président d'AN et/ou sénat
+  "Gouvernement", #autres membres du gouvernement
+  "EP", #Etablissement public
+  "EPES", #Etablissement public d'enseignement supérieur
+  "CNRS",
+  "INSERM",
+  "IGAS", #inspection des affaires sociales = doute,
+  "MILDT"
+)
+
+base_avis_ccne |>
+  left_join(read_excel("../data/raw/collected_metadata/metadata_avis.xlsx", 
+            col_types = c("numeric", "date", "text", 
+                "text", "text", "text", "logical", 
+                "text", "text", "text", "date", "logical", 
+                "text", "logical", "text"))|>
+              mutate(saisine = saisine_precise %in% list_saisine_obligatoire)|>
+              select(num,saisine,rapporteurs, membres_gt,titre_court,titre,date,theme,divergence)) -> base_avis_ccne
+
+base_avis_ccne|>
+  rename(Titre = titre,
+         Date = date)|>
+  mutate(Annee =year(Date)) -> base_avis_ccne
+
+base_avis_ccne$avis <- base_avis_ccne$avis|>
+  str_replace_all("\\s+", " ") |>
   str_replace_all("[']", " ") |>
   str_replace_all("[’]", " ") |>
   str_replace_all("[`]", " ") |>
@@ -103,7 +189,7 @@ BASE_CCNE$avis <- BASE_CCNE$avis|>
   str_replace_all("\n", " ") |>
   str_replace_all("[,]",".") # pour certains chiffres
 
-BASE_CCNE$Titre <- BASE_CCNE$Titre|>
+base_avis_ccne$Titre <- base_avis_ccne$Titre|>
   str_replace_all("\r", " ") |>
   str_replace_all("\n", " ")
 
@@ -116,16 +202,14 @@ date_pattern <- "\\b(?:\\d{4}-\\d{2}-\\d{2}|\\d{2}-\\d{2}-\\d{4}|\\d{4}-\\d{2}|\
 
 
 # Replace numbers and dates with labels
- BASE_CCNE$avis <- BASE_CCNE$avis |>
+ base_avis_ccne$avis <- base_avis_ccne$avis |>
    gsub(pattern = date_pattern, replacement = "date")
 #   gsub(pattern = number_pattern, replacement = "number_token")
 
-BASE_CCNE |> tibble::rowid_to_column("ID") |>
-  mutate(full_doc_name = paste(num_avis,Titre,sep = "_"))-> BASE_CCNE
-cp <- corpus(BASE_CCNE$avis, 
-             docvars = BASE_CCNE |> select(
-                                    avis, Titre, Annee, Date) |> as.data.frame(), 
-             docnames = BASE_CCNE$ID)
+cp <- corpus(base_avis_ccne$avis, 
+             docvars = base_avis_ccne |> select(num,
+                                    avis, Titre, Annee, Date, saisine, divergence, theme) |> as.data.frame(), 
+             docnames = base_avis_ccne$num)
 # tokenisation
 tk_original <- tokens(cp, remove_punct = TRUE, remove_numbers = TRUE)
 ```
@@ -239,6 +323,15 @@ important_expressions <- dictionary(list(
              "comité consultatif d ethique",
              "comité d ethique",
              "comité consultatif national d ethique",
+             "comit é national consultatif d éthique",
+             "comit é national d éthique",
+             "comit é consultatif d éthique",
+             "comit é d éthique",
+             "comit é consultatif national d ethique",
+             "comit é national consultatif d ethique",
+             "comit é national d ethique",
+             "comit é consultatif d ethique",
+             "comit é consultatif national d ethique",
              "consultatif national d éthique",
              "Consultatif National d Éthique",
              "ce comité",
@@ -530,24 +623,32 @@ kwic(tk, "droit", window=3) |>
 
 ## Find number of topics
 
-### Métriques
-
 ```{r}
 #| eval: true
-
-load("../data/report/LDA_report_20231123_V3_metrics.RData")
+recompute_choix_K = FALSE
 tm_data <- quanteda::convert(dfm, to = "topicmodels")
+stm_data <- convert(dfm, to = "stm")
 
-```
 
-```{r}
-#| eval: false
-tp_nb <- FindTopicsNumber(tm_data, topics = seq(5, 20), 
+if(recompute_choix_K){
+  list_nb_topics_K <- seq(5, 20)
+
+  tp_nb <- FindTopicsNumber(tm_data, topics = list_nb_topics_K, 
                           metrics = c("Griffiths2004", "CaoJuan2009", 
                                       "Arun2010", "Deveaud2014"),
                           method = "Gibbs")
+
+  diag <- searchK(stm_data$documents, stm_data$vocab, 
+                  list_nb_topics_K, 
+                  verbose=FALSE)
+  save(tp_nb,list_nb_topics_K,diag, file = "../data/report/LDA_report_20231205_metrics.RData")
+} else{
+  load("../data/report/LDA_report_20231205_metrics.RData")
+}
+
 ```
 
+### Métriques
 
 ```{r}
 #| eval: true
@@ -561,24 +662,7 @@ FindTopicsNumber_plot(tp_nb)+
   scale_colour_prism("winter_bright")
   
 ```
-
-```{r ldatuning_plot_kable}
-kable(tp_nb)
-```
-
 ### Exclusivité et cohérence sémantique
-
-```{r}
-#| eval: false
-
-stm_data <- convert(dfm, to = "stm")
-
-K <- seq(5, 20)
-diag <- searchK(stm_data$documents, stm_data$vocab, 
-                K, 
-                verbose=FALSE)
-```
-
 ```{r}
 #| eval: true
 #| output: true
@@ -590,10 +674,6 @@ map(diag$results, unlist) |>
     geom_point() +
     geom_label() +
   theme_prism()
-```
-
-```{r}
-save(tp_nb,K,diag, file = "../data/report/LDA_report_20231123_V3_metrics.RData")
 ```
 
 ```{r}
@@ -687,7 +767,7 @@ post$topics |>
   as.data.frame() |>
   rename_all(~ paste0("topic ", .)) |>
   tibble::rowid_to_column("ID") |>
-  left_join(BASE_CCNE, by="ID") -> tm_metadata
+  left_join(base_avis_ccne, by="ID") -> tm_metadata
 ```
 
 ```{r}
@@ -753,7 +833,8 @@ stm_data <- convert(dfm, to = "stm")
 
 stm_lda <- stm(dfm,
                K=num_topic, 
-               #prevalence =~ s(Annee),
+               prevalence =~ saisine + s(Annee),
+               content =~ theme,
                seed = seed, verbose = FALSE)
 ```
 
@@ -772,14 +853,14 @@ full_stm <- stm_data$meta |>
   bind_cols(stm_lda$theta |> 
               as_tibble() |> 
               rename_with(~str_replace(.x, "V", "topic "), starts_with("V")))
-full_stm |> select(Annee, starts_with("topic ")) |>
-  pivot_longer(-Annee) |> 
-  group_by(Annee, name) |> 
+full_stm |> select(Date, starts_with("topic ")) |>
+  pivot_longer(-Date) |> 
+  group_by(Date, name) |> 
   summarize(m = mean(value)) |> 
   mutate(topic_number = as.integer(str_extract(name, "\\d+"))) |>
-  ggpubr::ggscatter(x="Annee", y = "m", 
+  ggpubr::ggscatter(x="Date", y = "m", 
                     facet.by = "topic_number",
-                    xlab = "Année",ylab = "Mean Prevalence")+
+                    xlab = "Date",ylab = "Mean Prevalence")+
   geom_line()+
   theme_prism()
 ```
@@ -833,7 +914,7 @@ ggcorrplot(corrmat$cor)
 rajouter l'impact des métadonnées et leurs impacts
 
 ```{r}
-findThoughts(stm_lda, texts = BASE_CCNE$avis,meta = BASE_CCNE |> select(-avis), topics = 1:num_topic) -> thoughts
+findThoughts(stm_lda, texts = base_avis_ccne$avis,meta = base_avis_ccne |> select(-avis), topics = 1:num_topic) -> thoughts
 
 plot(thoughts$index)
 ```
