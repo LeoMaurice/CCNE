@@ -1,7 +1,7 @@
 ---
 title: "CCNE LDA"
 author: "Léopold MAURICE, ENSAE"
-date: "2023-07-11"
+date: "2023-12-12"
 project: CCNE
 supervision: Pr. Emmanuel Didier, CMH/ENS/EHESS
 output-ext: html
@@ -40,14 +40,13 @@ execute:
   output: true
   error: true
 editor: visual
+biblatex bibliography: LDA_report.bib
 ---
 
-citation_package: biblatex bibliography: references.bib
-
-# Set up
 
 ```{r}
 #| eval: true
+#| setup: true
 
 if (!require("pacman")) install.packages("pacman"); library(pacman)
 pacman::p_load(tidyverse,
@@ -73,22 +72,39 @@ pacman::p_load(tidyverse,
                tesseract,
                stringr,
                openxlsx,
-               readxl
+               readxl,
+               kableExtra
             )
 
 # Some little helps from the internet
 source("../src/helpers/lda_reports.R")
+source("../src/helpers/database_creation.R")
 
 seed = 1968
 set.seed(seed)
 ```
-# Pre-processing
+# Introduction : base de données et pre-processing
 
-## Premiers prétraitements
+## Présentation rapide de la base : les avis du CCNE
 
-Extraction des textes des avis
+La base explorée est l'ensemble des 144 avis publiés par le Comité Consultatif National d'Ethique, depuis 1983 jusqu'à maintenant.
+
+Le Comité Consultatif national d'Éthique, souvent abrégé CCNE, est une institution française indépendante créée en 1983. Son rôle central est d'apporter des réflexions éthiques sur les questions médicales, scientifiques et de santé publique. En tant qu'organe consultatif, le CCNE émet des avis sur des sujets variés tels que la bioéthique, la recherche médicale, les avancées technologiques dans le domaine de la santé, et d'autres enjeux éthiques contemporains. Composé de membres venant de la médecine clinique, de la recherche ou  des études théologiques, le CCNE favorise le dialogue entre experts de la médecine et de l'éthique et offre des recommandations visant à guider les décideurs publics.
+
+Les avis sont extrêmement divers en terme de sujets (avec des récurrences comme la génétique, les cellules souches par exemple) ou de formats. Les premiers avis étaient plutôt courts, avec une partie recommendation de 2 pages et une annexe de quelques pages supplémentaires. Au cours du temps, la longueur des avis a largement augmenté comme montré sur la figure @fig-longueur. Les textes des avis sont récupérés depuis leur PDF disponible sur [le site du CCNE](https://www.ccne-ethique.fr/).
+
+Notre base se compose aussi de quelques métadonnées sur les avis :
+- date : date de publication du CCNE
+- saisine : le CCNE peut être saisi par certaines institutions (président de la république, premier ministre, gouvernement, présidents du sénat et de l'assemblée), il doit alors rendre un avis. D'autres sujets sont décidés par les membres du CCNE selon leurs volontés ou les divers lettres qu'ils reçoivent.
+- theme : le thème dans le quel l'administration du CCNE a rangé les avis.
+- divergence : l'avis contient l'expression explicite d'une divergence
+- president : Président du  CCNE au moment de la publication du CCNE
+- composition du groupe de travail : les avis sont rédigés par deux rapporteurs (essentiellement), souvent accompagnés par d'autres membres intéressés par le sujet.
+
+Une des hypothèses est que les présidents du CCNE ont une grande importance dans la rédaction des avis, et leurs rôles devraient pouvoir se retrouver dans les thèmes aborder par le CCNE.
 
 ```{r}
+#| eval: true
 rescrap_texte = FALSE
 
 if(rescrap_texte){
@@ -109,7 +125,7 @@ if(rescrap_texte){
     numero <- as.integer(strsplit(strsplit(basename(fichier), " ")[[1]][2], ".pdf")[[1]])
     list_bugged <- c(69,70,71,72,76,77,78,79,80,83,84,86,89)
     if(numero %in% list_bugged){
-      texte <- pdf_ocr_text(fichier)
+      texte <- pdf_ocr_text(fichier) # embending de tesseract
     } else{
       texte <- pdf_text(fichier)
     }
@@ -133,7 +149,6 @@ if(rescrap_texte){
 }
 
 ```
-
 
 ```{r}
 #| eval: true
@@ -163,7 +178,7 @@ list_saisine_obligatoire <- c(
   "CNRS",
   "INSERM",
   "IGAS", #inspection des affaires sociales = doute,
-  "MILDT"
+  "MILDT" # Mission Interministérielle de luttes contre la dépendance et la toxicomanie
 )
 
 base_avis_ccne |>
@@ -172,13 +187,18 @@ base_avis_ccne |>
                 "text", "text", "text", "logical", 
                 "text", "text", "text", "date", "logical", 
                 "text", "logical", "text"))|>
-              mutate(saisine = saisine_precise %in% list_saisine_obligatoire)|>
-              select(num,saisine,rapporteurs, membres_gt,titre_court,titre,date,theme,divergence)) -> base_avis_ccne
+              mutate(saisine = saisine_precise %in% list_saisine_obligatoire,
+                     date = as.Date(date)
+                     )|>
+              select(num,saisine,rapporteurs, membres_gt,titre_court,titre,date,theme,divergence))|>
+  mutate(nb_mots = str_count(avis, "\\w+"),
+         president = sapply(date, president_CCNE_by_date))-> base_avis_ccne
 
 base_avis_ccne|>
   rename(Titre = titre,
          Date = date)|>
-  mutate(Annee =year(Date)) -> base_avis_ccne
+  mutate(Annee =year(Date),
+         theme = as.factor(theme)) -> base_avis_ccne
 
 base_avis_ccne$avis <- base_avis_ccne$avis|>
   str_replace_all("\\s+", " ") |>
@@ -208,12 +228,83 @@ date_pattern <- "\\b(?:\\d{4}-\\d{2}-\\d{2}|\\d{2}-\\d{2}-\\d{4}|\\d{4}-\\d{2}|\
 
 cp <- corpus(base_avis_ccne$avis, 
              docvars = base_avis_ccne |> select(num,
-                                    avis, Titre, Annee, Date, saisine, divergence, theme) |> as.data.frame(), 
+                                    avis, Titre, Annee, Date, saisine, divergence,president, theme) |> as.data.frame(), 
              docnames = base_avis_ccne$num)
 # tokenisation
 tk_original <- tokens(cp, remove_punct = TRUE, remove_numbers = TRUE)
 ```
-## Contexte autour des mots
+
+```{r}
+#| eval: true
+#| label: fig-longueur
+#| layout-ncol: 2
+#| fig-cap-location: bottom
+#| fig-cap: "Taille des avis au cours du temps"
+#| fig-subcap: 
+#|   - "Pages"
+#|   - "Mots"
+#| fig-env: "figure*"
+ggplot(base_avis_ccne, aes(x = Date, y = nb_pages)) +
+  geom_point() +  # Points pour chaque observation
+  geom_smooth(formula = 'y ~ x', method = "loess", se = FALSE, color = "#077E97") +  # Lissage LOESS
+  theme_prism() +  # Appliquer le thème ggprism
+  labs(title = "Nombre de pages par avis en fonction du temps",
+       x = "Date",
+       y = "Nombre de pages")
+
+ggplot(base_avis_ccne, aes(x = Date, y = nb_mots)) +
+  geom_point() +  # Points pour chaque observation
+  geom_smooth(formula = 'y ~ x', method = "loess", se = FALSE, color = "#C000C0") +  # Lissage LOESS
+  theme_prism() +  # Appliquer le thème ggprism
+  labs(title = "Nombre de mots par avis en fonction du temps",
+       x = "Date",
+       y = "Nombre de mots")
+```
+```{r}
+#| eval: true
+#| label: fig-avis_president
+#| fig-cap-location: bottom
+#| fig-cap: "Nombre d'avis par président"
+#| fig-env: "figure*"
+
+ggplot(base_avis_ccne, aes(x = president, fill = president)) +
+  geom_bar() +
+  scale_fill_prism(palette = "winter_bright") +  # Utiliser la palette winter_bright de ggprism
+  theme_prism() +  # Appliquer le thème ggpubr
+  labs(title = "Nombre d'avis par président du CCNE",
+       x = "Président",
+       y = "Nombre d'avis")+
+  theme(legend.position = "none")
+```
+
+```{r}
+#| eval: true
+#| label: fig-avis_president_theme
+#| fig-cap-location: bottom
+#| fig-cap: "Thème par président"
+#| fig-env: "figure*"
+
+ggplot(base_avis_ccne, aes(x = theme, fill = president)) +
+  geom_bar() +
+  scale_fill_prism(palette = "winter_bright") +  # Utiliser la palette winter_bright de ggprism
+  theme_prism() +  # Appliquer le thème ggpubr
+  labs(title = "Nombre d'avis par thème et président du CCNE",
+       x = "Nombre d'avis par thème",
+       y = "Président")+
+  coord_flip()
+    #theme(axis.text.x = element_text(angle = 90))  # Met les noms à 45°
+```
+
+
+## Preprocessing
+
+### Contexte autour des mots
+
+Pour pouvoir préparer correctement notre tokenisation, il nous faut regarder le contexte autour de certains mots. Deux exemples importants : le mot 'don' et le mot 'personne'. 
+
+Le mot don est avant modification des tokens initiaux le mot le plus fréquent du corpus. Cependant, au regard des 2-grams le suivant présenté dans la table @tbl-contexte_don, on peut voir que cela désigne plusieurs objets différents que nous avons rassemblés en quatre catégories : don de gamètes (d'ovocytes, de spermes etc.), don d'organe, don de sang, don de cellules. Ce découpage a fait perdre sa place au mot don.
+
+Un découpage similaire a été opéré pour le mot 'personne' : on a distingué personne handicapée, personne handicapée mentale, personne malade, personne de confiance, personne agée, personne humaine potentielle (compromis désignant le foetus) en suivant les résultats de la table @tbl-contexte_personne. 
 
 ```{r}
 #| eval: true
@@ -242,11 +333,11 @@ kwic(tk_original, "personne", window=2) |>
   select("post") |> 
   table() |>
   sort(decreasing = TRUE) |>
-  head(10)
+  head(20)
 ```
 
 ```{r}
-#| eval: true
+#| eval: false
 #| output: true
 #| tbl-cap: Examples de contexte précédant le mot 'personne'
 #| label: tbl-contexte_pre_personne
@@ -291,7 +382,7 @@ kwic(tk_original, c("essai","expérience","expérimentation", "essais","expérie
 ```
 
 ```{r}
-#| eval: true
+#| eval: false
 #| output: true
 #| tbl-cap: Examples de contexte suivant le mot 'droit'
 #| label: tbl-contexte_droit_bis
@@ -305,7 +396,9 @@ kwic(tk_original, "droit", window=3) |>
   head(30)
 ```
 
-## Création DFM
+### Tokenisation finale
+
+En plus des séparations évoquées plus haut, dans le pré-traitement, on supprime les dates et nombres présents dans le texte et on regroupe sous un même dénomination plusieurs ensembles de mots. Par exemple, l'ensemble 'CCNE' ou 'comité national consultatif d'éthique' sont regroupés sous la même domination ou encore, 'avortement', 'ivg' et 'interruption volontaire de grosse' sont regroupés sous le même token d'avortement. On supprime aussi un certain nombre de mots dont la fréquence était élevé mais dont la pertinence semblait être faible ("peut", "comme" etc.). De plus, en regardant aussi les mots les plus fréquent on rassemble les pluriels ou les masculins/féminins de certains adjectifs comme humain/humaine/humains/humaines sous le même token. Pour finir, on supprime les mots dont il y a moins de 5 occurences dans tout le corpus.
 
 ```{r}
 #| eval: true
@@ -387,7 +480,8 @@ important_expressions <- dictionary(list(
     don_cellule = c("don de cellule", "dons de cellule",
                     "don d'une cellule", "dons d'une cellule",
                     "don de cellules", "dons de cellules"),
-    santé_publique = c("santé publique"),
+    santé_publique = c("santé publique","santé pu- blique"),
+    santé_travail = c("santé au travail", "santé du travail"),
     sécurité_sociale = c("sécurité sociale"),
     assurance_maladie = c("assurance_maladie"),
     ricoeur = c("ricoeur", "ricœur"),
@@ -492,7 +586,8 @@ toremove <- c(stopwords("fr"), stopwords("en"),
               "dès", "ni", "nouvelles",
               "aujourd","hui","agit",
               "objet","place","projet",
-              "deux","ment","e"
+              "deux","ment","e",
+              "méme","étre","etre","|","ȼ","Ȼ","¢" # ce symbole est utilisé en bio pour désigné cellule apparement.
               )
 )
 tk <- tokens_remove(tk,toremove)
@@ -500,13 +595,18 @@ tk <- tokens_remove(tk,toremove)
 dfm <- dfm(tk) |>
   dfm_lookup(important_expressions, exclusive = FALSE) |>
   dfm_remove(toremove) |>
-  dfm_trim(min_termfreq = 1)
+  dfm_trim(min_termfreq = 5)
 
 ```
 
-## Statistique descriptive
+```{r}
+topfeatures(dfm, 50, decreasing = TRUE) 
+```
 
-### WordCloud
+
+# Premières descriptions du corpus
+
+On peut voir sur la figure @fig-wordcloud les mots les plus fréquents (au moins 750  dans le corpus) représenté sous la forme d'un wordcloud. On peut voir que malgré le fait d'avoir subdivisé grossièrement les sens de personne, le terme en lui-même reste le plus fréquent. Cela tend à confirmer le fait que le CCNE analyse les problématiques qui lui sont données au regard de la notion de personne en premier lieu. On retrouve aussi dans ce wordcloud des sujets essentiels comme le don de gamète, l'enfant, l'embryon, la génétique.
 
 ```{r}
 #| eval: true
@@ -518,110 +618,29 @@ textplot_wordcloud(dfm, min_count = 750, random_order = FALSE, rotation = 0.25,
                    color = palette)
 ```
 
-### Features similarity
-
-```{r}
-tstat_dist <- as.dist(textstat_dist(dfm))
-clust <- hclust(tstat_dist)
-plot(clust, xlab = "Distance", ylab = NULL)
-```
-
-
-### Evolution de mots choisies
-
 ```{r}
 #| eval: true
 #| output: true
-#| fig-cap: Evolution de certains mots au cours du temps
+#| fig-cap: Evolution des mots les plus fréquent du corpus au cours du temps
 #| label: fig-word_time
-#| 
-important_words <- c("personne",
-                     "nature",
-                     "société",
-                     "solidarité",
-                     "autonomie",
-                     "dignité",
-                     "liberté",
-                     "consentement",
-                     "non-commercialisation"
-                     )
 
-# word_person <- c("personne",
-#                  "personne handicapée mentale",
-#                  "personne handicapée",
-#                  "enfant",
-#                  "parent",
-#                  "humain",
-#                  "père",
-#                  "mère",
-#                  "homme",
-#                  "femme",
-#                  "journaliste",
-#                  "médecin",
-#                  "personne humain")
 
-tk |>
-  tokens_keep(pattern = important_words) |>
-  dfm() |>
-  textstat_frequency(groups = Annee) |>
-ggpubr::ggscatter(x="group", y = "frequency", facet.by = "feature", xlab = "Année",ylab = "Word Frequency")+
-    #geom_line()+
+important_words<- names(topfeatures(dfm,n=4))
+
+dfm |>
+  dfm_keep(pattern = important_words) |>
+  textstat_frequency(groups = num) |>
+  mutate(num = as.numeric((group)),
+         feature = factor(feature, levels = important_words))|>
+  left_join(base_avis_ccne, by = "num")|>
+ggpubr::ggscatter(x="Date", y = "frequency", facet.by = "feature", xlab = "Temps",ylab = "Fréquence par avis",title = "Les mots les plus fréquents du corpus au cours du temps")+
+    geom_smooth(formula = 'y ~ x', method = "loess", se = FALSE, color = "#C000C0") +  # Lissage LOESS
     theme_prism()
 ```
-### Contexte without stopwords
 
-```{r}
-#| eval: true
-#| output: true
-#| tbl-cap: Examples de contexte suivant le mot 'personne'
-#| label: tbl-contexte_personne_bis
+# Analyse : modélisation lexicométrique par Latent Dirichlet Allocation et Structural Topic Modelling
 
-
-kwic(tk, "personne", window=3) |> 
-  as.data.frame() |> 
-  select("post") |> 
-  table() |>
-  sort(decreasing = TRUE) |>
-  head(10)
-```
-
-```{r}
-#| eval: true
-#| output: true
-#| tbl-cap: Examples de contexte précédant le mot 'personne'
-#| label: tbl-contexte_pre_personne_bis
-
-
-kwic(tk, "personne", window=2) |> 
-  as.data.frame() |> 
-  select("pre") |> 
-  table() |>
-  sort(decreasing = TRUE) |>
-  head(10)
-```
-
-```{r}
-#| eval: true
-#| output: true
-#| tbl-cap: Examples de contexte suivant le mot 'droit'
-#| label: tbl-contexte_droit_bis
-
-
-kwic(tk, "droit", window=3) |> 
-  as.data.frame() |> 
-  select("post") |> 
-  table() |>
-  sort(decreasing = TRUE) |>
-  head(10)
-```
-
-## On peut complexifier le pre processing
-
-1.  Lemmatization ? pour éviter ce que j'ai déjà fait avec les pluriels ? : meh en français
-
-# LDA
-
-## Find number of topics
+## Choix du nombre de topics
 
 ```{r}
 #| eval: true
@@ -631,7 +650,7 @@ stm_data <- convert(dfm, to = "stm")
 
 
 if(recompute_choix_K){
-  list_nb_topics_K <- seq(5, 20)
+  list_nb_topics_K <- seq(5, 30)
 
   tp_nb <- FindTopicsNumber(tm_data, topics = list_nb_topics_K, 
                           metrics = c("Griffiths2004", "CaoJuan2009", 
@@ -641,20 +660,19 @@ if(recompute_choix_K){
   diag <- searchK(stm_data$documents, stm_data$vocab, 
                   list_nb_topics_K, 
                   verbose=FALSE)
-  save(tp_nb,list_nb_topics_K,diag, file = "../data/report/LDA_report_20231205_metrics.RData")
+  save(tp_nb,list_nb_topics_K,diag, file = "../data/intermediate/report/LDA_report_metrics.RData")
 } else{
-  load("../data/report/LDA_report_20231205_metrics.RData")
+  load("../data/intermediate/report/LDA_report_metrics.RData")
 }
 
 ```
 
-### Métriques
+Pour choisir le nombre de topics de nos modèles, on regarde des métriques définies par de précédents auteurs (fonction `FindTopicsNumber` de `TopicModels`), présentées sur la figure @fig-lda-metrics. De plus, on compare pour chaque nombre de topics la cohérence sémantique et l'exclusivité (fonction `searchK` de `stm`), présenté dans la figure @fig-lda-exclu_cohsem. L'exclusivité mesure dans quel point un terme est associé de manière unique à un seul thème, tandis que la cohérence sémantique évalue le degré de similarité entre les termes au sein d'un thème, reflétant la cohésion interne et l'interprétabilité du thème. On voit que le dernier gros gain pour la métrique `Deveaud2014` se fait pour onze topics, c'est aussi vers ce nombre de topics que les autres courbes ont tendance à s'aplatir et donc qu'augmenter de un le nombre de topics ne donne pas beaucoup plus d'information tout en rendant plus complexe l'interprétation. On voit aussi qu'on gagne beaucoup en exclusivité (par rapport à la situation à 8 topics) quand on utilise 11 topics. Chaque topic devrait donc dépendre sur des mots spécifiques à chacun, même s'il faut renoncer à un peu de cohérence). Huit topics aurait pu être une bonne alternative.
 
 ```{r}
 #| eval: true
 #| output: true
-#| fig-cap: Evolution des différentes métriques en fonction du nombre de topics
-#| fig-subcap: Commenter métriques/résultats
+#| fig-cap: Evolution de différentes métriques en fonction du nombre de topics
 #| label: fig-lda-metrics
 
 FindTopicsNumber_plot(tp_nb)+
@@ -662,7 +680,7 @@ FindTopicsNumber_plot(tp_nb)+
   scale_colour_prism("winter_bright")
   
 ```
-### Exclusivité et cohérence sémantique
+
 ```{r}
 #| eval: true
 #| output: true
@@ -670,7 +688,7 @@ FindTopicsNumber_plot(tp_nb)+
 #| label: fig-lda-exclu_cohsem
 map(diag$results, unlist) |> 
   bind_cols() |> 
-  ggplot(aes(exclus, semcoh, label = K)) +
+  ggplot(aes(exclus, semcoh, label = K, xlab = "Exclusivité", ylab = "Cohérence sémantique")) +
     geom_point() +
     geom_label() +
   theme_prism()
@@ -678,153 +696,13 @@ map(diag$results, unlist) |>
 
 ```{r}
 #| eval: true
-num_topic = 8
+num_topic = 11
 ```
 
-## First model : classic LDA
+## STM à Onze topics
 
-### implémanté avec topicmodels
-
-```{r}
-#| eval: true
-#| output: false
-
-tm_data <- quanteda::convert(dfm, to = "topicmodels")
-
-tm_lda <- LDA(tm_data, k = num_topic, method = "Gibbs", 
-               control = list(seed = seed))
-terms(tm_lda, 10) |> kable()
-```
-
-```{r}
-#| eval: true
-tm_lda_js <- topicmodels2LDAvis(tm_lda, reorder.topics = FALSE) # issu de ldareports
-```
-
-```{r}
-#| eval: true
-#| output: true
-#| fig-cap: Top 10 mots par topic, estimation pour 14 topic avec topicmodels
-#| label: tbl-lda-tm
-report_topics_table(tm_lda)
-```
-
-```{r}
-serVis(tm_lda_js)
-```
-
-## Analyse 1er modèle
-
-### Multidimensional Scaling
-
-```{r}
-#| eval: true
-RJSONIO::fromJSON(tm_lda_js) -> tm_lda_ldavis
-tm_lda_ldavis[["topic.order"]] -> ordre_ldavis
-RJSONIO::fromJSON(tm_lda_js)[["mdsDat"]] |> 
-  as.data.frame() |>
-  rename(order = topics)|>
-  mutate(topics = ordre_ldavis[order])-> tm_msd
-```
-
-```{r}
-#| eval: true
-#| echo: true
-#| output: true
-print("ordre LDAvis")
-print(ordre_ldavis)
-```
-
-```{r}
-#| eval: true
-#| output: true
-#| fig-cap: Intertopic Distance Map (PCA, multidimensional scaling). Marker size is proportionnal to topic prevalence
-#| label: fig-lda-PCA
-ggplot(tm_msd, aes(x = x, y = y, label = topics)) +
-  geom_point(aes(size = Freq), alpha = 0.6, color = "#00AFBB") +
-  geom_label(
-    box.padding = 0.3,
-    point.padding = 0.1,
-    size = 3,
-    color = "black",
-    nudge_x = -0.02,
-    nudge_y = 0.00
-  )+
-  scale_x_continuous(limits = symmetric_limits) +
-  scale_y_continuous(limits = symmetric_limits) +
-  geom_quadrant_lines(linetype = "solid") +
-  scale_size_area(max_size = 20, limits = c(0, 41), breaks = c(0, 2, 6, 10, 40)) +
-  theme_minimal()
-```
-
-### Topics by documents
-
-```{r}
-#| eval: true
-
-post <- posterior(tm_lda)
-post$topics |> 
-  as.data.frame() |>
-  rename_all(~ paste0("topic ", .)) |>
-  tibble::rowid_to_column("ID") |>
-  left_join(base_avis_ccne, by="ID") -> tm_metadata
-```
-
-```{r}
-#| eval: true
-#| output: true
-#| fig-cap: TOP1 documents where each topics is the more relevant
-#| label: tbl-lda-top3doc
-
-ordre_topics <- data.frame(topic = paste("topic", ordre_ldavis), ordre = 1:length(ordre_ldavis))
-
-tm_metadata |>
-  pivot_longer(cols = starts_with("topic "), names_to = "topic", values_to = "prevalence") |>
-  left_join(ordre_topics, by = "topic")|> 
-  group_by(topic) |>
-  top_n(1, prevalence) |> 
-  ungroup()|>
-  arrange(ordre, desc(prevalence)) |>
-  select("topic","num_avis","Titre","prevalence","Date","ordre") |>
-  rename(Topic = topic, Prevalence = prevalence, "N° Avis"=num_avis) |>
-  head(num_topic) |>
-  kable(caption = "Most relevant doc by topic")
-```
-
-### Graph par années
-
-```{r}
-#| eval: true
-#| output: true
-#| fig-cap: Mean topic prevalence in the corpus by years
-#| label: fig-lda-time
-
-name_topic <- list(ordre = paste("topic",ordre_ldavis))
-# name_topic <- list(ordre = c(
-#                 "éthique",
-#                 "fin de vie",
-#                 "système de soins",
-#                 "données",
-#                 "cellule souche",
-#                 "science et nature",
-#                 "test génétique",
-#                 "procréation",
-#                 "substance et cognition",
-#                 "VIH",
-#                 "chirurgie"))
-
-tm_metadata|>
-  select(Annee, starts_with("topic")) |>
-  pivot_longer(-Annee, names_to = "topic") |>
-  left_join(ordre_topics, by = "topic")|> 
-  group_by(Annee, topic, ordre) |> 
-  summarize(moyenne = mean(value)) |> 
-  ggpubr::ggscatter(x="Annee", y = "moyenne", facet.by = "ordre", panel.labs = name_topic, xlab = "Année",ylab = "Mean Prevalence")+
-  geom_line()+
-  theme_prism()
-```
-
-## 2nd model Structural Topic Modelling
+On réalise un structural topic modeling avec 11 topics et la formule suivante :
+`prevalence =~ saisine + divergence + factor(president) + factor(theme) + s(Annee)`.
 
 ```{r}
 #| eval: true
@@ -833,45 +711,43 @@ stm_data <- convert(dfm, to = "stm")
 
 stm_lda <- stm(dfm,
                K=num_topic, 
-               prevalence =~ saisine + s(Annee),
-               content =~ theme,
-               seed = seed, verbose = FALSE)
+               prevalence =~ saisine + divergence + factor(president) + factor(theme) + s(Annee),
+               #content =~ saisine,
+               init.type = "Spectral",
+               seed = seed, 
+               verbose = FALSE)
 ```
 
 ```{r}
+#| eval: false
 toLDAvis(stm_lda, stm_data$documents,reorder.topics = FALSE)
 
 ```
 
-```{r}
-#| eval: true
-#| output: true
-#| fig-cap: Mean STM topic prevalence in the corpus by years
-#| label: fig-stm-time
+### Description des thèmes
 
-full_stm <- stm_data$meta |> 
-  bind_cols(stm_lda$theta |> 
-              as_tibble() |> 
-              rename_with(~str_replace(.x, "V", "topic "), starts_with("V")))
-full_stm |> select(Date, starts_with("topic ")) |>
-  pivot_longer(-Date) |> 
-  group_by(Date, name) |> 
-  summarize(m = mean(value)) |> 
-  mutate(topic_number = as.integer(str_extract(name, "\\d+"))) |>
-  ggpubr::ggscatter(x="Date", y = "m", 
-                    facet.by = "topic_number",
-                    xlab = "Date",ylab = "Mean Prevalence")+
-  geom_line()+
-  theme_prism()
-```
+A partir des mots les plus fréquents - présentés de façon courte dans la figure @fig-stm-summary_prob et de façon détaillée en annexe dans la figure @tbl-stm-full_prob_words - et des mots les plus exclusifs - de même, résumé figure @fig-stm-summary_frex, détails figure @tbl-stm-full_frex_words, on peut tenter de donner un premier sens à nos topics.
+
+En les prenants dans l'ordre de prévalence :
+- Le topic 3 peut correspondre au diagnostic génétique et prénatal.
+- Le topic 2 peut correspondre aux questions de procréation et de risques pour l'enfant. L'autisme a - malheuresement - été traité dans ce sens dans un certain nombre d'avis.
+- Le topic 9 correspond problablement aux réflexions éthiques portant sur la recherche clinique.
+- Le topic 1 correspond aux questions relatives aux prélèvements de tissus humains
+- Le topic 6 correspond plus spécifiquement aux questions de recherche sur l'embryon, comme un sous cas du topic 1. Il est important de rappeler que c'est un des thèmes 
+- Le topic 10 est difficile à distinguer du topic 9, plus d'explorations sont nécessaires. On peut penser qu'il est lié aux questions de greffes et de transplantations.
+- Le topic 5 est un mélange entre les questions de drogue, de prix du médicaments et d'handicaps mentales. Peut-être un lien commun par l'utilisation du vocabulaire de prix ou de travail.
+- Le topic 8 semble être un topic sur l'éthique de façon plus générale mais pas forcément sur la recherche clinique, plutôt sur différents problèmes de santé publique : soins, COVID, vaccination, autotests comme le montre les plus exclusifs
+- Le topic 4 mélange l'euthanasie et la PMA. C'est possiblement lié à un vocabulaire commun autour de l'assistance, comme sugéré dans les tableaux détaillés
+- Le topic 7 correspond aux problématiques d'utilisation des données médicales : RGPD,
+
 ```{r}
 #| eval: true
 #| output: true
 #| echo: true
-#| fig-cap: STM label words
-#| label: fig-stm-label
+#| fig-cap: Les 3 mots les plus fréquents par topics. La ligne représente la prévalence dans le corpus du topic.
+#| label: fig-stm-summary_prob
 
-labelTopics(stm_lda)
+plot(stm_lda, type = "summary", labeltype = "prob")
 
 ```
 
@@ -879,23 +755,18 @@ labelTopics(stm_lda)
 #| eval: true
 #| output: true
 #| echo: true
-#| fig-cap: STM label words
-#| label: fig-stm-plot
+#| fig-cap: Les 3 mots les plus exclusifs (mesure FREX) par topics. La ligne représente la prévalence dans le corpus du topic.
+#| label: fig-stm-summary_frex
 
-plot(stm_lda, type = "summary")
+plot(stm_lda, type = "summary", labeltype = "frex")
 
 ```
-
-```{r}
-plot(stm_lda, type = "perspectives", topics = c(1,2))
-```
-
-
+Pour aller plus en détails, on peut regarder les corrélations entre les topics, présentés dans le graphe @fig-stm-corr_plot (et en annexe la matrice de corrélation complète @fig-stm-corr_mat). On trouve que seuls les topic 1 et 6 sont très légèrements corrélés, car ils parlent tous les deux de prélévements chez l'humain. Les autres topics ne sont pas du tout corrélés entre eux ou voir légèrement négativement corrélés. Il semble que cela vient de l'initialisation par les valeurs spectrales.
 
 ```{r}
 #| eval: true
 #| output: true
-#| echo: true
+#| echo: false
 #| fig-cap: STM correlation between topics
 #| label: fig-stm-corr_plot
 
@@ -903,19 +774,231 @@ plot(stm_lda, type = "perspectives", topics = c(1,2))
 corrmat <- topicCorr(stm_lda)
 plot(corrmat)
 ```
+Pour bien essayer de comprendre les différences entre les topic 9, 10 et 11, on peut les mettre en perspective.
+On voit que le topic 9 par rapport au topic 10 est plus orienté recherche scientifique et éthique tandis que le topic 10 est plus orientés sur des techniques cliniques et médicales.
+En faisant une comparaison similaire entre 9 et 11, on voit que les deux topics parlent d'éthique mais le 9 parle d'éthique de la recherche scientifique alors qu'on peut penser que le topic 11 se concentre sur des problématiques particulières (biodiversité, don de gamète, génétique). Dans cette comparaison, l'opposition entre les mots personnes et humains nous semblent vraiment intéressante : le traduit une intention pour le topic 11 surtout sur le corps biologique, tandis que le topic 9 parle de la personne, donc l'individu dans un sens plus général.
 ```{r}
 #| eval: true
 #| output: true
-#| echo: true
-#| fig-cap: STM correlation matrix between topics
+#| fig-cap: "Topic 9 contre Topic 10"
+#| label: fig-stm-perspective910
+plot(stm_lda, type = "perspectives", topics = c(9,10))
+```
+
+```{r}
+#| eval: true
+#| output: true
+#| fig-cap: "Topic 9 contre Topic 11"
+#| label: fig-stm-perspective911
+plot(stm_lda, type = "perspectives", topics = c(9,11))
+```
+
+```{r}
+findTopic(stm_lda, c("humain"))
+```
+Pour terminer sur la description des topics, on peut regarder pour chaque topic, quels avis montrent la plus forte prévalence de topic. On montre dans la table @tbl-stm-top_avis.
+Cela permet de nuancer l'imprétation des topics. Il nou
+- Le topic 1 est sur l'utilisation de produits issus du corps humain.
+- Le topic 10 est sur l'utilisation de parties du corps humains : greffe mais aussi de façon supprenante un avis sur l'exposition des corps au musée, avis soulevé par une lettre du Museum d'histoire naturel.
+- Le topic 11 semble recoupé plusieurs sujets différents. Il peut être interprété comme la monter de l'importance de regard en écosystème les questions de santé : biodiversité et manipulation du génome.
+- Le topic 2 semble correspond à sexualité, reproduction et risques avec des avis sur la contraception et l'enjeu du don du sang pour les hommes ayant des rapports avec d'autres hommes.
+- Le topic 3 correspond bien au diagnostic prénatal et génétique.
+- Le topic 4 semble correspondre à la fin de vie, plus la santé en prison. Cela est dû à un grand volet sur la fin de vie en prison dans l'avis n°94.
+- Le topic 5 correspond à l'usage des drogues et les risques de certains traitements médicamenteux (centoxin, anti-corps autorisé en 1991, puis retiré en 1993 en raison de falsifications). On peut l'interpréter comme substances et risques.
+- Le topic 6 est bien le topic embryon.
+- Le topic 7 est le topic données de santé.
+- Le topic 8 correspond à l'éthique en situation de santé publique : pandémies, vaccinations, santé des migrants.
+- Le topic 9 correspond à éthique et recherche, notamment l'étonnant avis n°131 dédié aux expérimentations en sciences de l'éducation, sciences cognitives et psychologie, ce qui explique la prévalence du terme pédagogie.
+
+
+```{r}
+#| eval: true
+#| output: true
+#| tbl-cap: "Top 3 des avis avec le plus grande prévalence par topic"
+#| tbl-cap-location: bottom
+#| label: tbl-stm-top_avis
+make.dt(stm_lda,meta = stm_data$meta)|> 
+  select(num,Titre, starts_with("Topic"),Date, president) |>
+  pivot_longer(starts_with("Topic"))|>
+  group_by(name)|>
+  rename(`N°avis` = num, Topic = name, Prevalence = value,President = president)|>
+  slice_max(order_by = Prevalence, n = 3) |>  # Sélectionne les 2 premiers pour chaque name
+  kable()
+```
+
+On obtient finalement le tableau d'interprétation grossière suivant :
+| Numéro du Topic | Interprétation Grossière               |
+|-----------------|---------------------------------------|
+| 1               | Produits corpus humains                |
+| 2               | Rapports sexuels et risques           |
+| 3               | Diagnostic génétique                  |
+| 4               | Fin de vie et assistance              |
+| 5               | Substances et risques                  |
+| 6               | Embryon                               |
+| 7               | Données                               |
+| 8               | Santé publique                         |
+| 9               | Recherche                             |
+| 10              | Corps                                 |
+| 11              | Ecosystèmes ?                          |
+
+```{r}
+#| eval: true
+interpretations <- c(
+  "1 Produits corpus humains",
+  "2 Rapports sexuels et risques",
+  "3 Diagnostic génétique",
+  "4 Fin de vie et assistance",
+  "5 Substances et risques",
+  "6 Embryon",
+  "7 Données",
+  "8 Santé publique",
+  "9 Recherche",
+  "10 Corps",
+  "11 Ecosystèmes ?"
+)
+
+topic_names <- setNames(interpretations, paste0("Topic", 1:length(interpretations)))
+
+```
+
+
+### Effets des métadonnées sur la prévalence
+
+Grâce à notre modélisation par un structural topic modelling, on peut regarder l'effet de nos métadata sur la prévalence des thèmes. Globalement dans les tableaux présentés @tbl-stm-main_effects, il y a une certaines cohérences entre notre interprétation et l'effet des covariables:
+- pour le topic 1, utilisation du corps humains : croit avec la thématique greffe, ce qui est logique vu qu'il semble parler d'utiliser les tissus humains. Il est intéressant de noter que c'est un sujet qui décroit avec tous les présidents depuis 1992.
+- pour le topic 2, effets positifs et significatifs (respectivement à 1% et à 10%) des thèmes sexualité, genre et du thème procréation. Ce qui est logique pour le topic associé aux risques de ces pratiques (?).
+- pour le topic 3, c'est un topic extrêment transversal aux questionnements du CCNE.
+- pour le topic 4, on a un effet très très fortement significatif du thème fin de vie ce qui confirme notre interprétation
+- pour les topic 5, 6 et 11, les effets et nos interprétations sont complexes à mettre en lien
+- pour les topics 7 et 8, on a bien l'influence des questions de santé publique, ce qui est logique avec nos interprétations.
+- pour le topic 9, on trouve la significativité des politiques de santé et de la recherche.
+- pour le topic 10, on retrouve l'influence du corps (thème des greffes) mais surtout l'importance du droit.
+
+Pour l'interprétation des autres covariables, on peut noter quelques points intéressants. L'actuel président (depuis 2016) Jean-François Delfraissy semble marquer quelques ruptures : il a un effet positif et significatif sur les topics 7, 8, et 11 qui marquent un tournant vers la santé publique et les écosystèmes et non plus simplement une éthique de la pratique clinique. Cela semble aller dans le sens que le CCNE s'est ouvert à insérer sa réflexion dans la société et la nature.
+
+Une autre rupture notable est le topic 11 où tous les présidents du CCNE depuis 1992 ont un effet négatif (et significatif à 5%) sur sa prévalence. Mais cela semble difficile de le faire correspondre avec un événement historique ou un changement structurel du CCNE. De même pour le topic 5 concernant les risques des médicaments qui semblent avoir été sous évoqué durant la présidence de Jean Claude Aimensen de 2012 à 2015.
+
+L'essentiel des autres topics sont guidés principalement par leurs sujets et thèmes ce qui laisse à penser une cohérence de vocabulaire et lexicographique au cours du temps. 
+
+Dernière remarque, contrairement à ce qu'on pourrait penser, il n'y a peu d'effet sur les thèmes abordés du fait d'avoir été saisi par une institution officielle. La demande politique semble faire baisser (de façon significatif à 10%) la prévalence du topic 2 "sexualité et risque" et du topic 10 "corps". Si dans le second cas, cela semble relativement logique car ce sont des préocupations de terrains (de chirurgiens ou de musées), le premier cas semble d'intérêt publique surtout avec la crise du SIDA. Une explication possible pour ce résultat étonnant est que la crise du VIH fait l'objet de ses propres négociations et réflexions en dehors du CCNE.
+
+```{r}
+#| eval: true
+stm_lda.effect <- estimateEffect(formula = 1:11 ~ saisine + divergence + factor(president) + factor(theme), stmobj = stm_lda, metadata = stm_data$meta, uncertainty="Global")
+```
+
+```{r}
+#| eval: true
+#| output: true
+#| label: tbl-stm-main_effects
+#| 
+summary(stm_lda.effect) -> summary_stm_main_effects
+signif_code_footnotes = "Signif. codes, p<t : 0.001 ‘***’ 0.01 ‘**’ 0.05 ‘*’ 0.1 ‘.’ "
+
+signif_codes <- function(p){
+  if(p<=0.001)
+    return("***")
+  else if(p < 0.01)
+    return("**")
+  else if(p <0.5)
+    return("*")
+  else if(p<0.1)
+    return(".")
+  else
+    return("")
+}
+
+for(i in 1:11){
+  topic_caption <- paste("Effets structurels significatifs sur la prévalence des thèmes pour le topic", i,
+                         topic_names[paste0("Topic",i)])
+  print(summary_stm_main_effects$tables[[i]] |>
+    as.data.frame()|>
+    mutate(signif = sapply(`Pr(>|t|)`,signif_codes))|>
+    filter(`Pr(>|t|)`<=0.1)|>
+      kable(caption = topic_caption)|>
+      footnote(signif_code_footnotes))
+}
+
+```
+
+```{r}
+# plot(stm_lda.effect, type = "perspectives", topics = c(10), covariate = "saisine", xlab = "Saisine", model = stm_lda.effect, method = "pointestimate")
+```
+
+```{r}
+#| eval: true
+#| output: true
+#| fig-cap: Prevalence des topics au cours du temps dans les documents (présentant une prévalence d'au moins 0.1)
+#| label: fig-stm-time
+
+make.dt(stm_lda,meta = stm_data$meta)|> select(num,Date, starts_with("Topic")) |>
+  pivot_longer(starts_with("Topic")) |>
+  filter(value >0.1)|>
+  mutate(name = topic_names[name])|> 
+  ggpubr::ggscatter(x="Date", y = "value", 
+                    facet.by = "name",
+                    xlab = "Temps",ylab = "Prevalence", title = "Prevalence of each topics by documents overtime")+
+  geom_smooth(formula = 'y ~ x', method = "loess", se = FALSE, color = "#C000C0")+
+  theme_prism()
+```
+
+# Annexe
+
+## STM à 11 topics
+
+### Labelisation des topics
+
+```{r}
+#| eval: true
+#| output: true
+#| fig-cap: "Ensemble des mots les plus fréquents par topic"
+#| label: tbl-stm-full_prob_words
+#| 
+plot(stm_lda, type = "labels", labeltype = "prob")
+```
+
+```{r}
+#| eval: true
+#| output: true
+#| fig-cap: "Ensemble des mots les plus exclusifs par topic"
+#| label: tbl-stm-full_frex_words
+#| 
+plot(stm_lda, type = "labels", labeltype = "frex", frexw=0.5)
+```
+
+```{r}
+#| eval: false
+#| output: false
+#| echo: false
+#| fig-cap: "Ensemble des mots par topic pour toutes les mesures disponibles"
+#| label: fig-stm-full_all_measures_word
+
+labelTopics(stm_lda)
+
+```
+### Liens entre les topics
+
+```{r}
+#| eval: True
+#| output: True
+#| echo: false
+#| fig-cap: "Matrice de corrélation entre les topics"
 #| label: fig-stm-corr_mat
 ggcorrplot(corrmat$cor)
 ```
-rajouter l'impact des métadonnées et leurs impacts
 
 ```{r}
-findThoughts(stm_lda, texts = base_avis_ccne$avis,meta = base_avis_ccne |> select(-avis), topics = 1:num_topic) -> thoughts
+plot(stm_lda, type = "hist")
+```
 
-plot(thoughts$index)
+### Tables complètes des effets structurelles
+
+```{r}
+#| eval: true
+#| output: true
+#| fig-cap: "Full regression like table of the structural effects on each topics"
+#| label: tbl-stm-full_reg_tab
+summary(estimateEffect(formula = 1:11 ~ saisine + divergence + factor(president) + factor(theme) + s(Annee), stmobj = stm_lda, metadata = stm_data$meta, uncertainty="Global"))
+
 ```
 
