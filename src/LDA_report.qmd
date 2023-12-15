@@ -1,7 +1,7 @@
 ---
 title: "CCNE LDA"
 author: "Léopold MAURICE, ENSAE"
-date: "2023-12-12"
+date: "2023-12-21"
 project: CCNE
 supervision: Pr. Emmanuel Didier, CMH/ENS/EHESS
 output-ext: html
@@ -91,7 +91,7 @@ La base explorée est l'ensemble des 144 avis publiés par le Comité Consultati
 
 Le Comité Consultatif national d'Éthique, souvent abrégé CCNE, est une institution française indépendante créée en 1983. Son rôle central est d'apporter des réflexions éthiques sur les questions médicales, scientifiques et de santé publique. En tant qu'organe consultatif, le CCNE émet des avis sur des sujets variés tels que la bioéthique, la recherche médicale, les avancées technologiques dans le domaine de la santé, et d'autres enjeux éthiques contemporains. Composé de membres venant de la médecine clinique, de la recherche ou  des études théologiques, le CCNE favorise le dialogue entre experts de la médecine et de l'éthique et offre des recommandations visant à guider les décideurs publics.
 
-Les avis sont extrêmement divers en terme de sujets (avec des récurrences comme la génétique, les cellules souches par exemple) ou de formats. Les premiers avis étaient plutôt courts, avec une partie recommendation de 2 pages et une annexe de quelques pages supplémentaires. Au cours du temps, la longueur des avis a largement augmenté comme montré sur la figure @fig-longueur. Les textes des avis sont récupérés depuis leur PDF disponible sur [le site du CCNE](https://www.ccne-ethique.fr/).
+Les avis sont extrêmement divers en terme de sujets (avec des récurrences comme la génétique, les cellules souches par exemple) ou de formats. Les premiers avis étaient plutôt courts, avec une partie recommendation de 2 pages et une annexe de quelques pages supplémentaires. Au cours du temps, la longueur des avis a largement augmenté comme montré sur la @fig-longueur. Les textes des avis sont récupérés depuis leur PDF disponible sur [le site du CCNE](https://www.ccne-ethique.fr/).
 
 Notre base se compose aussi de quelques métadonnées sur les avis :
 - date : date de publication du CCNE
@@ -274,6 +274,7 @@ ggplot(base_avis_ccne, aes(x = president, fill = president)) +
   labs(title = "Nombre d'avis par président du CCNE",
        x = "Président",
        y = "Nombre d'avis")+
+  coord_flip()+
   theme(legend.position = "none")
 ```
 
@@ -302,14 +303,14 @@ ggplot(base_avis_ccne, aes(x = theme, fill = president)) +
 
 Pour pouvoir préparer correctement notre tokenisation, il nous faut regarder le contexte autour de certains mots. Deux exemples importants : le mot 'don' et le mot 'personne'. 
 
-Le mot don est avant modification des tokens initiaux le mot le plus fréquent du corpus. Cependant, au regard des 2-grams le suivant présenté dans la table @tbl-contexte_don, on peut voir que cela désigne plusieurs objets différents que nous avons rassemblés en quatre catégories : don de gamètes (d'ovocytes, de spermes etc.), don d'organe, don de sang, don de cellules. Ce découpage a fait perdre sa place au mot don.
+Le mot don est avant modification des tokens initiaux le mot le plus fréquent du corpus. Cependant, au regard des 2-grams le suivant présenté dans la @tbl-contexte_don, on peut voir que cela désigne plusieurs objets différents que nous avons rassemblés en quatre catégories : don de gamètes (d'ovocytes, de spermes etc.), don d'organe, don de sang, don de cellules. Ce découpage a fait perdre sa place au mot don.
 
-Un découpage similaire a été opéré pour le mot 'personne' : on a distingué personne handicapée, personne handicapée mentale, personne malade, personne de confiance, personne agée, personne humaine potentielle (compromis désignant le foetus) en suivant les résultats de la table @tbl-contexte_personne. 
+Un découpage similaire a été opéré pour le mot 'personne' : on a distingué personne handicapée, personne handicapée mentale, personne malade, personne de confiance, personne agée, personne humaine potentielle (compromis désignant le foetus) en suivant les résultats de la @tbl-contexte_personne 
 
 ```{r}
 #| eval: true
 #| output: true
-#| tbl-cap: Examples de contexte suivant le mot don
+#| tbl-cap: Examples de contexte suivant le mot 'don'
 #| label: tbl-contexte_don
 
 
@@ -318,7 +319,11 @@ kwic(tk_original, "don", window=2) |>
   select("post") |> 
   table() |>
   sort(decreasing = TRUE) |>
-  head(15)
+  head(20)|> 
+  as.data.frame()|>
+  rename(`Contexte après` = post, `Fréquence` = Freq) |>
+  pivot_wider(names_from = `Contexte après`, values_from = `Fréquence`)|> 
+  kable(booktabs = TRUE, longtable = TRUE, linesep = "", digits = 3)
 ```
 
 ```{r}
@@ -329,11 +334,15 @@ kwic(tk_original, "don", window=2) |>
 
 
 kwic(tk_original, "personne", window=2) |> 
-  as.data.frame() |> 
+  as.data.frame() |>
   select("post") |> 
   table() |>
   sort(decreasing = TRUE) |>
-  head(20)
+  head(20) |> 
+  as.data.frame()|>
+  rename(`Contexte après` = post, `Fréquence` = Freq) |>
+  pivot_wider(names_from = `Contexte après`, values_from = `Fréquence`)|> 
+  kable(booktabs = TRUE, longtable = TRUE, linesep = "", digits = 3)
 ```
 
 ```{r}
@@ -606,7 +615,7 @@ topfeatures(dfm, 50, decreasing = TRUE)
 
 # Premières descriptions du corpus
 
-On peut voir sur la figure @fig-wordcloud les mots les plus fréquents (au moins 750  dans le corpus) représenté sous la forme d'un wordcloud. On peut voir que malgré le fait d'avoir subdivisé grossièrement les sens de personne, le terme en lui-même reste le plus fréquent. Cela tend à confirmer le fait que le CCNE analyse les problématiques qui lui sont données au regard de la notion de personne en premier lieu. On retrouve aussi dans ce wordcloud des sujets essentiels comme le don de gamète, l'enfant, l'embryon, la génétique.
+On peut voir sur la @fig-wordcloud les mots les plus fréquents (au moins 750  dans le corpus) représenté sous la forme d'un wordcloud. On peut voir que malgré le fait d'avoir subdivisé grossièrement les sens de personne, le terme en lui-même reste le plus fréquent. Cela tend à confirmer le fait que le CCNE analyse les problématiques qui lui sont données au regard de la notion de personne en premier lieu. On retrouve aussi dans ce wordcloud des sujets essentiels comme le don de gamète, l'enfant, l'embryon, la génétique.
 
 ```{r}
 #| eval: true
@@ -667,7 +676,7 @@ if(recompute_choix_K){
 
 ```
 
-Pour choisir le nombre de topics de nos modèles, on regarde des métriques définies par de précédents auteurs (fonction `FindTopicsNumber` de `TopicModels`), présentées sur la figure @fig-lda-metrics. De plus, on compare pour chaque nombre de topics la cohérence sémantique et l'exclusivité (fonction `searchK` de `stm`), présenté dans la figure @fig-lda-exclu_cohsem. L'exclusivité mesure dans quel point un terme est associé de manière unique à un seul thème, tandis que la cohérence sémantique évalue le degré de similarité entre les termes au sein d'un thème, reflétant la cohésion interne et l'interprétabilité du thème. On voit que le dernier gros gain pour la métrique `Deveaud2014` se fait pour onze topics, c'est aussi vers ce nombre de topics que les autres courbes ont tendance à s'aplatir et donc qu'augmenter de un le nombre de topics ne donne pas beaucoup plus d'information tout en rendant plus complexe l'interprétation. On voit aussi qu'on gagne beaucoup en exclusivité (par rapport à la situation à 8 topics) quand on utilise 11 topics. Chaque topic devrait donc dépendre sur des mots spécifiques à chacun, même s'il faut renoncer à un peu de cohérence). Huit topics aurait pu être une bonne alternative.
+Pour choisir le nombre de topics de nos modèles, on regarde des métriques définies par de précédents auteurs (fonction `FindTopicsNumber` de `TopicModels`), présentées sur la @fig-lda-metrics. De plus, on compare pour chaque nombre de topics la cohérence sémantique et l'exclusivité (fonction `searchK` de `stm`), présenté dans la @fig-lda-exclu_cohsem. L'exclusivité mesure dans quel point un terme est associé de manière unique à un seul thème, tandis que la cohérence sémantique évalue le degré de similarité entre les termes au sein d'un thème, reflétant la cohésion interne et l'interprétabilité du thème. On voit que le dernier gros gain pour la métrique `Deveaud2014` se fait pour onze topics, c'est aussi vers ce nombre de topics que les autres courbes ont tendance à s'aplatir et donc qu'augmenter de un le nombre de topics ne donne pas beaucoup plus d'information tout en rendant plus complexe l'interprétation. On voit aussi qu'on gagne beaucoup en exclusivité (par rapport à la situation à 8 topics) quand on utilise 11 topics. Chaque topic devrait donc dépendre sur des mots spécifiques à chacun, même s'il faut renoncer à un peu de cohérence). Huit topics aurait pu être une bonne alternative.
 
 ```{r}
 #| eval: true
@@ -726,19 +735,29 @@ toLDAvis(stm_lda, stm_data$documents,reorder.topics = FALSE)
 
 ### Description des thèmes
 
-A partir des mots les plus fréquents - présentés de façon courte dans la figure @fig-stm-summary_prob et de façon détaillée en annexe dans la figure @tbl-stm-full_prob_words - et des mots les plus exclusifs - de même, résumé figure @fig-stm-summary_frex, détails figure @tbl-stm-full_frex_words, on peut tenter de donner un premier sens à nos topics.
+A partir des mots les plus fréquents - présentés de façon courte dans la @fig-stm-summary_prob et de façon détaillée en annexe dans la @tbl-stm-full_prob_words - et des mots les plus exclusifs - de même, résumé figure @fig-stm-summary_frex, détails sur @tbl-stm-full_frex_words, on peut tenter de donner un premier sens à nos topics.
 
 En les prenants dans l'ordre de prévalence :
-- Le topic 3 peut correspondre au diagnostic génétique et prénatal.
-- Le topic 2 peut correspondre aux questions de procréation et de risques pour l'enfant. L'autisme a - malheuresement - été traité dans ce sens dans un certain nombre d'avis.
-- Le topic 9 correspond problablement aux réflexions éthiques portant sur la recherche clinique.
-- Le topic 1 correspond aux questions relatives aux prélèvements de tissus humains
-- Le topic 6 correspond plus spécifiquement aux questions de recherche sur l'embryon, comme un sous cas du topic 1. Il est important de rappeler que c'est un des thèmes 
-- Le topic 10 est difficile à distinguer du topic 9, plus d'explorations sont nécessaires. On peut penser qu'il est lié aux questions de greffes et de transplantations.
-- Le topic 5 est un mélange entre les questions de drogue, de prix du médicaments et d'handicaps mentales. Peut-être un lien commun par l'utilisation du vocabulaire de prix ou de travail.
-- Le topic 8 semble être un topic sur l'éthique de façon plus générale mais pas forcément sur la recherche clinique, plutôt sur différents problèmes de santé publique : soins, COVID, vaccination, autotests comme le montre les plus exclusifs
-- Le topic 4 mélange l'euthanasie et la PMA. C'est possiblement lié à un vocabulaire commun autour de l'assistance, comme sugéré dans les tableaux détaillés
-- Le topic 7 correspond aux problématiques d'utilisation des données médicales : RGPD,
+
+- **Topic 3:** Correspond probablement au diagnostic génétique et prénatal.
+
+- **Topic 2:** Peut correspondre aux questions de procréation et de risques pour l'enfant. L'autisme a malheureusement été traité dans ce sens dans un certain nombre d'avis.
+
+- **Topic 9:** Correspond probablement aux réflexions éthiques portant sur la recherche clinique.
+
+- **Topic 1:** Correspond aux questions relatives aux prélèvements de tissus humains.
+
+- **Topic 6:** Correspond plus spécifiquement aux questions de recherche sur l'embryon, comme un sous-cas du topic 1. Il est important de rappeler que c'est l'un des thèmes.
+
+- **Topic 10:** Difficile à distinguer du topic 9, plus d'explorations sont nécessaires. On peut penser qu'il est lié aux questions de greffes et de transplantations.
+
+- **Topic 5:** Mélange entre les questions de drogue, de prix des médicaments et d'handicaps mentaux. Peut-être un lien commun par l'utilisation du vocabulaire de prix ou de travail.
+
+- **Topic 8:** Semble être un topic sur l'éthique de façon plus générale, mais pas forcément sur la recherche clinique. Plutôt sur différents problèmes de santé publique : soins, COVID, vaccination, autotests comme le montre les plus exclusifs.
+
+- **Topic 4:** Mélange l'euthanasie et la PMA. C'est possiblement lié à un vocabulaire commun autour de l'assistance, comme suggéré dans les tableaux détaillés.
+
+- **Topic 7:** Correspond aux problématiques d'utilisation des données médicales avec le mot exclusif 'RGPD', par exemple.
 
 ```{r}
 #| eval: true
@@ -761,7 +780,7 @@ plot(stm_lda, type = "summary", labeltype = "prob")
 plot(stm_lda, type = "summary", labeltype = "frex")
 
 ```
-Pour aller plus en détails, on peut regarder les corrélations entre les topics, présentés dans le graphe @fig-stm-corr_plot (et en annexe la matrice de corrélation complète @fig-stm-corr_mat). On trouve que seuls les topic 1 et 6 sont très légèrements corrélés, car ils parlent tous les deux de prélévements chez l'humain. Les autres topics ne sont pas du tout corrélés entre eux ou voir légèrement négativement corrélés. Il semble que cela vient de l'initialisation par les valeurs spectrales.
+Pour aller plus en détails, on peut regarder les corrélations entre les topics, présentés dans la @fig-stm-corr_plot (et en annexe la matrice de corrélation complète, @fig-stm-corr_mat). On trouve que seuls les topic 1 et 6 sont très légèrements corrélés, car ils parlent tous les deux de prélévements chez l'humain. Les autres topics ne sont pas du tout corrélés entre eux ou voir légèrement négativement corrélés. Il semble que cela vient de l'initialisation par les valeurs spectrales.
 
 ```{r}
 #| eval: true
@@ -796,20 +815,30 @@ plot(stm_lda, type = "perspectives", topics = c(9,11))
 ```{r}
 findTopic(stm_lda, c("humain"))
 ```
-Pour terminer sur la description des topics, on peut regarder pour chaque topic, quels avis montrent la plus forte prévalence de topic. On montre dans la table @tbl-stm-top_avis.
-Cela permet de nuancer l'imprétation des topics. Il nou
-- Le topic 1 est sur l'utilisation de produits issus du corps humain.
-- Le topic 10 est sur l'utilisation de parties du corps humains : greffe mais aussi de façon supprenante un avis sur l'exposition des corps au musée, avis soulevé par une lettre du Museum d'histoire naturel.
-- Le topic 11 semble recoupé plusieurs sujets différents. Il peut être interprété comme la monter de l'importance de regard en écosystème les questions de santé : biodiversité et manipulation du génome.
-- Le topic 2 semble correspond à sexualité, reproduction et risques avec des avis sur la contraception et l'enjeu du don du sang pour les hommes ayant des rapports avec d'autres hommes.
-- Le topic 3 correspond bien au diagnostic prénatal et génétique.
-- Le topic 4 semble correspondre à la fin de vie, plus la santé en prison. Cela est dû à un grand volet sur la fin de vie en prison dans l'avis n°94.
-- Le topic 5 correspond à l'usage des drogues et les risques de certains traitements médicamenteux (centoxin, anti-corps autorisé en 1991, puis retiré en 1993 en raison de falsifications). On peut l'interpréter comme substances et risques.
-- Le topic 6 est bien le topic embryon.
-- Le topic 7 est le topic données de santé.
-- Le topic 8 correspond à l'éthique en situation de santé publique : pandémies, vaccinations, santé des migrants.
-- Le topic 9 correspond à éthique et recherche, notamment l'étonnant avis n°131 dédié aux expérimentations en sciences de l'éducation, sciences cognitives et psychologie, ce qui explique la prévalence du terme pédagogie.
+Pour terminer sur la description des topics, on peut regarder pour chaque topic, quels avis montrent la plus forte prévalence de topic. On montre dans la @tbl-stm-top_avis.
+Cela permet de nuancer l'imprétation des topics. On peut ainsi dire que : 
 
+- **Topic 1:** Utilisation de produits issus du corps humain.
+
+- **Topic 10:** Utilisation de parties du corps humain, incluant la greffe et un avis sur l'exposition des corps au musée, soulevé par une lettre du Museum d'histoire naturelle.
+
+- **Topic 11:** Semble recouper plusieurs sujets différents. Peut être interprété comme la montée de l'importance de regarder en écosystème les questions de santé, y compris la biodiversité et la manipulation du génome.
+
+- **Topic 2:** Correspond à la sexualité, la reproduction et les risques, avec des avis sur la contraception et l'enjeu du don du sang pour les hommes ayant des rapports avec d'autres hommes.
+
+- **Topic 3:** Correspond bien au diagnostic prénatal et génétique.
+
+- **Topic 4:** Semble correspondre à la fin de vie, en incluant la santé en prison, en raison d'un grand volet sur la fin de vie en prison dans l'avis n°94.
+
+- **Topic 5:** Correspond à l'usage des drogues et aux risques de certains traitements médicamenteux (centoxin, anti-corps autorisé en 1991, puis retiré en 1993 en raison de falsifications). Interprétable comme substances et risques.
+
+- **Topic 6:** Correspond au thème de l'embryon.
+
+- **Topic 7:** Thème des données de santé.
+
+- **Topic 8:** Éthique en situation de santé publique, incluant les pandémies, les vaccinations et la santé des migrants.
+
+- **Topic 9:** Éthique et recherche, notamment l'étonnant avis n°131 dédié aux expérimentations en sciences de l'éducation, sciences cognitives et psychologie, expliquant la prévalence du terme "pédagogie".
 
 ```{r}
 #| eval: true
@@ -823,26 +852,16 @@ make.dt(stm_lda,meta = stm_data$meta)|>
   group_by(name)|>
   rename(`N°avis` = num, Topic = name, Prevalence = value,President = president)|>
   slice_max(order_by = Prevalence, n = 3) |>  # Sélectionne les 2 premiers pour chaque name
-  kable()
+  kable(digits = 3)
 ```
 
-On obtient finalement le tableau d'interprétation grossière suivant :
-| Numéro du Topic | Interprétation Grossière               |
-|-----------------|---------------------------------------|
-| 1               | Produits corpus humains                |
-| 2               | Rapports sexuels et risques           |
-| 3               | Diagnostic génétique                  |
-| 4               | Fin de vie et assistance              |
-| 5               | Substances et risques                  |
-| 6               | Embryon                               |
-| 7               | Données                               |
-| 8               | Santé publique                         |
-| 9               | Recherche                             |
-| 10              | Corps                                 |
-| 11              | Ecosystèmes ?                          |
+On obtient finalement les interprésentations grossières présentés dans @tbl-stm-interpretations.
 
 ```{r}
 #| eval: true
+#| tbl-cap: "Interprétations de nos topics"
+#| label: tbl-stm-interpretations
+#| tbl-colwidths: [10,90]
 interpretations <- c(
   "1 Produits corpus humains",
   "2 Rapports sexuels et risques",
@@ -858,6 +877,16 @@ interpretations <- c(
 )
 
 topic_names <- setNames(interpretations, paste0("Topic", 1:length(interpretations)))
+# Ajuster les options pour afficher toutes les lignes
+options("dplyr.print_max" = Inf)
+
+data.frame(
+  num = as.integer(gsub("[^0-9]", "", names(topic_names))),  # Extraire les numéros d'avis
+  Interprétation = gsub("^\\d+\\s", "", interpretations)  # Utiliser les interprétations
+)|> 
+rename("N° Avis"=num)|>
+kable(digits = 3)
+
 
 ```
 
@@ -865,14 +894,26 @@ topic_names <- setNames(interpretations, paste0("Topic", 1:length(interpretation
 ### Effets des métadonnées sur la prévalence
 
 Grâce à notre modélisation par un structural topic modelling, on peut regarder l'effet de nos métadata sur la prévalence des thèmes. Globalement dans les tableaux présentés @tbl-stm-main_effects, il y a une certaines cohérences entre notre interprétation et l'effet des covariables:
-- pour le topic 1, utilisation du corps humains : croit avec la thématique greffe, ce qui est logique vu qu'il semble parler d'utiliser les tissus humains. Il est intéressant de noter que c'est un sujet qui décroit avec tous les présidents depuis 1992.
-- pour le topic 2, effets positifs et significatifs (respectivement à 1% et à 10%) des thèmes sexualité, genre et du thème procréation. Ce qui est logique pour le topic associé aux risques de ces pratiques (?).
-- pour le topic 3, c'est un topic extrêment transversal aux questionnements du CCNE.
-- pour le topic 4, on a un effet très très fortement significatif du thème fin de vie ce qui confirme notre interprétation
-- pour les topic 5, 6 et 11, les effets et nos interprétations sont complexes à mettre en lien
-- pour les topics 7 et 8, on a bien l'influence des questions de santé publique, ce qui est logique avec nos interprétations.
-- pour le topic 9, on trouve la significativité des politiques de santé et de la recherche.
-- pour le topic 10, on retrouve l'influence du corps (thème des greffes) mais surtout l'importance du droit.
+
+* **Topic 1:** Utilisation du corps humain
+  - Croît avec la thématique greffe, ce qui est logique vu qu'il semble parler d'utiliser les tissus humains.
+  - Intéressant de noter que c'est un sujet qui décroît avec tous les présidents depuis 1992.
+
+* **Topic 2:** Effets positifs et significatifs
+  - Respectivement à 1% et à 10% pour les thèmes sexualité, genre, et du thème procréation.
+  - Logique pour le topic associé aux risques de ces pratiques (?).
+
+* **Topic 3:** Topic extrêmement transversal aux questionnements du CCNE.
+
+* **Topic 4:** Effet très très fortement significatif du thème fin de vie, confirmant notre interprétation.
+
+* **Topics 5, 6, et 11:** Effets et interprétations complexes à mettre en lien.
+
+* **Topics 7 et 8:** Influence des questions de santé publique, logique avec nos interprétations.
+
+* **Topic 9:** Significativité des politiques de santé et de la recherche.
+
+* **Topic 10:** Influence du corps (thème des greffes), mais surtout l'importance du droit.
 
 Pour l'interprétation des autres covariables, on peut noter quelques points intéressants. L'actuel président (depuis 2016) Jean-François Delfraissy semble marquer quelques ruptures : il a un effet positif et significatif sur les topics 7, 8, et 11 qui marquent un tournant vers la santé publique et les écosystèmes et non plus simplement une éthique de la pratique clinique. Cela semble aller dans le sens que le CCNE s'est ouvert à insérer sa réflexion dans la société et la nature.
 
@@ -884,39 +925,59 @@ Dernière remarque, contrairement à ce qu'on pourrait penser, il n'y a peu d'ef
 
 ```{r}
 #| eval: true
-stm_lda.effect <- estimateEffect(formula = 1:11 ~ saisine + divergence + factor(president) + factor(theme), stmobj = stm_lda, metadata = stm_data$meta, uncertainty="Global")
+stm_lda.effect <- estimateEffect(formula = 1:num_topic ~ saisine + divergence + factor(president) + factor(theme), stmobj = stm_lda, metadata = stm_data$meta, uncertainty="Global")
 ```
 
 ```{r}
 #| eval: true
 #| output: true
 #| label: tbl-stm-main_effects
-#| 
+#| tbl-cap: "Effets significatifs des métadonnées sur les différents topics"
+# tbl-cap-location: top
+#| tbl-colwidths: [100]
+data.frame()|>kable()
+```
+
+```{r}
+#| eval: true
+#| output: true
+#| results: asis
 summary(stm_lda.effect) -> summary_stm_main_effects
-signif_code_footnotes = "Signif. codes, p<t : 0.001 ‘***’ 0.01 ‘**’ 0.05 ‘*’ 0.1 ‘.’ "
+signif_code_footnotes = "Signif. codes, p<t : 0.001 ‘\u00B7\u00B7\u00B7\u00B7’ 0.01 ‘\u00B7\u00B7\u00B7’ 0.05 ‘\u00B7\u00B7’ 0.1 ‘\u00B7’ "
 
 signif_codes <- function(p){
   if(p<=0.001)
-    return("***")
+    return("\u2022\u2022\u2022\u2022")
   else if(p < 0.01)
-    return("**")
+    return("\u2022\u2022\u2022")
   else if(p <0.5)
-    return("*")
+    return("\u2022\u2022")
   else if(p<0.1)
-    return(".")
+    return("\u2022")
   else
     return("")
 }
 
-for(i in 1:11){
-  topic_caption <- paste("Effets structurels significatifs sur la prévalence des thèmes pour le topic", i,
-                         topic_names[paste0("Topic",i)])
-  print(summary_stm_main_effects$tables[[i]] |>
+# data.frame()|>
+#   kable(caption = "**Effets significatifs des métadonnées sur les différents topics**",
+#         label = "tbl-stm-main_effects")
+
+
+for(i in 1:num_topic){
+  # if (i==1)
+  #   topic_label = "tbl-stm-main_effects"
+  # else
+  topic_label = paste("tbl-stm-main_effects",i,collapse = "-")
+  topic_caption <- paste("Effets structurels significatifs sur la prévalence des thèmes pour le topic",
+                         topic_names[paste0("Topic",i)], collaspe = "\n")
+  cat(summary_stm_main_effects$tables[[i]] |>
     as.data.frame()|>
     mutate(signif = sapply(`Pr(>|t|)`,signif_codes))|>
     filter(`Pr(>|t|)`<=0.1)|>
-      kable(caption = topic_caption)|>
+      kable(caption = topic_caption, digits = 3,
+            label = topic_label)|>
       footnote(signif_code_footnotes))
+  cat("\n\n")
 }
 
 ```
@@ -951,19 +1012,21 @@ make.dt(stm_lda,meta = stm_data$meta)|> select(num,Date, starts_with("Topic")) |
 ```{r}
 #| eval: true
 #| output: true
-#| fig-cap: "Ensemble des mots les plus fréquents par topic"
+#| tbl-cap: "Ensemble des 15 mots les plus fréquents par topic"
+# tbl-cap-location: top
 #| label: tbl-stm-full_prob_words
 #| 
-plot(stm_lda, type = "labels", labeltype = "prob")
+plot(stm_lda, type = "labels", labeltype = "prob", n=15)|> kable(digits = 3)
 ```
 
 ```{r}
 #| eval: true
 #| output: true
-#| fig-cap: "Ensemble des mots les plus exclusifs par topic"
+#| tbl-cap: "Ensemble des 15 mots les plus exclusifs par topic"
 #| label: tbl-stm-full_frex_words
-#| 
-plot(stm_lda, type = "labels", labeltype = "frex", frexw=0.5)
+# tbl-cap-location: top
+
+plot(stm_lda, type = "labels", labeltype = "frex", frexw=0.5, n = 15)|> kable(digits = 3)
 ```
 
 ```{r}
@@ -996,9 +1059,21 @@ plot(stm_lda, type = "hist")
 ```{r}
 #| eval: true
 #| output: true
-#| fig-cap: "Full regression like table of the structural effects on each topics"
 #| label: tbl-stm-full_reg_tab
-summary(estimateEffect(formula = 1:11 ~ saisine + divergence + factor(president) + factor(theme) + s(Annee), stmobj = stm_lda, metadata = stm_data$meta, uncertainty="Global"))
+#| results: asis
+#| tbl-cap: "Effets des métadonnées sur les différents topics"
 
+summary(estimateEffect(formula = 1:num_topic ~ saisine + divergence + factor(president) + factor(theme) + s(Annee), stmobj = stm_lda, metadata = stm_data$meta, uncertainty="Global")) -> complete_estimation_effects 
+
+for(i in 1:num_topic){
+  topic_caption <- paste("Effets structurels sur la prévalence des thèmes pour le topic", i,
+                         topic_names[paste0("Topic",i)])
+  cat(complete_estimation_effects$tables[[i]] |>
+    as.data.frame()|>
+    mutate(signif = sapply(`Pr(>|t|)`,signif_codes))|>
+      kable(caption = topic_caption, digits = 3)|>
+      footnote(signif_code_footnotes))
+  cat("\n\n")
+}
 ```
 
