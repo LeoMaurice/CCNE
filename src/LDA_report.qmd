@@ -244,6 +244,8 @@ tk_original <- tokens(cp, remove_punct = TRUE, remove_numbers = TRUE)
 #|   - "Pages"
 #|   - "Mots"
 #| fig-env: "figure*"
+#| fig-width: 8
+#| fig-height: 5
 ggplot(base_avis_ccne, aes(x = Date, y = nb_pages)) +
   geom_point() +  # Points pour chaque observation
   geom_smooth(formula = 'y ~ x', method = "loess", se = FALSE, color = "#077E97") +  # Lissage LOESS
@@ -765,6 +767,7 @@ En les prenants dans l'ordre de prévalence :
 #| echo: true
 #| fig-cap: Les 3 mots les plus fréquents par topics. La ligne représente la prévalence dans le corpus du topic.
 #| label: fig-stm-summary_prob
+#| fig-width: 16
 
 plot(stm_lda, type = "summary", labeltype = "prob")
 
@@ -776,6 +779,8 @@ plot(stm_lda, type = "summary", labeltype = "prob")
 #| echo: true
 #| fig-cap: Les 3 mots les plus exclusifs (mesure FREX) par topics. La ligne représente la prévalence dans le corpus du topic.
 #| label: fig-stm-summary_frex
+#| fig-width: 16
+
 
 plot(stm_lda, type = "summary", labeltype = "frex")
 
@@ -801,6 +806,8 @@ En faisant une comparaison similaire entre 9 et 11, on voit que les deux topics 
 #| output: true
 #| fig-cap: "Topic 9 contre Topic 10"
 #| label: fig-stm-perspective910
+#| fig-width: 16
+#| fig-height: 8
 plot(stm_lda, type = "perspectives", topics = c(9,10))
 ```
 
@@ -809,6 +816,8 @@ plot(stm_lda, type = "perspectives", topics = c(9,10))
 #| output: true
 #| fig-cap: "Topic 9 contre Topic 11"
 #| label: fig-stm-perspective911
+#| fig-width: 16
+#| fig-height: 8
 plot(stm_lda, type = "perspectives", topics = c(9,11))
 ```
 
@@ -862,6 +871,8 @@ On obtient finalement les interprésentations grossières présentés dans @tbl-
 #| tbl-cap: "Interprétations de nos topics"
 #| label: tbl-stm-interpretations
 #| tbl-colwidths: [10,90]
+#| fig-width: 16
+#| fig-height: 16
 interpretations <- c(
   "1 Produits corpus humains",
   "2 Rapports sexuels et risques",
@@ -873,7 +884,7 @@ interpretations <- c(
   "8 Santé publique",
   "9 Recherche",
   "10 Corps",
-  "11 Ecosystèmes ?"
+  "11 Ecosystèmes"
 )
 
 topic_names <- setNames(interpretations, paste0("Topic", 1:length(interpretations)))
@@ -1012,11 +1023,12 @@ make.dt(stm_lda,meta = stm_data$meta)|> select(num,Date, starts_with("Topic")) |
 ```{r}
 #| eval: true
 #| output: true
-#| tbl-cap: "Ensemble des 15 mots les plus fréquents par topic"
-# tbl-cap-location: top
 #| label: tbl-stm-full_prob_words
-#| 
-plot(stm_lda, type = "labels", labeltype = "prob", n=15)|> kable(digits = 3)
+# tab-cap: "Ensemble des 15 mots les plus fréquents par topic"
+# tbl-cap-location: top
+
+
+plot(stm_lda, type = "labels", labeltype = "prob", n=12)
 ```
 
 ```{r}
@@ -1026,7 +1038,7 @@ plot(stm_lda, type = "labels", labeltype = "prob", n=15)|> kable(digits = 3)
 #| label: tbl-stm-full_frex_words
 # tbl-cap-location: top
 
-plot(stm_lda, type = "labels", labeltype = "frex", frexw=0.5, n = 15)|> kable(digits = 3)
+plot(stm_lda, type = "labels", labeltype = "frex", frexw=0.5, n = 12)
 ```
 
 ```{r}
