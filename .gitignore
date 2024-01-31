@@ -20,6 +20,7 @@
 
 # RStudio files
 .Rproj.user/
+src/helpers/__pycache__/
 
 # produced vignettes
 vignettes/*.html
