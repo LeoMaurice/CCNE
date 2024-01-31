@@ -19,3 +19,85 @@ president_CCNE_by_date <- Vectorize(function(date){
   else
     return(facteur_presidents[1]) #Jean Bernard
 })
+
+open_avis <- function(rescrap_texte=FALSE){
+  if(rescrap_texte){
+    # Définir le chemin vers le dossier contenant les fichiers PDF
+    dossier_avis <- "../data/raw/avis"
+    
+    # Liste des fichiers PDF dans le dossier
+    liste_fichiers <- list.files(path = dossier_avis, pattern = "\\.pdf$", full.names = TRUE)
+    
+    # Initialiser un data.frame vide
+    base_avis_ccne <- data.frame(num = integer(), avis = character(), 
+                                 nom_fichier = character(), nb_pages = integer(),
+                                 stringsAsFactors = FALSE)
+    
+    # Boucle pour lire chaque fichier PDF et extraire le texte
+    for (fichier in liste_fichiers) {
+      # Extraire le numéro du fichier
+      numero <- as.integer(strsplit(strsplit(basename(fichier), " ")[[1]][2], ".pdf")[[1]])
+      list_bugged <- c(69,70,71,72,76,77,78,79,80,83,84,86,89)
+      if(numero %in% list_bugged){
+        texte <- pdf_ocr_text(fichier) # embending de tesseract
+      } else{
+        texte <- pdf_text(fichier)
+      }
+      
+      
+      nombre_page <- pdf_info(fichier)$pages
+      
+      texte <- paste(texte, collapse = " ")
+      
+      # Ajouter les données au data.frame
+      base_avis_ccne <- base_avis_ccne |>
+        bind_rows(data.frame(num = numero, 
+                             avis = texte,
+                             nom_fichier = basename(fichier),
+                             nb_pages = nombre_page,
+                             stringsAsFactors = FALSE))
+    }
+    saveRDS(base_avis_ccne, "../data/intermediate/base_avis_ccne.rds")
+  } else {
+    readRDS("../data/intermediate/base_avis_ccne.rds") -> base_avis_ccne
+  }
+  return(base_avis_ccne)
+}
+
+join_metadata - function(base_avis_ccne){
+  list_saisine_obligatoire <- c(
+    "PR", #président
+    "PM", #Premier Minsitre
+    "MS", #ministère et secrétariat santé et autres appelations (solidarité, affaire social)
+    "DGS", #direction générale de la santé
+    "Parlement", #président d'AN et/ou sénat
+    "Gouvernement", #autres membres du gouvernement
+    "EP", #Etablissement public
+    "EPES", #Etablissement public d'enseignement supérieur
+    "CNRS",
+    "INSERM",
+    "IGAS", #inspection des affaires sociales = doute,
+    "MILDT" # Mission Interministérielle de luttes contre la dépendance et la toxicomanie
+  )
+  
+  base_avis_ccne |>
+    left_join(read_excel("../data/raw/collected_metadata/metadata_avis.xlsx", 
+                         col_types = c("numeric", "date", "text", 
+                                       "text", "text", "text", "logical", 
+                                       "text", "text", "text", "date", "logical", 
+                                       "text", "logical", "text"))|>
+                mutate(saisine = saisine_precise %in% list_saisine_obligatoire,
+                       date = as.Date(date)
+                )|>
+                select(num,saisine,rapporteurs, membres_gt,titre_court,titre,date,theme,divergence))|>
+    mutate(nb_mots = str_count(avis, "\\w+"),
+           president = sapply(date, president_CCNE_by_date))-> base_avis_ccne
+  
+  base_avis_ccne|>
+    rename(Titre = titre,
+           Date = date)|>
+    mutate(Annee =year(Date),
+           theme = as.factor(theme)) -> base_avis_ccne
+  
+  return(base_avis_ccne)
+}

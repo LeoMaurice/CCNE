@@ -43,7 +43,6 @@ editor: visual
 biblatex bibliography: LDA_report.bib
 ---
 
-
 ```{r}
 #| eval: true
 #| setup: true
@@ -83,70 +82,25 @@ source("../src/helpers/database_creation.R")
 seed = 1968
 set.seed(seed)
 ```
+
 # Introduction : base de données et pre-processing
 
 ## Présentation rapide de la base : les avis du CCNE
 
 La base explorée est l'ensemble des 144 avis publiés par le Comité Consultatif National d'Ethique, depuis 1983 jusqu'à maintenant.
 
-Le Comité Consultatif national d'Éthique, souvent abrégé CCNE, est une institution française indépendante créée en 1983. Son rôle central est d'apporter des réflexions éthiques sur les questions médicales, scientifiques et de santé publique. En tant qu'organe consultatif, le CCNE émet des avis sur des sujets variés tels que la bioéthique, la recherche médicale, les avancées technologiques dans le domaine de la santé, et d'autres enjeux éthiques contemporains. Composé de membres venant de la médecine clinique, de la recherche ou  des études théologiques, le CCNE favorise le dialogue entre experts de la médecine et de l'éthique et offre des recommandations visant à guider les décideurs publics.
+Le Comité Consultatif national d'Éthique, souvent abrégé CCNE, est une institution française indépendante créée en 1983. Son rôle central est d'apporter des réflexions éthiques sur les questions médicales, scientifiques et de santé publique. En tant qu'organe consultatif, le CCNE émet des avis sur des sujets variés tels que la bioéthique, la recherche médicale, les avancées technologiques dans le domaine de la santé, et d'autres enjeux éthiques contemporains. Composé de membres venant de la médecine clinique, de la recherche ou des études théologiques, le CCNE favorise le dialogue entre experts de la médecine et de l'éthique et offre des recommandations visant à guider les décideurs publics.
 
 Les avis sont extrêmement divers en terme de sujets (avec des récurrences comme la génétique, les cellules souches par exemple) ou de formats. Les premiers avis étaient plutôt courts, avec une partie recommendation de 2 pages et une annexe de quelques pages supplémentaires. Au cours du temps, la longueur des avis a largement augmenté comme montré sur la @fig-longueur. Les textes des avis sont récupérés depuis leur PDF disponible sur [le site du CCNE](https://www.ccne-ethique.fr/).
 
-Notre base se compose aussi de quelques métadonnées sur les avis :
-- date : date de publication du CCNE
-- saisine : le CCNE peut être saisi par certaines institutions (président de la république, premier ministre, gouvernement, présidents du sénat et de l'assemblée), il doit alors rendre un avis. D'autres sujets sont décidés par les membres du CCNE selon leurs volontés ou les divers lettres qu'ils reçoivent.
-- theme : le thème dans le quel l'administration du CCNE a rangé les avis.
-- divergence : l'avis contient l'expression explicite d'une divergence
-- president : Président du  CCNE au moment de la publication du CCNE
-- composition du groupe de travail : les avis sont rédigés par deux rapporteurs (essentiellement), souvent accompagnés par d'autres membres intéressés par le sujet.
+Notre base se compose aussi de quelques métadonnées sur les avis : - date : date de publication du CCNE - saisine : le CCNE peut être saisi par certaines institutions (président de la république, premier ministre, gouvernement, présidents du sénat et de l'assemblée), il doit alors rendre un avis. D'autres sujets sont décidés par les membres du CCNE selon leurs volontés ou les divers lettres qu'ils reçoivent. - theme : le thème dans le quel l'administration du CCNE a rangé les avis. - divergence : l'avis contient l'expression explicite d'une divergence - president : Président du CCNE au moment de la publication du CCNE - composition du groupe de travail : les avis sont rédigés par deux rapporteurs (essentiellement), souvent accompagnés par d'autres membres intéressés par le sujet.
 
 Une des hypothèses est que les présidents du CCNE ont une grande importance dans la rédaction des avis, et leurs rôles devraient pouvoir se retrouver dans les thèmes aborder par le CCNE.
 
 ```{r}
 #| eval: true
-rescrap_texte = FALSE
 
-if(rescrap_texte){
-  # Définir le chemin vers le dossier contenant les fichiers PDF
-  dossier_avis <- "../data/raw/avis"
-  
-  # Liste des fichiers PDF dans le dossier
-  liste_fichiers <- list.files(path = dossier_avis, pattern = "\\.pdf$", full.names = TRUE)
-  
-  # Initialiser un data.frame vide
-  base_avis_ccne <- data.frame(num = integer(), avis = character(), 
-                               nom_fichier = character(), nb_pages = integer(),
-                               stringsAsFactors = FALSE)
-  
-  # Boucle pour lire chaque fichier PDF et extraire le texte
-  for (fichier in liste_fichiers) {
-    # Extraire le numéro du fichier
-    numero <- as.integer(strsplit(strsplit(basename(fichier), " ")[[1]][2], ".pdf")[[1]])
-    list_bugged <- c(69,70,71,72,76,77,78,79,80,83,84,86,89)
-    if(numero %in% list_bugged){
-      texte <- pdf_ocr_text(fichier) # embending de tesseract
-    } else{
-      texte <- pdf_text(fichier)
-    }
-    
-
-    nombre_page <- pdf_info(fichier)$pages
-
-    texte <- paste(texte, collapse = " ")
-    
-    # Ajouter les données au data.frame
-    base_avis_ccne <- base_avis_ccne |>
-      bind_rows(data.frame(num = numero, 
-                           avis = texte,
-                           nom_fichier = basename(fichier),
-                           nb_pages = nombre_page,
-                           stringsAsFactors = FALSE))
-  }
-  saveRDS(base_avis_ccne, "../data/intermediate/base_avis_ccne.rds")
-} else {
-  readRDS("../data/intermediate/base_avis_ccne.rds") -> base_avis_ccne
-}
+base_avis_ccne<- open_avis(rescrap_texte=FALSE)
 
 ```
 
@@ -166,39 +120,7 @@ if(rescrap_texte){
 #   rename(num_avis=Num_avis,
 #          avis = txt_tot3)
 
-list_saisine_obligatoire <- c(
-  "PR", #président
-  "PM", #Premier Minsitre
-  "MS", #ministère et secrétariat santé et autres appelations (solidarité, affaire social)
-  "DGS", #direction générale de la santé
-  "Parlement", #président d'AN et/ou sénat
-  "Gouvernement", #autres membres du gouvernement
-  "EP", #Etablissement public
-  "EPES", #Etablissement public d'enseignement supérieur
-  "CNRS",
-  "INSERM",
-  "IGAS", #inspection des affaires sociales = doute,
-  "MILDT" # Mission Interministérielle de luttes contre la dépendance et la toxicomanie
-)
-
-base_avis_ccne |>
-  left_join(read_excel("../data/raw/collected_metadata/metadata_avis.xlsx", 
-            col_types = c("numeric", "date", "text", 
-                "text", "text", "text", "logical", 
-                "text", "text", "text", "date", "logical", 
-                "text", "logical", "text"))|>
-              mutate(saisine = saisine_precise %in% list_saisine_obligatoire,
-                     date = as.Date(date)
-                     )|>
-              select(num,saisine,rapporteurs, membres_gt,titre_court,titre,date,theme,divergence))|>
-  mutate(nb_mots = str_count(avis, "\\w+"),
-         president = sapply(date, president_CCNE_by_date))-> base_avis_ccne
-
-base_avis_ccne|>
-  rename(Titre = titre,
-         Date = date)|>
-  mutate(Annee =year(Date),
-         theme = as.factor(theme)) -> base_avis_ccne
+join_metadata(base_avis_ccne) -> base_avis_ccne
 
 base_avis_ccne$avis <- base_avis_ccne$avis|>
   str_replace_all("\\s+", " ") |>
@@ -262,6 +184,7 @@ ggplot(base_avis_ccne, aes(x = Date, y = nb_mots)) +
        x = "Date",
        y = "Nombre de mots")
 ```
+
 ```{r}
 #| eval: true
 #| label: fig-avis_president
@@ -298,16 +221,15 @@ ggplot(base_avis_ccne, aes(x = theme, fill = president)) +
     #theme(axis.text.x = element_text(angle = 90))  # Met les noms à 45°
 ```
 
-
 ## Preprocessing
 
 ### Contexte autour des mots
 
-Pour pouvoir préparer correctement notre tokenisation, il nous faut regarder le contexte autour de certains mots. Deux exemples importants : le mot 'don' et le mot 'personne'. 
+Pour pouvoir préparer correctement notre tokenisation, il nous faut regarder le contexte autour de certains mots. Deux exemples importants : le mot 'don' et le mot 'personne'.
 
 Le mot don est avant modification des tokens initiaux le mot le plus fréquent du corpus. Cependant, au regard des 2-grams le suivant présenté dans la @tbl-contexte_don, on peut voir que cela désigne plusieurs objets différents que nous avons rassemblés en quatre catégories : don de gamètes (d'ovocytes, de spermes etc.), don d'organe, don de sang, don de cellules. Ce découpage a fait perdre sa place au mot don.
 
-Un découpage similaire a été opéré pour le mot 'personne' : on a distingué personne handicapée, personne handicapée mentale, personne malade, personne de confiance, personne agée, personne humaine potentielle (compromis désignant le foetus) en suivant les résultats de la @tbl-contexte_personne 
+Un découpage similaire a été opéré pour le mot 'personne' : on a distingué personne handicapée, personne handicapée mentale, personne malade, personne de confiance, personne agée, personne humaine potentielle (compromis désignant le foetus) en suivant les résultats de la @tbl-contexte_personne
 
 ```{r}
 #| eval: true
@@ -614,10 +536,9 @@ dfm <- dfm(tk) |>
 topfeatures(dfm, 50, decreasing = TRUE) 
 ```
 
-
 # Premières descriptions du corpus
 
-On peut voir sur la @fig-wordcloud les mots les plus fréquents (au moins 750  dans le corpus) représenté sous la forme d'un wordcloud. On peut voir que malgré le fait d'avoir subdivisé grossièrement les sens de personne, le terme en lui-même reste le plus fréquent. Cela tend à confirmer le fait que le CCNE analyse les problématiques qui lui sont données au regard de la notion de personne en premier lieu. On retrouve aussi dans ce wordcloud des sujets essentiels comme le don de gamète, l'enfant, l'embryon, la génétique.
+On peut voir sur la @fig-wordcloud les mots les plus fréquents (au moins 750 dans le corpus) représenté sous la forme d'un wordcloud. On peut voir que malgré le fait d'avoir subdivisé grossièrement les sens de personne, le terme en lui-même reste le plus fréquent. Cela tend à confirmer le fait que le CCNE analyse les problématiques qui lui sont données au regard de la notion de personne en premier lieu. On retrouve aussi dans ce wordcloud des sujets essentiels comme le don de gamète, l'enfant, l'embryon, la génétique.
 
 ```{r}
 #| eval: true
@@ -712,8 +633,7 @@ num_topic = 11
 
 ## STM à Onze topics
 
-On réalise un structural topic modeling avec 11 topics et la formule suivante :
-`prevalence =~ saisine + divergence + factor(president) + factor(theme) + s(Annee)`.
+On réalise un structural topic modeling avec 11 topics et la formule suivante : `prevalence =~ saisine + divergence + factor(president) + factor(theme) + s(Annee)`.
 
 ```{r}
 #| eval: true
@@ -741,25 +661,25 @@ A partir des mots les plus fréquents - présentés de façon courte dans la @fi
 
 En les prenants dans l'ordre de prévalence :
 
-- **Topic 3:** Correspond probablement au diagnostic génétique et prénatal.
+-   **Topic 3:** Correspond probablement au diagnostic génétique et prénatal.
 
-- **Topic 2:** Peut correspondre aux questions de procréation et de risques pour l'enfant. L'autisme a malheureusement été traité dans ce sens dans un certain nombre d'avis.
+-   **Topic 2:** Peut correspondre aux questions de procréation et de risques pour l'enfant. L'autisme a malheureusement été traité dans ce sens dans un certain nombre d'avis.
 
-- **Topic 9:** Correspond probablement aux réflexions éthiques portant sur la recherche clinique.
+-   **Topic 9:** Correspond probablement aux réflexions éthiques portant sur la recherche clinique.
 
-- **Topic 1:** Correspond aux questions relatives aux prélèvements de tissus humains.
+-   **Topic 1:** Correspond aux questions relatives aux prélèvements de tissus humains.
 
-- **Topic 6:** Correspond plus spécifiquement aux questions de recherche sur l'embryon, comme un sous-cas du topic 1. Il est important de rappeler que c'est l'un des thèmes.
+-   **Topic 6:** Correspond plus spécifiquement aux questions de recherche sur l'embryon, comme un sous-cas du topic 1. Il est important de rappeler que c'est l'un des thèmes.
 
-- **Topic 10:** Difficile à distinguer du topic 9, plus d'explorations sont nécessaires. On peut penser qu'il est lié aux questions de greffes et de transplantations.
+-   **Topic 10:** Difficile à distinguer du topic 9, plus d'explorations sont nécessaires. On peut penser qu'il est lié aux questions de greffes et de transplantations.
 
-- **Topic 5:** Mélange entre les questions de drogue, de prix des médicaments et d'handicaps mentaux. Peut-être un lien commun par l'utilisation du vocabulaire de prix ou de travail.
+-   **Topic 5:** Mélange entre les questions de drogue, de prix des médicaments et d'handicaps mentaux. Peut-être un lien commun par l'utilisation du vocabulaire de prix ou de travail.
 
-- **Topic 8:** Semble être un topic sur l'éthique de façon plus générale, mais pas forcément sur la recherche clinique. Plutôt sur différents problèmes de santé publique : soins, COVID, vaccination, autotests comme le montre les plus exclusifs.
+-   **Topic 8:** Semble être un topic sur l'éthique de façon plus générale, mais pas forcément sur la recherche clinique. Plutôt sur différents problèmes de santé publique : soins, COVID, vaccination, autotests comme le montre les plus exclusifs.
 
-- **Topic 4:** Mélange l'euthanasie et la PMA. C'est possiblement lié à un vocabulaire commun autour de l'assistance, comme suggéré dans les tableaux détaillés.
+-   **Topic 4:** Mélange l'euthanasie et la PMA. C'est possiblement lié à un vocabulaire commun autour de l'assistance, comme suggéré dans les tableaux détaillés.
 
-- **Topic 7:** Correspond aux problématiques d'utilisation des données médicales avec le mot exclusif 'RGPD', par exemple.
+-   **Topic 7:** Correspond aux problématiques d'utilisation des données médicales avec le mot exclusif 'RGPD', par exemple.
 
 ```{r}
 #| eval: true
@@ -785,6 +705,7 @@ plot(stm_lda, type = "summary", labeltype = "prob")
 plot(stm_lda, type = "summary", labeltype = "frex")
 
 ```
+
 Pour aller plus en détails, on peut regarder les corrélations entre les topics, présentés dans la @fig-stm-corr_plot (et en annexe la matrice de corrélation complète, @fig-stm-corr_mat). On trouve que seuls les topic 1 et 6 sont très légèrements corrélés, car ils parlent tous les deux de prélévements chez l'humain. Les autres topics ne sont pas du tout corrélés entre eux ou voir légèrement négativement corrélés. Il semble que cela vient de l'initialisation par les valeurs spectrales.
 
 ```{r}
@@ -798,9 +719,9 @@ Pour aller plus en détails, on peut regarder les corrélations entre les topics
 corrmat <- topicCorr(stm_lda)
 plot(corrmat)
 ```
-Pour bien essayer de comprendre les différences entre les topic 9, 10 et 11, on peut les mettre en perspective.
-On voit que le topic 9 par rapport au topic 10 est plus orienté recherche scientifique et éthique tandis que le topic 10 est plus orientés sur des techniques cliniques et médicales.
-En faisant une comparaison similaire entre 9 et 11, on voit que les deux topics parlent d'éthique mais le 9 parle d'éthique de la recherche scientifique alors qu'on peut penser que le topic 11 se concentre sur des problématiques particulières (biodiversité, don de gamète, génétique). Dans cette comparaison, l'opposition entre les mots personnes et humains nous semblent vraiment intéressante : le traduit une intention pour le topic 11 surtout sur le corps biologique, tandis que le topic 9 parle de la personne, donc l'individu dans un sens plus général.
+
+Pour bien essayer de comprendre les différences entre les topic 9, 10 et 11, on peut les mettre en perspective. On voit que le topic 9 par rapport au topic 10 est plus orienté recherche scientifique et éthique tandis que le topic 10 est plus orientés sur des techniques cliniques et médicales. En faisant une comparaison similaire entre 9 et 11, on voit que les deux topics parlent d'éthique mais le 9 parle d'éthique de la recherche scientifique alors qu'on peut penser que le topic 11 se concentre sur des problématiques particulières (biodiversité, don de gamète, génétique). Dans cette comparaison, l'opposition entre les mots personnes et humains nous semblent vraiment intéressante : le traduit une intention pour le topic 11 surtout sur le corps biologique, tandis que le topic 9 parle de la personne, donc l'individu dans un sens plus général.
+
 ```{r}
 #| eval: true
 #| output: true
@@ -824,30 +745,30 @@ plot(stm_lda, type = "perspectives", topics = c(9,11))
 ```{r}
 findTopic(stm_lda, c("humain"))
 ```
-Pour terminer sur la description des topics, on peut regarder pour chaque topic, quels avis montrent la plus forte prévalence de topic. On montre dans la @tbl-stm-top_avis.
-Cela permet de nuancer l'imprétation des topics. On peut ainsi dire que : 
 
-- **Topic 1:** Utilisation de produits issus du corps humain.
+Pour terminer sur la description des topics, on peut regarder pour chaque topic, quels avis montrent la plus forte prévalence de topic. On montre dans la @tbl-stm-top_avis. Cela permet de nuancer l'imprétation des topics. On peut ainsi dire que :
 
-- **Topic 10:** Utilisation de parties du corps humain, incluant la greffe et un avis sur l'exposition des corps au musée, soulevé par une lettre du Museum d'histoire naturelle.
+-   **Topic 1:** Utilisation de produits issus du corps humain.
 
-- **Topic 11:** Semble recouper plusieurs sujets différents. Peut être interprété comme la montée de l'importance de regarder en écosystème les questions de santé, y compris la biodiversité et la manipulation du génome.
+-   **Topic 10:** Utilisation de parties du corps humain, incluant la greffe et un avis sur l'exposition des corps au musée, soulevé par une lettre du Museum d'histoire naturelle.
 
-- **Topic 2:** Correspond à la sexualité, la reproduction et les risques, avec des avis sur la contraception et l'enjeu du don du sang pour les hommes ayant des rapports avec d'autres hommes.
+-   **Topic 11:** Semble recouper plusieurs sujets différents. Peut être interprété comme la montée de l'importance de regarder en écosystème les questions de santé, y compris la biodiversité et la manipulation du génome.
 
-- **Topic 3:** Correspond bien au diagnostic prénatal et génétique.
+-   **Topic 2:** Correspond à la sexualité, la reproduction et les risques, avec des avis sur la contraception et l'enjeu du don du sang pour les hommes ayant des rapports avec d'autres hommes.
 
-- **Topic 4:** Semble correspondre à la fin de vie, en incluant la santé en prison, en raison d'un grand volet sur la fin de vie en prison dans l'avis n°94.
+-   **Topic 3:** Correspond bien au diagnostic prénatal et génétique.
 
-- **Topic 5:** Correspond à l'usage des drogues et aux risques de certains traitements médicamenteux (centoxin, anti-corps autorisé en 1991, puis retiré en 1993 en raison de falsifications). Interprétable comme substances et risques.
+-   **Topic 4:** Semble correspondre à la fin de vie, en incluant la santé en prison, en raison d'un grand volet sur la fin de vie en prison dans l'avis n°94.
 
-- **Topic 6:** Correspond au thème de l'embryon.
+-   **Topic 5:** Correspond à l'usage des drogues et aux risques de certains traitements médicamenteux (centoxin, anti-corps autorisé en 1991, puis retiré en 1993 en raison de falsifications). Interprétable comme substances et risques.
 
-- **Topic 7:** Thème des données de santé.
+-   **Topic 6:** Correspond au thème de l'embryon.
 
-- **Topic 8:** Éthique en situation de santé publique, incluant les pandémies, les vaccinations et la santé des migrants.
+-   **Topic 7:** Thème des données de santé.
 
-- **Topic 9:** Éthique et recherche, notamment l'étonnant avis n°131 dédié aux expérimentations en sciences de l'éducation, sciences cognitives et psychologie, expliquant la prévalence du terme "pédagogie".
+-   **Topic 8:** Éthique en situation de santé publique, incluant les pandémies, les vaccinations et la santé des migrants.
+
+-   **Topic 9:** Éthique et recherche, notamment l'étonnant avis n°131 dédié aux expérimentations en sciences de l'éducation, sciences cognitives et psychologie, expliquant la prévalence du terme "pédagogie".
 
 ```{r}
 #| eval: true
@@ -901,36 +822,37 @@ kable(digits = 3)
 
 ```
 
-
 ### Effets des métadonnées sur la prévalence
 
 Grâce à notre modélisation par un structural topic modelling, on peut regarder l'effet de nos métadata sur la prévalence des thèmes. Globalement dans les tableaux présentés @tbl-stm-main_effects, il y a une certaines cohérences entre notre interprétation et l'effet des covariables:
 
-* **Topic 1:** Utilisation du corps humain
-  - Croît avec la thématique greffe, ce qui est logique vu qu'il semble parler d'utiliser les tissus humains.
-  - Intéressant de noter que c'est un sujet qui décroît avec tous les présidents depuis 1992.
+-   **Topic 1:** Utilisation du corps humain
 
-* **Topic 2:** Effets positifs et significatifs
-  - Respectivement à 1% et à 10% pour les thèmes sexualité, genre, et du thème procréation.
-  - Logique pour le topic associé aux risques de ces pratiques (?).
+    -   Croît avec la thématique greffe, ce qui est logique vu qu'il semble parler d'utiliser les tissus humains.
+    -   Intéressant de noter que c'est un sujet qui décroît avec tous les présidents depuis 1992.
 
-* **Topic 3:** Topic extrêmement transversal aux questionnements du CCNE.
+-   **Topic 2:** Effets positifs et significatifs
 
-* **Topic 4:** Effet très très fortement significatif du thème fin de vie, confirmant notre interprétation.
+    -   Respectivement à 1% et à 10% pour les thèmes sexualité, genre, et du thème procréation.
+    -   Logique pour le topic associé aux risques de ces pratiques (?).
 
-* **Topics 5, 6, et 11:** Effets et interprétations complexes à mettre en lien.
+-   **Topic 3:** Topic extrêmement transversal aux questionnements du CCNE.
 
-* **Topics 7 et 8:** Influence des questions de santé publique, logique avec nos interprétations.
+-   **Topic 4:** Effet très très fortement significatif du thème fin de vie, confirmant notre interprétation.
 
-* **Topic 9:** Significativité des politiques de santé et de la recherche.
+-   **Topics 5, 6, et 11:** Effets et interprétations complexes à mettre en lien.
 
-* **Topic 10:** Influence du corps (thème des greffes), mais surtout l'importance du droit.
+-   **Topics 7 et 8:** Influence des questions de santé publique, logique avec nos interprétations.
+
+-   **Topic 9:** Significativité des politiques de santé et de la recherche.
+
+-   **Topic 10:** Influence du corps (thème des greffes), mais surtout l'importance du droit.
 
 Pour l'interprétation des autres covariables, on peut noter quelques points intéressants. L'actuel président (depuis 2016) Jean-François Delfraissy semble marquer quelques ruptures : il a un effet positif et significatif sur les topics 7, 8, et 11 qui marquent un tournant vers la santé publique et les écosystèmes et non plus simplement une éthique de la pratique clinique. Cela semble aller dans le sens que le CCNE s'est ouvert à insérer sa réflexion dans la société et la nature.
 
 Une autre rupture notable est le topic 11 où tous les présidents du CCNE depuis 1992 ont un effet négatif (et significatif à 5%) sur sa prévalence. Mais cela semble difficile de le faire correspondre avec un événement historique ou un changement structurel du CCNE. De même pour le topic 5 concernant les risques des médicaments qui semblent avoir été sous évoqué durant la présidence de Jean Claude Aimensen de 2012 à 2015.
 
-L'essentiel des autres topics sont guidés principalement par leurs sujets et thèmes ce qui laisse à penser une cohérence de vocabulaire et lexicographique au cours du temps. 
+L'essentiel des autres topics sont guidés principalement par leurs sujets et thèmes ce qui laisse à penser une cohérence de vocabulaire et lexicographique au cours du temps.
 
 Dernière remarque, contrairement à ce qu'on pourrait penser, il n'y a peu d'effet sur les thèmes abordés du fait d'avoir été saisi par une institution officielle. La demande politique semble faire baisser (de façon significatif à 10%) la prévalence du topic 2 "sexualité et risque" et du topic 10 "corps". Si dans le second cas, cela semble relativement logique car ce sont des préocupations de terrains (de chirurgiens ou de musées), le premier cas semble d'intérêt publique surtout avec la crise du SIDA. Une explication possible pour ce résultat étonnant est que la crise du VIH fait l'objet de ses propres négociations et réflexions en dehors du CCNE.
 
@@ -1051,6 +973,7 @@ plot(stm_lda, type = "labels", labeltype = "frex", frexw=0.5, n = 12)
 labelTopics(stm_lda)
 
 ```
+
 ### Liens entre les topics
 
 ```{r}
@@ -1088,4 +1011,3 @@ for(i in 1:num_topic){
   cat("\n\n")
 }
 ```
-
