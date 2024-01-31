@@ -1,3 +1,6 @@
+# last modification
+# 31/01/2024
+
 president_CCNE_by_date <- Vectorize(function(date){
   # Définir l'ordre des niveaux du facteur
   ordre_presidents <- c("Bernard (83-91)", "Changeux (92-99)", "Sicard (00-08)", 
