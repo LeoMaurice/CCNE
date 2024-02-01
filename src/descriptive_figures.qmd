@@ -1,0 +1,262 @@
+---
+title: "descriptive_figures"
+format: html
+editor: visual
+---
+```{r}
+pacman::p_load(arrow,
+               ggplot2,
+               tidyverse,
+               gridExtra,
+               ggprism,
+               ggpubr,
+               ggcorrplot,
+               ComplexHeatmap,
+               circlize,
+               reshape2)
+source("./helpers/df_to_matrix.R")
+```
+
+```{r}
+df <- arrow::read_feather('../data/intermediate/big/base_sentences.feather')
+```
+
+```{r}
+#ggprism::preview_theme("colorblind_safe")
+ggprism::prism_color_pal("floral")(6)
+```
+
+```{r}
+# Assuming you have a data frame called 'df' with columns: num, human, person, societe, nature, position_in_avis
+quantile = 50
+ylab = "Position relative de la phrase"
+xlab = "Numéro de l'avis"
+title = "Carte de chaleur de la distribution de"
+
+# Calculate the quantiles for position_in_avis
+df_heatmap <- df |> 
+  arrange(num, position_in_avis) |>
+  group_by(num) |>
+  mutate(quantile_group = ntile(position_in_avis, quantile))|>
+  ungroup()|>
+  group_by(num,quantile_group,president,theme,number_sentences)|>
+  summarise(human_nb = sum(human),
+            person_nb = sum(person),
+            societe_nb = sum(societe),
+            nature_nb = sum(nature),
+            n_in_quantile = n())|>
+  mutate(human_freq = human_nb/n_in_quantile,
+         person_freq = person_nb/n_in_quantile,
+         societe_freq = societe_nb/n_in_quantile,
+         nature_freq = nature_nb/n_in_quantile)
+
+# Create a heatmap for 'human'
+human_heatmap <- df_heatmap |>
+  ggplot(aes(x = num, y = quantile_group, fill = human_freq)) +
+  geom_tile() +
+  scale_fill_gradient(low = "white", high = "#66CCFE") +
+  labs(title = paste(title,"humain"),
+       x = xlab,
+       y = ylab) +
+  theme_prism()
+
+# Create a heatmap for 'person'
+person_heatmap <- df_heatmap |>
+  ggplot(aes(x = num, y = quantile_group, fill = person_freq)) +
+  geom_tile() +
+  scale_fill_gradient(low = "white", high = "#40007F") +
+  labs(title = paste(title,"personne"),
+       x = xlab,
+       y = ylab) +
+  theme_prism()
+
+# Create a heatmap for 'societe'
+societe_heatmap <- df_heatmap |>
+  ggplot(aes(x = num, y = quantile_group, fill = societe_freq)) +
+  geom_tile() +
+  scale_fill_gradient(low = "white", high = "#FF0066") +
+  labs(title = paste(title,"société"),
+       x = xlab,
+       y = ylab) +
+  theme_prism()
+
+# Create a heatmap for 'nature'
+nature_heatmap <- df_heatmap |>
+  ggplot(aes(x = num, y = quantile_group, fill = nature_freq)) +
+  geom_tile() +
+  scale_fill_gradient(low = "white", high = "#107F80") +
+  labs(title = paste(title,"nature"),
+       x = xlab,
+       y = ylab) +
+  theme_prism()
+
+# Display the heatmaps
+grid.arrange(human_heatmap, person_heatmap, societe_heatmap, nature_heatmap, ncol = 2) -> words_heatmaps
+
+# Set the desired plot size (in inches)
+plot_width <- 20  # Adjust as needed
+plot_height <- 15  # Adjust as needed
+
+# Save the plot with increased size
+ggsave("../output/descriptive_figures/words_ggheatmaps.pdf", 
+       plot = words_heatmaps, 
+       width = plot_width, 
+       height = plot_height)  # Adjust DPI as needed
+```
+Description :
+Pour chaque quantile, la couleur sur la carte de chaleur représente la fréquence relative d'un mot spécifique. Pour calculer cette fréquence, nous divisons le nombre d'occurrences du mot par le nombre total de phrases dans le quantile. Cette transformation fournit une mesure de la fréquence à laquelle le mot apparaît au sein du sous-ensemble de phrases représenté par chaque quantile, permettant ainsi de comparer l'utilisation du mot dans différentes parties du texte.
+```{r}
+# Préparation des données pour la heatmap
+human_matrix <-
+  df_to_matrix(df_heatmap,
+               Xname = "num",
+               Yname = "quantile_group",
+               Zname = "human_freq")
+person_matrix <-
+  df_to_matrix(df_heatmap,
+               Xname = "num",
+               Yname = "quantile_group",
+               Zname = "person_freq")
+societe_matrix <-
+  df_to_matrix(df_heatmap,
+               Xname = "num",
+               Yname = "quantile_group",
+               Zname = "societe_freq")
+nature_matrix <-
+  df_to_matrix(df_heatmap,
+               Xname = "num",
+               Yname = "quantile_group",
+               Zname = "nature_freq")
+
+# Préparation des annotations
+colors_palette <-
+  ggprism::scale_colour_prism(palette = "colors")$palette
+pearl_palette <-
+  ggprism::scale_colour_prism(palette = "office")$palette
+theme_colors <-
+  setNames(colors_palette(length(unique(df_heatmap$theme))), unique(df_heatmap$theme))
+president_colors <-
+  setNames(pearl_palette(length(unique(
+    df_heatmap$president
+  ))), unique(df_heatmap$president))
+
+president_annotation <- HeatmapAnnotation(
+  df = df_heatmap |>
+    group_by(num, president, theme) |>
+    summarise() |>
+    ungroup() |>
+    arrange(num) |>
+    select(-num),
+  "nombre phrase" = anno_barplot(
+    df_heatmap |>
+      group_by(num, number_sentences) |>
+      summarise() |>
+      ungroup() |>
+      arrange(num) |>
+      select(-num) |>
+      as.vector(),
+    add_numbers = TRUE,
+    height = unit(3,"cm"),
+    gp = gpar(fill ="#285291"),
+    numbers_rot = 90
+  ),
+  which = "column",
+  show_legend = TRUE,
+  annotation_name_side = "right",
+  col = list(president = president_colors,
+             theme = theme_colors)
+)
+
+
+# Création de la heatmap
+heatmap_humain <- Heatmap(
+  human_matrix,
+  name = "humain",
+  row_title = "Fréquence présence 'humain'",
+  col = colorRamp2(c(0, 1), c("white", "#66CCFE")),
+  column_names_gp = gpar(fontsize = 8),
+  cluster_rows = FALSE,
+  cluster_columns = FALSE
+)
+heatmap_person <- Heatmap(
+  person_matrix,
+  name = "personne",
+  row_title = "Fréquence présence 'personne'",
+  # row_title = "Fréquence par quantile des phrases avec 'personne'",
+  column_title = xlab,
+  # column_title_side = "bottom",
+  col = colorRamp2(c(0, 1), c("white", "#40007F")),
+  column_names_gp = gpar(fontsize = 8),
+  cluster_rows = FALSE,
+  cluster_columns = FALSE,
+)
+
+heatmap_societe <- Heatmap(
+  societe_matrix,
+  name = "societe",
+  row_title = "Fréquence présence 'société'",
+  col = colorRamp2(c(0, 1), c("white", "#FF0066")),
+  column_names_gp = gpar(fontsize = 8),
+  cluster_rows = FALSE,
+  cluster_columns = FALSE
+)
+
+heatmap_nature <- Heatmap(
+  nature_matrix,
+  name = "nature",
+  row_title = "Fréquence présence 'nature'",
+  # column_title = xlab,
+  # column_title_side = "bottom",
+  col = colorRamp2(c(0, 1), c("white", "#107F80")),
+  column_names_gp = gpar(fontsize = 8),
+  cluster_rows = FALSE,
+  cluster_columns = FALSE
+)
+
+heatmap_list = president_annotation %v% heatmap_person %v% heatmap_humain %v% heatmap_societe %v% heatmap_nature
+
+pdf("../output/descriptive_figures/words_complexheatmaps.pdf", width = plot_width, height = plot_height)  # Adjust size as needed
+draw(heatmap_list, column_title = "Cartes de chaleur de la fréquence de la présence de mots dans les phrases par groupe de phrase (2% quantile)",row_title = ylab)
+dev.off()
+
+# pdf("../output/descriptive_figures/words_complexheatmaps_person.pdf", width = 18, height = 12)  # Adjust size as needed
+# draw(president_annotation %v% heatmap_person, column_title = "Cartes de chaleur de la fréquence de la présence du mot 'personne' dans les phrases par groupe de phrase (2% quantile)",row_title = ylab)
+# dev.off()
+
+```
+
+```{r}
+# Calculate the correlation matrix
+cor_matrix <- cor(df|>ungroup()|>
+                    select(human,person,nature,societe))
+
+# Create a correlation matrix plot with ggpubr
+corr_plot <- ggcorrplot(cor_matrix, 
+                        ggtheme = theme_prism(),
+                        colors = c("#FF0066", "white", "#66CCFE"),
+                        p.mat = cor_pmat(cor_matrix),
+                        lab = TRUE
+                        )
+corr_plot
+
+ggsave("../output/descriptive_figures/words_corrplot.pdf", 
+       plot = corr_plot)
+```
+```{r}
+# Calculate the correlation matrix
+cor_matrix <- cor(df_heatmap|>ungroup()|>
+                    select(human_freq,person_freq,nature_freq,societe_freq))
+
+# Create a correlation matrix plot with ggpubr
+corr_plot <- ggcorrplot(cor_matrix, 
+                        ggtheme = theme_prism(),
+                        colors = c("#FF0066", "white", "#66CCFE"),
+                        p.mat = cor_pmat(cor_matrix),
+                        lab = TRUE
+                        )
+corr_plot
+
+ggsave("../output/descriptive_figures/words_quantile_corrplot.pdf", 
+       plot = corr_plot)
+```
+    

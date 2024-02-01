@@ -57,4 +57,16 @@ rsconnect/
 *.min.js
 *.png
 
+# tex
+*.tex
+
+# figures and report
 LDA_report_files/
+
+# big file
+data/intermediate/big/
+data/exterior/big
+data/raw/big
+
+# conda
+.conda/
