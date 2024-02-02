@@ -98,7 +98,7 @@ def generate_sentences_pdf(df, pdf_filename):
 
     for i, (_, row) in enumerate(df.iterrows()):
         sentence_index = str(row.get('sentence_index', ''))
-        number_sentences = str(len(df))
+        number_sentences = str(row.get('number_sentences', ''))
         num = str(row.get('num', ''))
         
         sentence = row['sentence']
