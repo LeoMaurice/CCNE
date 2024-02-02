@@ -46,6 +46,7 @@ def join_metadata(base_avis_ccne):
     metadata = pd.read_excel("../data/raw/collected_metadata/metadata_avis.xlsx")
     metadata['saisine'] = metadata['saisine_precise'].isin(list_saisine_obligatoire)
     metadata['date'] = pd.to_datetime(metadata['date'])
+    metadata.drop(columns=['date_saisie', 'saisine_precise','invites_et_CCNPEN','mot_pr','auditions','détails'],inplace=True)
 
     base_avis_ccne = base_avis_ccne.merge(metadata, on='num', how='left')
     base_avis_ccne['nb_mots'] = base_avis_ccne['avis'].str.count('\\w+')
@@ -108,15 +109,16 @@ def corpus_to_sentences_with_context(base, verbose = True):
               {__check_number_of_sentences(base_sentences)}""")
     return base_sentences
 
-def filter_sentences_with_words(df, words):
-    # Function to check if a sentence contains at least one word from 'words'
-    def has_word(sentence):
+def has_words(sentence,words):
         for word in words:
             if word in sentence:
                 return True
         return False
 
+def filter_sentences_with_words(df, words):
+    # Function to check if a sentence contains at least one word from 'words'
+    has_specific_words = lambda x: has_words(x, words=words)
     # Apply the 'has_word' function to filter sentences
-    filtered_df = df[df['sentence'].apply(has_word)]
+    filtered_df = df[df['sentence'].apply(has_specific_words)]
     
     return filtered_df
