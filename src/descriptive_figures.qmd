@@ -237,7 +237,7 @@ ggsave("../output/descriptive_figures/words_corrplot.pdf",
 ```
 ```{r}
 # Assuming you have a data frame called 'df' with columns: num, human, person, societe, nature, position_in_avis
-quantile = 2
+quantile = 10
 
 # Calculate the quantiles for position_in_avis
 df_heatmap <- df |> 
