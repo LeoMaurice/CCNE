@@ -54,12 +54,27 @@ def interactive_sentence_display(df):
 
 import pandas as pd
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
-from reportlab.platypus.tables import Table, TableStyle
 from reportlab.lib.units import inch
 import re
+
+class NumberedCanvas:
+    def __init__(self, canvas, doc):
+        self.canvas = canvas
+        self.doc = doc
+
+    def drawPageNumber(self, page_num):
+        self.canvas.saveState()
+        self.canvas.setFont('Times-Roman', 10)
+        page_number_text = "%d" % page_num
+        self.canvas.drawCentredString(
+            0.75 * inch,
+            0.75 * inch,
+            page_number_text,
+        )
+        self.canvas.restoreState()
 
 def generate_sentences_pdf(df, pdf_filename):
     # Initialize the PDF document
@@ -73,13 +88,24 @@ def generate_sentences_pdf(df, pdf_filename):
 
     table_data = []  # Data for each table (one row per page)
     num_sentences = len(df)
+    
+    # Define column headers
+    headers = ["n° sentence", "# sentences", "n° avis", "Previous", "Sentence", "Next"]
+    header_style = styles['Normal']
+    header_style.textColor = colors.black
+    header_paragraphs = [Paragraph(header, header_style) for header in headers]
+    table_data.append(header_paragraphs)  # Add headers to the first table data list
 
     for i, (_, row) in enumerate(df.iterrows()):
+        sentence_index = str(row.get('sentence_index', ''))
+        number_sentences = str(len(df))
+        num = str(row.get('num', ''))
+        
         sentence = row['sentence']
         previous = row['previous']
         next_sentence = row['next']
 
-        # Clean up and format the text (remove '\n' and multiple spaces)
+        # Clean up and format the text
         sentence = re.sub(r'\n', ' ', sentence)
         sentence = re.sub(r'\s+', ' ', sentence)
 
@@ -90,35 +116,35 @@ def generate_sentences_pdf(df, pdf_filename):
         next_sentence = re.sub(r'\s+', ' ', next_sentence)
 
         # Create Paragraph objects for the cells
+        index_paragraph = Paragraph(sentence_index, style)
+        number_sentences_paragraph = Paragraph(number_sentences, style)
+        num_paragraph = Paragraph(num, style)
         previous_paragraph = Paragraph(previous, style)
         sentence_paragraph = Paragraph(sentence, style)
         next_paragraph = Paragraph(next_sentence, style)
 
-        # Calculate maximum cell height for this page
-        max_cell_height = max(
-            [previous_paragraph.wrap(doc.width, doc.bottomMargin)[1],  # Extract the height from the tuple
-             sentence_paragraph.wrap(doc.width, doc.bottomMargin)[1],  # Extract the height from the tuple
-             next_paragraph.wrap(doc.width, doc.bottomMargin)[1]]  # Extract the height from the tuple
-        ) + 2 * style.leading  # Use style.leading directly
-
-        # Create a table row with sentence and context
-        table_data.append([previous_paragraph, sentence_paragraph, next_paragraph])
+        # Append row data
+        table_data.append([index_paragraph, number_sentences_paragraph, num_paragraph, previous_paragraph, sentence_paragraph, next_paragraph])
 
         # Check if it's time to start a new page or it's the last sentence
         if (i + 1) % 3 == 0 or (i == num_sentences - 1):
-            # Adjust row heights for this page
-            row_heights = [max_cell_height * 2.5] * len(table_data)  # Make rows three times taller
-            table = Table(table_data, colWidths=[2.5*inch, 2.5*inch, 2.5*inch], rowHeights=row_heights)
-            table.setStyle(TableStyle([('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-                                       ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                                       ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
-                                       ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
-                                       ('BOX', (0, 0), (-1, -1), 0.25, colors.black)]))
+            table = Table(table_data, colWidths=[0.25*inch, 0.25*inch, 0.25*inch, 2.5*inch, 2.5*inch, 2.5*inch])
+            table.setStyle(TableStyle([
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+                ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+                ('BOX', (0, 0), (-1, -1), 0.25, colors.black)
+            ]))
 
             story.append(table)
-            story.append(PageBreak())  # Add a page break
+            if (i + 1) % 3 == 0 and (i != num_sentences - 1):
+                story.append(PageBreak())  # Add a page break if not the last sentence
 
             table_data = []  # Clear the data for the next table
 
+    # Custom canvas for page numbers
+    def onLaterPages(canvas, doc):
+        NumberedCanvas(canvas, doc).drawPageNumber(doc.page)
+
     # Build the PDF
-    doc.build(story)
+    doc.build(story, onFirstPage=onLaterPages, onLaterPages=onLaterPages)
