@@ -21,6 +21,7 @@
 # RStudio files
 .Rproj.user/
 src/helpers/__pycache__/
+src/helpers/archive_figures.R
 
 # produced vignettes
 vignettes/*.html
