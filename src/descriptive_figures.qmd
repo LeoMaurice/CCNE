@@ -221,7 +221,7 @@ dev.off()
 ```{r}
 # Calculate the correlation matrix
 cor_matrix <- cor(df|>ungroup()|>
-                    select(human,person,nature,societe))
+                    select(person,human,individu,societe,nature,environment))
 
 # Create a correlation matrix plot with ggpubr
 corr_plot <- ggcorrplot(cor_matrix, 
@@ -236,16 +236,44 @@ ggsave("../output/descriptive_figures/words_corrplot.pdf",
        plot = corr_plot)
 ```
 ```{r}
+# Assuming you have a data frame called 'df' with columns: num, human, person, societe, nature, position_in_avis
+quantile = 2
+
+# Calculate the quantiles for position_in_avis
+df_heatmap <- df |> 
+  mutate(position_in_avis =sentence_index/number_sentences)|>
+  arrange(num, position_in_avis) |>
+  group_by(num) |>
+  mutate(quantile_group = ntile(position_in_avis, quantile))|>
+  ungroup()|>
+  group_by(num,quantile_group,president,theme,number_sentences)|>
+  summarise(human_nb = sum(human),
+            person_nb = sum(person),
+            individu_nb = sum(individu),
+            societe_nb = sum(societe),
+            nature_nb = sum(nature),
+            env_nb = sum(environment),
+            n_in_quantile = n())|>
+  mutate(human_freq = human_nb/n_in_quantile,
+         person_freq = person_nb/n_in_quantile,
+         individu_freq = individu_nb/n_in_quantile,
+         societe_freq = societe_nb/n_in_quantile,
+         nature_freq = nature_nb/n_in_quantile,
+         env_freq = env_nb/n_in_quantile)
+```
+
+```{r}
 # Calculate the correlation matrix
 cor_matrix <- cor(df_heatmap|>ungroup()|>
-                    select(human_freq,person_freq,nature_freq,societe_freq))
+                    select(person_freq,human_freq,societe_freq,nature_freq,env_freq))
 
 # Create a correlation matrix plot with ggpubr
 corr_plot <- ggcorrplot(cor_matrix, 
                         ggtheme = theme_prism(),
                         colors = c("#FF0066", "white", "#66CCFE"),
                         p.mat = cor_pmat(cor_matrix),
-                        lab = TRUE
+                        lab = TRUE,
+                        title = paste("Corrélation entre les fréquences pour",quantile,"quantiles")
                         )
 corr_plot
 
