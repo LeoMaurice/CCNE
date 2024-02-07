@@ -14,16 +14,21 @@ pacman::p_load(arrow,
                ComplexHeatmap,
                circlize,
                reshape2)
-source("./helpers/df_to_matrix.R")
+
+source("helpers/df_to_matrix.R")
+source("helpers/heatmap.R")
+source("helpers/lexico_helper.R")
 ```
 
 ```{r}
+# base au niveau de phrases
 df <- arrow::read_feather('../data/intermediate/big/base_sentences.feather')
 ```
 
 ```{r}
 #ggprism::preview_theme("colorblind_safe")
 ggprism::prism_color_pal("floral")(6)
+
 ```
 
 ```{r}
@@ -54,169 +59,130 @@ df_heatmap <- df |>
 ```
 Description :
 Pour chaque quantile, la couleur sur la carte de chaleur représente la fréquence relative d'un mot spécifique. Pour calculer cette fréquence, nous divisons le nombre d'occurrences du mot par le nombre total de phrases dans le quantile. Cette transformation fournit une mesure de la fréquence à laquelle le mot apparaît au sein du sous-ensemble de phrases représenté par chaque quantile, permettant ainsi de comparer l'utilisation du mot dans différentes parties du texte.
-```{r}
-ylab = "Position relative de la phrase"
-xlab = "Numéro de l'avis"
-title = "Carte de chaleur de la distribution de"
 
+```{r}
+source("helpers/heatmap.R")
 plot_width = 20
 plot_height = 15
-# Préparation des données pour la heatmap
-human_matrix <-
-  df_to_matrix(df_heatmap,
-               Xname = "num",
-               Yname = "quantile_group",
-               Zname = "human_freq")
-person_matrix <-
-  df_to_matrix(df_heatmap,
-               Xname = "num",
-               Yname = "quantile_group",
-               Zname = "person_freq")
 
-indiv_matrix <-
-  df_to_matrix(df_heatmap,
-               Xname = "num",
-               Yname = "quantile_group",
-               Zname = "individu_freq")
+pdf("../output/descriptive_figures/more_words_complexheatmaps_test.pdf", width = plot_width, height = plot_height)  # Adjust size as needed
 
-societe_matrix <-
-  df_to_matrix(df_heatmap,
-               Xname = "num",
-               Yname = "quantile_group",
-               Zname = "societe_freq")
-nature_matrix <-
-  df_to_matrix(df_heatmap,
-               Xname = "num",
-               Yname = "quantile_group",
-               Zname = "nature_freq")
-
-env_matrix <-
-  df_to_matrix(df_heatmap,
-               Xname = "num",
-               Yname = "quantile_group",
-               Zname = "env_freq")
-
-# Préparation des annotations
-colors_palette <-
-  ggprism::scale_colour_prism(palette = "colors")$palette
-pearl_palette <-
-  ggprism::scale_colour_prism(palette = "office")$palette
-theme_colors <-
-  setNames(colors_palette(length(unique(df_heatmap$theme))), unique(df_heatmap$theme))
-president_colors <-
-  setNames(pearl_palette(length(unique(
-    df_heatmap$president
-  ))), unique(df_heatmap$president))
-
-president_annotation <- HeatmapAnnotation(
-  df = df_heatmap |>
-    group_by(num, president, theme) |>
-    summarise() |>
-    ungroup() |>
-    arrange(num) |>
-    select(-num),
-  "nombre phrase" = anno_barplot(
-    df_heatmap |>
-      group_by(num, number_sentences) |>
-      summarise() |>
-      ungroup() |>
-      arrange(num) |>
-      select(-num) |>
-      as.vector(),
-    add_numbers = TRUE,
-    height = unit(3,"cm"),
-    gp = gpar(fill ="#285291"),
-    numbers_rot = 90
-  ),
-  which = "column",
-  show_legend = TRUE,
-  annotation_name_side = "right",
-  col = list(president = president_colors,
-             theme = theme_colors)
-)
-
-
-# Création de la heatmap
-heatmap_person <- Heatmap(
-  person_matrix,
-  name = "personne",
-  row_title = "Fréquence présence 'personne'",
-  # row_title = "Fréquence par quantile des phrases avec 'personne'",
-  column_title = xlab,
-  # column_title_side = "bottom",
-  col = colorRamp2(c(0, 1), c("white", "#40007F")),
-  column_names_gp = gpar(fontsize = 8),
-  cluster_rows = FALSE,
-  cluster_columns = FALSE,
-)
-
-heatmap_humain <- Heatmap(
-  human_matrix,
-  name = "humain",
-  row_title = "Fréquence présence 'humain'",
-  col = colorRamp2(c(0, 1), c("white", "#66CCFE")),
-  column_names_gp = gpar(fontsize = 8),
-  cluster_rows = FALSE,
-  cluster_columns = FALSE
-)
-
-heatmap_individu<- Heatmap(
-  indiv_matrix,
-  name = "individu",
-  row_title = "Fréquence présence 'individu'",
-  col = colorRamp2(c(0, 1), c("white", "#91188E")),
-  column_names_gp = gpar(fontsize = 8),
-  cluster_rows = FALSE,
-  cluster_columns = FALSE
-)
-
-heatmap_societe <- Heatmap(
-  societe_matrix,
-  name = "societe",
-  row_title = "Fréquence présence 'société'",
-  col = colorRamp2(c(0, 1), c("white", "#FF0066")),
-  column_names_gp = gpar(fontsize = 8),
-  cluster_rows = FALSE,
-  cluster_columns = FALSE
-)
-
-heatmap_nature <- Heatmap(
-  nature_matrix,
-  name = "nature",
-  row_title = "Fréquence présence 'nature'",
-  # column_title = xlab,
-  # column_title_side = "bottom",
-  col = colorRamp2(c(0, 1), c("white", "#107F80")),
-  column_names_gp = gpar(fontsize = 8),
-  cluster_rows = FALSE,
-  cluster_columns = FALSE
-)
-
-heatmap_env <- Heatmap(
-  env_matrix,
-  name = "environnement",
-  row_title = "Fréquence présence 'environnement'",
-  # column_title = xlab,
-  # column_title_side = "bottom",
-  col = colorRamp2(c(0, 1), c("white", "#539027")),
-  column_names_gp = gpar(fontsize = 8),
-  cluster_rows = FALSE,
-  cluster_columns = FALSE
-)
-
-
-
-heatmap_list = president_annotation %v% heatmap_person %v% heatmap_humain %v% heatmap_individu %v% heatmap_societe %v% heatmap_nature %v% heatmap_env
-
-pdf("../output/descriptive_figures/more_words_complexheatmaps.pdf", width = plot_width, height = plot_height)  # Adjust size as needed
-draw(heatmap_list, column_title = "Cartes de chaleur de la fréquence de la présence de mots dans les phrases par groupe de phrase (2% quantile)",row_title = ylab)
+heatmap_figure_frequence_quantile(df_heatmap = df_heatmap,
+                                  X="num",Y="quantile_group",
+                                  Zs = c("person_freq","human_freq","individu_freq",
+                                    "societe_freq","nature_freq","env_freq"),
+                                  names_legend = c("personne","humain","individu",
+                                                   "société","nature","environnement"),
+                                  subrow_title = "Freq",
+                                  subcol_title = "Numéro de l'avis",
+                                  mainrow_title = "Position relative de la phrase",
+                                  maincol_title = "Cartes de chaleur de la fréquence de la présence de mots dans les phrases par groupe de phrase (2% quantile)",
+                                  colors_hexcodes = c("#40007F","#66CCFE","#91188E",
+                                                      "#FF0066","#107F80","#539027")
+                                  )
 dev.off()
-
-# pdf("../output/descriptive_figures/words_complexheatmaps_person.pdf", width = 18, height = 12)  # Adjust size as needed
-# draw(president_annotation %v% heatmap_person, column_title = "Cartes de chaleur de la fréquence de la présence du mot 'personne' dans les phrases par groupe de phrase (2% quantile)",row_title = ylab)
-# dev.off()
-
 ```
+```{r}
+# Assuming you have a data frame called 'df' with columns: num, human, person, societe, nature, position_in_avis
+quantile = 50
+
+df_heatmap <- df |>
+  rowwise() |>
+  mutate(gen = has_words(sentence, c("génétique","génétiques","gène","gènes")),
+         cellule = has_words(sentence, c("cellule","cellules","cellulaire","cellulaires")),
+         vitro = has_words(sentence,c("vitro")),
+         vaccin = has_words(sentence, c("vaccincation","vaccinations","vaccin","vaccins")),
+         biodiv = has_words(sentence, c("biodiversité"))) |>
+  ungroup() |>
+  mutate(position_in_avis =sentence_index/number_sentences)|>
+  arrange(num, position_in_avis) |>
+  group_by(num) |>
+  mutate(quantile_group = ntile(position_in_avis, quantile))|>
+  ungroup()|>
+  group_by(num,quantile_group,president,theme,number_sentences)|>
+  summarise(gen_freq = sum(gen)/n(),
+            cellule_freq = sum(cellule)/n(),
+            vitro_freq = sum(vitro)/n(),
+            vaccin_freq = sum(vaccin)/n(),
+            biodiv_freq = sum(biodiv)/n(),
+            n_in_quantile = n())
+
+source("helpers/heatmap.R")
+plot_width = 20
+plot_height = 15
+
+pdf("../output/descriptive_figures/science_words_complexheatmaps.pdf", width = plot_width, height = plot_height)  # Adjust size as needed
+
+heatmap_figure_frequence_quantile(df_heatmap = df_heatmap,
+                                  X="num",Y="quantile_group",
+                                  Zs = c("gen_freq","cellule_freq",
+                                    "vitro_freq","vaccin_freq","biodiv_freq"),
+                                  names_legend = c("génétique","cellule",
+                                                   "in vitro","vaccin",
+                                                   "biodiversité"),
+                                  subrow_title = "Freq",
+                                  subcol_title = "Numéro de l'avis",
+                                  mainrow_title = "Position relative de la phrase",
+                                  maincol_title = "Cartes de chaleur de la fréquence de la présence de mots dans les phrases par groupe de phrase (2% quantile)",
+                                  colors_hexcodes = c("#40007F","#66CCFE","#91188E",
+                                                      "#FF0066","#107F80")
+                                  )
+dev.off()
+```
+```{r}
+# Assuming you have a data frame called 'df' with columns: num, human, person, societe, nature, position_in_avis
+quantile = 50
+
+df_heatmap <- df |>
+  rowwise() |>
+  mutate(person = has_words(sentence,c("personne","personnes")),
+         human = has_words(sentence,c("humain","humains")),
+         societe = has_words(saisine, c("société","sociétés","societé","societé","societés","sociétes")),
+         nature_env = has_words(saisine, c("nature","natures","environnement","environnements")),
+         gen = has_words(sentence, c("génétique","génétiques","gène","gènes")),
+         cellule = has_words(sentence, c("cellule","cellules","cellulaire","cellulaires")),
+         vitro = has_words(sentence,c("vitro"))) |>
+  ungroup() |>
+  mutate(position_in_avis =sentence_index/number_sentences)|>
+  arrange(num, position_in_avis) |>
+  group_by(num) |>
+  mutate(quantile_group = ntile(position_in_avis, quantile))|>
+  ungroup()|>
+  group_by(num,quantile_group,president,theme,number_sentences)|>
+  summarise(person_freq = sum(person)/n(),
+            human_freq = sum(human)/n(),
+            societe_freq = sum(societe)/n(),
+            nature_env_freq = sum(nature_env)/n(),
+            gen_freq = sum(gen)/n(),
+            cellule_freq = sum(cellule)/n(),
+            vitro_freq = sum(vitro)/n(),
+            n_in_quantile = n())
+
+source("helpers/heatmap.R")
+plot_width = 20
+plot_height = 15
+
+pdf("../output/descriptive_figures/science_person_words_complexheatmaps.pdf", width = plot_width, height = plot_height)  # Adjust size as needed
+
+heatmap_figure_frequence_quantile(df_heatmap = df_heatmap,
+                                  X="num",Y="quantile_group",
+                                  Zs = c("person_freq","human_freq",
+                                         "gen_freq","cellule_freq","vitro_freq"),
+                                  names_legend = c("personne","humain",
+                                                   "génétique","cellule","in vitro"
+                                                   ),
+                                  subrow_title = "Freq",
+                                  subcol_title = "Numéro de l'avis",
+                                  mainrow_title = "Position relative de la phrase",
+                                  maincol_title = "Cartes de chaleur de la fréquence de la présence de mots dans les phrases par groupe de phrase (2% quantile)",
+                                  colors_hexcodes = c("#40007F","#66CCFE",
+                                                      "#91188E","#FF0066","#107F80")
+                                  )
+dev.off()
+```
+```
+
+
 
 ```{r}
 # Calculate the correlation matrix
