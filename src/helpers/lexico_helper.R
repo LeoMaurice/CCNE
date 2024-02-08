@@ -4,3 +4,15 @@ has_words <- function(sentence, words) {
   # Return TRUE if any word is found, FALSE otherwise
   return(any(test))
 }
+
+count_digits <- function(text) {
+  # Utilisation d'une expression régulière pour trouver les chiffres dans la phrase
+  digit_pattern <- "\\b\\d+\\b"
+  # Compter le nombre d'occurrences de chiffres
+  count <- sum(grepl(digit_pattern, text))
+  return(count)
+}
+
+count_words <- function(text){
+  return(str_count(text, "\\w+"))
+}

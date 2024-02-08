@@ -7,7 +7,8 @@ heatmap_figure_frequence_quantile <- function(df_heatmap,
                                               subcol_title,
                                               mainrow_title,
                                               maincol_title,
-                                              colors_hexcodes
+                                              colors_hexcodes,
+                                              xtrem_values = c(0,1)
                                               ){
 
   # metadonnées : pas changeable dans la fct pour l'instant
@@ -65,7 +66,7 @@ heatmap_figure_frequence_quantile <- function(df_heatmap,
       row_title = paste(subrow_title,names_legend[i]),
       column_title = ifelse(i==length(Zs),subcol_title,""),
       column_title_side = "bottom",
-      col = colorRamp2(c(0, 1), c("white", colors_hexcodes[i])),
+      col = colorRamp2(xtrem_values, c("white", colors_hexcodes[i])),
       column_names_gp = gpar(fontsize = 8),
       cluster_rows = FALSE,
       cluster_columns = FALSE,
