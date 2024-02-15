@@ -109,11 +109,14 @@ def corpus_to_sentences_with_context(base, verbose = True):
               {__check_number_of_sentences(base_sentences)}""")
     return base_sentences
 
-def has_words(sentence,words):
-        for word in words:
-            if word in sentence:
-                return True
-        return False
+import re
+
+def has_words(sentence, words):
+    for word in words:
+        if re.search(r'\b' + re.escape(word) + r'\b', sentence):
+            return True
+    return False
+
 
 def filter_sentences_with_words(df, words):
     # Function to check if a sentence contains at least one word from 'words'
