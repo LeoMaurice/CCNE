@@ -18,7 +18,51 @@ def __president_CCNE_by_date(date):
         return presidents[1]  # Jean-Pierre Changeux
     else:
         return presidents[0]  # Jean Bernard
-    
+
+import re
+
+def __merge_hyphenated_words(text):
+    """
+    Cette fonction utilise une expression régulière (re.sub()) pour rechercher les mots qui sont coupés par un tiret (-) suivi d'un retour à la ligne (\s*) dans le texte.
+    La partie (\w+) capture un ou plusieurs caractères alphanumériques (les parties des mots), et la partie \s* correspond à zéro ou plusieurs espaces (le retour à la ligne).
+    La fonction de substitution r'\1\2' fusionne les parties des mots capturées sans espace intermédiaire.
+    """
+    # Utiliser une expression régulière pour fusionner les mots coupés par des tirets
+    merged_text = re.sub(r'(\w+)-\s*(\w+)', r'\1\2', text)
+    return merged_text
+
+import nltk
+
+def __separate_footnote_numbers(text):
+    """
+    (\w+) capture un ou plusieurs caractères alphanumériques (les parties des mots).
+    (?<!H1N1) est un "negative lookbehind assertion", cela signifie que le mot précédent ne doit pas être "H1N1". 
+    Ainsi, les mots comme "H1N1" resteront collés avec les chiffres qui suivent.
+    (\d+) capture un ou plusieurs chiffres (les numéros de notes de bas de page).
+    La fonction de substitution r'\1 \2' insère un espace entre les parties des mots et les numéros de notes de bas de page pour les séparer.
+    """
+    # Utiliser une expression régulière pour séparer les numéros de notes de bas de page des mots
+    separated_text = re.sub(r'(\w+)(?<!H1N1)(\d+)', r'\1 \2', text)
+    return separated_text
+
+
+import unicodedata
+
+def __fix_encoding(text):
+    """
+    Cette fonction utilise la fonction unicodedata.normalize() 
+    pour normaliser le texte en utilisant la forme de compatibilité 
+    de décomposition canonique (NFKD) de l'Unicode.
+    Cette normalisation permet de convertir 
+    les caractères mal encodés ou les caractères accentués 
+    avec des accents cassés en leur équivalent correct. 
+    Par exemple, 'a' avec un accent cassé deviendra simplement 'a'.
+    """
+    # Utiliser la fonction de normalisation Unicode pour corriger les caractères mal encodés
+    normalized_text = unicodedata.normalize('NFKD', text)
+    return normalized_text
+
+
 
 import pandas as pd
 import re
