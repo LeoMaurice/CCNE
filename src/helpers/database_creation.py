@@ -69,10 +69,26 @@ def __clean_text(text):
     
     return cleaned_text.strip() 
 
+from pdf2image import convert_from_path
+import pytesseract
+
+# Fonction pour extraire du texte avec Tesseract
+def __extract_text_with_tesseract(fichier):
+    # Convertir le PDF en liste d'images
+    images = convert_from_path(fichier)
+    
+    texte = ""
+    for image in images:
+        # Utiliser pytesseract pour extraire le texte de chaque image
+        texte += pytesseract.image_to_string(image, lang='fra') + "\n"
+    
+    return texte
+
 import os
 import pandas as pd
-from PyPDF2 import PdfFileReader
+from PyPDF2 import PdfReader, PdfFileReader
 from tika import parser as tika_parser  # for OCR
+from tqdm import tqdm
 
 def open_avis(rescrap_texte=False):
     if rescrap_texte:
@@ -83,33 +99,36 @@ def open_avis(rescrap_texte=False):
         liste_fichiers = [os.path.join(dossier_avis, f) for f in os.listdir(dossier_avis) if f.endswith('.pdf')]
 
         # Initialiser un DataFrame vide
-        base_avis_ccne = pd.DataFrame(columns=['num', 'avis', 'nom_fichier', 'nb_pages'])
+        base_avis_ccne = []
 
         # Boucle pour lire chaque fichier PDF et extraire le texte
-        for fichier in liste_fichiers:
+        for fichier in tqdm(liste_fichiers):
             with open(fichier, 'rb') as f:
-                    pdf_reader = PdfFileReader(f)
-            # Extraire le numéro du fichier
-            numero = int(os.path.splitext(os.path.basename(fichier))[0].split()[1])
+                pdf_reader = PdfFileReader(f)
 
-            if numero in [69, 70, 71, 72, 76, 77, 78, 79, 80, 83, 84, 86, 89]:
-                # Use OCR for bugged files
-                raw = tika_parser.from_file(fichier)
-                texte = raw['content']
-            else:
-                # Use PyPDF2 for regular files
-                texte = ''
-                for page_num in range(pdf_reader.numPages):
-                    texte += pdf_reader.getPage(page_num).extractText()
+                # Extraire le numéro du fichier
+                numero = int(os.path.splitext(os.path.basename(fichier))[0].split()[1])
 
-            # Nombre de pages du PDF
-            nombre_page = pdf_reader.numPages
+                if numero in [69, 70, 71, 72, 76, 77, 78, 79, 80, 83, 84, 86, 89]:
+                    # Use OCR for bugged files
+                    
+                    texte = __extract_text_with_tesseract(fichier)
+                else:
+                    # Use PyPDF2 for regular files
+                    texte = ''
+                    for page_num in range(len(pdf_reader.pages)):
+                        texte += pdf_reader.pages[page_num].extract_text(0)
+                        texte += "\n"
+
+                # Nombre de pages du PDF
+                nombre_page = len(pdf_reader.pages)
 
             # Ajouter les données au DataFrame
-            base_avis_ccne = base_avis_ccne.append({'num': numero, 'avis': texte, 'nom_fichier': os.path.basename(fichier), 'nb_pages': nombre_page}, ignore_index=True)
+            base_avis_ccne.append({'num': numero, 'avis': texte, 'nom_fichier': os.path.basename(fichier), 'nb_pages': nombre_page})
         
+        base_avis_ccne= pd.DataFrame(base_avis_ccne)
         # Cleaning text    
-        base_avis_ccne["avis"] = base_avis_ccne["avis"].apply(__clean_text, axis = 1)
+        base_avis_ccne["avis"] = base_avis_ccne["avis"].apply(__clean_text)
 
         # Sauvegarder le DataFrame
         base_avis_ccne.to_feather("../data/intermediate/base_avis_ccne.feather")
