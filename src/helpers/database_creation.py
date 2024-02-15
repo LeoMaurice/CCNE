@@ -95,7 +95,8 @@ def __check_number_of_sentences(df):
     return result
 
 def corpus_to_sentences_with_context(base, verbose = True):
-    base['tokenized_avis'] = base['avis'].apply(sent_tokenize)
+    french_sent_tokenize = lambda x: sent_tokenize(x, language="french")
+    base['tokenized_avis'] = base['avis'].apply(french_sent_tokenize)
     base_sentences = base.apply(__transform_one_corpus_to_sentences, axis=1)
     base_sentences = pd.concat(base_sentences.tolist(), ignore_index=True)
     base.drop(columns = ['tokenized_avis'], inplace=True)
