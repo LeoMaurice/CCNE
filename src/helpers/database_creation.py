@@ -1,4 +1,126 @@
 # converted from R in 31/01/2024
+# largely modified since
+
+# ---- Creation et ouverture de la base des avis ----
+
+## -- fonctions de cleaning de textes --
+import re
+
+def __merge_hyphenated_words(text):
+    """
+    Cette fonction utilise une expression régulière (re.sub()) pour rechercher les mots qui sont coupés par un tiret (-) suivi d'un retour à la ligne (\s*) dans le texte.
+    La partie (\w+) capture un ou plusieurs caractères alphanumériques (les parties des mots), et la partie \s* correspond à zéro ou plusieurs espaces (le retour à la ligne).
+    La fonction de substitution r'\1\2' fusionne les parties des mots capturées sans espace intermédiaire.
+    """
+    # Utiliser une expression régulière pour fusionner les mots coupés par des tirets
+    return re.sub(r'(\w+)-\s*(\w+)', r'\1\2', text)
+
+import nltk
+
+def __separate_footnote_numbers(text):
+    """
+    (\w+) capture un ou plusieurs caractères alphanumériques (les parties des mots).
+    (?<!H1N1) est un "negative lookbehind assertion", cela signifie que le mot précédent ne doit pas être "H1N1". 
+    Ainsi, les mots comme "H1N1" resteront collés avec les chiffres qui suivent.
+    (\d+) capture un ou plusieurs chiffres (les numéros de notes de bas de page).
+    La fonction de substitution r'\1 \2' insère un espace entre les parties des mots et les numéros de notes de bas de page pour les séparer.
+    """
+    # Utiliser une expression régulière pour séparer les numéros de notes de bas de page des mots
+    separated_text = re.sub(r'(\w+)(?<!H1N1)(\d+)\s', r'\1 \2', text)
+    # Capturer les cas où la note de bas de page est à la fin de la phrase
+    separated_text = re.sub(r'(\w+)(?<!H1N1)(\d+)([.,;!?])', r'\1 \2\3', separated_text)
+    return separated_text
+
+import unicodedata
+
+def __fix_encoding(text):
+    # ne fonctionne pas du tout pour l'instant
+    """
+    Cette fonction utilise la fonction unicodedata.normalize() 
+    pour normaliser le texte en utilisant la forme de compatibilité 
+    de décomposition canonique (NFKD) de l'Unicode.
+    Cette normalisation permet de convertir 
+    les caractères mal encodés ou les caractères accentués 
+    avec des accents cassés en leur équivalent correct. 
+    Par exemple, 'a' avec un accent cassé deviendra simplement 'a'.
+    """
+    # Utiliser la fonction de normalisation Unicode pour corriger les caractères mal encodés
+    return unicodedata.normalize('NFKD', text)
+
+import re
+
+def __remove_lines(text):
+    return text.replace('\n', ' ')
+
+def __remove_multiple_spaces(text):
+    return re.sub(r'\s+', ' ', text)
+
+
+import pandas as pd
+import re
+
+def __clean_text(text):
+
+    # Fusionne les retours à la ligne
+    cleaned_text = __merge_hyphenated_words(text)
+
+    # Separer les mots des nombres acoller comme les n° de bas de page
+    cleaned_text = __separate_footnote_numbers(text)
+    
+    return cleaned_text.strip() 
+
+import os
+import pandas as pd
+from PyPDF2 import PdfFileReader
+from tika import parser as tika_parser  # for OCR
+
+def open_avis(rescrap_texte=False):
+    if rescrap_texte:
+        # Définir le chemin vers le dossier contenant les fichiers PDF
+        dossier_avis = "../data/raw/avis"
+
+        # Liste des fichiers PDF dans le dossier
+        liste_fichiers = [os.path.join(dossier_avis, f) for f in os.listdir(dossier_avis) if f.endswith('.pdf')]
+
+        # Initialiser un DataFrame vide
+        base_avis_ccne = pd.DataFrame(columns=['num', 'avis', 'nom_fichier', 'nb_pages'])
+
+        # Boucle pour lire chaque fichier PDF et extraire le texte
+        for fichier in liste_fichiers:
+            with open(fichier, 'rb') as f:
+                    pdf_reader = PdfFileReader(f)
+            # Extraire le numéro du fichier
+            numero = int(os.path.splitext(os.path.basename(fichier))[0].split()[1])
+
+            if numero in [69, 70, 71, 72, 76, 77, 78, 79, 80, 83, 84, 86, 89]:
+                # Use OCR for bugged files
+                raw = tika_parser.from_file(fichier)
+                texte = raw['content']
+            else:
+                # Use PyPDF2 for regular files
+                texte = ''
+                for page_num in range(pdf_reader.numPages):
+                    texte += pdf_reader.getPage(page_num).extractText()
+
+            # Nombre de pages du PDF
+            nombre_page = pdf_reader.numPages
+
+            # Ajouter les données au DataFrame
+            base_avis_ccne = base_avis_ccne.append({'num': numero, 'avis': texte, 'nom_fichier': os.path.basename(fichier), 'nb_pages': nombre_page}, ignore_index=True)
+        
+        # Cleaning text    
+        base_avis_ccne["avis"] = base_avis_ccne["avis"].apply(__clean_text, axis = 1)
+
+        # Sauvegarder le DataFrame
+        base_avis_ccne.to_feather("../data/intermediate/base_avis_ccne.feather")
+    else:
+        # Lire le DataFrame à partir du fichier pickle
+        base_avis_ccne = pd.read_feather("../data/intermediate/base_avis_ccne.feather")
+
+    return base_avis_ccne
+
+
+# -- Adding metadata --
 
 from datetime import datetime
 
@@ -18,68 +140,6 @@ def __president_CCNE_by_date(date):
         return presidents[1]  # Jean-Pierre Changeux
     else:
         return presidents[0]  # Jean Bernard
-
-import re
-
-def __merge_hyphenated_words(text):
-    """
-    Cette fonction utilise une expression régulière (re.sub()) pour rechercher les mots qui sont coupés par un tiret (-) suivi d'un retour à la ligne (\s*) dans le texte.
-    La partie (\w+) capture un ou plusieurs caractères alphanumériques (les parties des mots), et la partie \s* correspond à zéro ou plusieurs espaces (le retour à la ligne).
-    La fonction de substitution r'\1\2' fusionne les parties des mots capturées sans espace intermédiaire.
-    """
-    # Utiliser une expression régulière pour fusionner les mots coupés par des tirets
-    merged_text = re.sub(r'(\w+)-\s*(\w+)', r'\1\2', text)
-    return merged_text
-
-import nltk
-
-def __separate_footnote_numbers(text):
-    """
-    (\w+) capture un ou plusieurs caractères alphanumériques (les parties des mots).
-    (?<!H1N1) est un "negative lookbehind assertion", cela signifie que le mot précédent ne doit pas être "H1N1". 
-    Ainsi, les mots comme "H1N1" resteront collés avec les chiffres qui suivent.
-    (\d+) capture un ou plusieurs chiffres (les numéros de notes de bas de page).
-    La fonction de substitution r'\1 \2' insère un espace entre les parties des mots et les numéros de notes de bas de page pour les séparer.
-    """
-    # Utiliser une expression régulière pour séparer les numéros de notes de bas de page des mots
-    separated_text = re.sub(r'(\w+)(?<!H1N1)(\d+)', r'\1 \2', text)
-    return separated_text
-
-
-import unicodedata
-
-def __fix_encoding(text):
-    """
-    Cette fonction utilise la fonction unicodedata.normalize() 
-    pour normaliser le texte en utilisant la forme de compatibilité 
-    de décomposition canonique (NFKD) de l'Unicode.
-    Cette normalisation permet de convertir 
-    les caractères mal encodés ou les caractères accentués 
-    avec des accents cassés en leur équivalent correct. 
-    Par exemple, 'a' avec un accent cassé deviendra simplement 'a'.
-    """
-    # Utiliser la fonction de normalisation Unicode pour corriger les caractères mal encodés
-    normalized_text = unicodedata.normalize('NFKD', text)
-    return normalized_text
-
-
-
-import pandas as pd
-import re
-
-def __clean_text(text):
-    # Remove '\n' and replace with spaces
-    cleaned_text = text.replace('\n', ' ')
-    
-    # Remove multiple consecutive spaces
-    cleaned_text = re.sub(r'\s+', ' ', cleaned_text)
-    
-    return cleaned_text.strip() 
-
-def open_avis(rescrap_texte=False):
-    df = pd.read_pickle("../data/intermediate/base_avis_ccne.pkl")
-    df['avis'] = df['avis'].apply(__clean_text)
-    return df
 
 import pandas as pd
 from datetime import datetime
@@ -102,12 +162,12 @@ def join_metadata(base_avis_ccne):
 
     return base_avis_ccne
 
+# ----- transforming avis into sentences
+
 import pandas as pd
 import nltk
 nltk.download('punkt')
 from nltk.tokenize import sent_tokenize
-
-nltk.download('punkt')
 
 def __transform_one_corpus_to_sentences(row):
     tokenized_sentences = row["tokenized_avis"]
@@ -139,6 +199,7 @@ def __check_number_of_sentences(df):
     return result
 
 def corpus_to_sentences_with_context(base, verbose = True):
+    # fonction pour transformer découper les avis en phrase, issu de nltk
     french_sent_tokenize = lambda x: sent_tokenize(x, language="french")
     base['tokenized_avis'] = base['avis'].apply(french_sent_tokenize)
     base_sentences = base.apply(__transform_one_corpus_to_sentences, axis=1)
@@ -153,6 +214,8 @@ def corpus_to_sentences_with_context(base, verbose = True):
               is  the number of sentences counted corresponding to the number of rows by 'num' ?
               {__check_number_of_sentences(base_sentences)}""")
     return base_sentences
+
+# ---- filtering words, counting words -----
 
 import re
 
