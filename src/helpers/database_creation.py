@@ -13,23 +13,26 @@ def __merge_hyphenated_words(text):
     La fonction de substitution r'\1\2' fusionne les parties des mots capturées sans espace intermédiaire.
     """
     # Utiliser une expression régulière pour fusionner les mots coupés par des tirets
-    return re.sub(r'(\w+)-\s*(\w+)', r'\1\2', text)
+    return re.sub(r'(\w+)-\s*(\w+)', r'\1\2', text) # faut il rajouter : \n après \1\2 pour resimuler le saut de ligne ?
 
 import nltk
 
-def __separate_footnote_numbers(text):
+import re
+
+def __separate_numbers_from_words(text):
     """
-    (\w+) capture un ou plusieurs caractères alphanumériques (les parties des mots).
-    (?<!H1N1) est un "negative lookbehind assertion", cela signifie que le mot précédent ne doit pas être "H1N1". 
-    Ainsi, les mots comme "H1N1" resteront collés avec les chiffres qui suivent.
-    (\d+) capture un ou plusieurs chiffres (les numéros de notes de bas de page).
-    La fonction de substitution r'\1 \2' insère un espace entre les parties des mots et les numéros de notes de bas de page pour les séparer.
+    # Exemple d'utilisation
+    texte = "je111 suis11 tard1 et j'ai un problè22 ME333 et je suis un nombre 1 22 333 4444 et je suis une date 16/02/2024 et je suis un numéro de page : 4. 55555et"
+    resultat = separate_numbers_from_words(texte)
+    print(resultat)  # Output: "je 111 suis 11 tard 1"
     """
-    # Utiliser une expression régulière pour séparer les numéros de notes de bas de page des mots
-    separated_text = re.sub(r'(\w+)(?<!H1N1)(\d+)\s', r'\1 \2', text)
-    # Capturer les cas où la note de bas de page est à la fin de la phrase
-    separated_text = re.sub(r'(\w+)(?<!H1N1)(\d+)([.,;!?])', r'\1 \2\3', separated_text)
+    # Utiliser une expression régulière pour ajouter un espace entre les nombres et les mots
+    separated_text = re.sub(r'([A-Za-zÀ-ÖØ-öø-ÿ]+)(\d)', r'\1 \2', text)
+    separated_text = re.sub(r'(\d)([A-Za-zÀ-ÖØ-öø-ÿ]+)', r'\1 \2', separated_text)
     return separated_text
+
+
+
 
 import unicodedata
 
@@ -65,7 +68,7 @@ def __clean_text(text):
     cleaned_text = __merge_hyphenated_words(text)
 
     # Separer les mots des nombres acoller comme les n° de bas de page
-    cleaned_text = __separate_footnote_numbers(text)
+    cleaned_text = __separate_numbers_from_words(cleaned_text)
     
     return cleaned_text.strip() 
 
