@@ -43,12 +43,12 @@ df_heatmap <- df |>
   mutate(quantile_group = ntile(position_in_avis, quantile))|>
   ungroup()|>
   group_by(num,quantile_group,president,theme,number_sentences)|>
-  summarise(human_nb = sum(human),
-            person_nb = sum(person),
+  summarise(human_nb = sum(humain),
+            person_nb = sum(personne),
             individu_nb = sum(individu),
             societe_nb = sum(societe),
             nature_nb = sum(nature),
-            env_nb = sum(environment),
+            env_nb = sum(environnement),
             n_in_quantile = n())|>
   mutate(human_freq = human_nb/n_in_quantile,
          person_freq = person_nb/n_in_quantile,
@@ -65,20 +65,17 @@ source("helpers/heatmap.R")
 plot_width = 20
 plot_height = 15
 
-pdf("../output/descriptive_figures/more_words_complexheatmaps_test.pdf", width = plot_width, height = plot_height)  # Adjust size as needed
+pdf("../output/descriptive_figures/personne_humain_individu_complexheatmaps.pdf", width = plot_width, height = plot_height)  # Adjust size as needed
 
 heatmap_figure_frequence_quantile(df_heatmap = df_heatmap,
                                   X="num",Y="quantile_group",
-                                  Zs = c("person_freq","human_freq","individu_freq",
-                                    "societe_freq","nature_freq","env_freq"),
-                                  names_legend = c("personne","humain","individu",
-                                                   "société","nature","environnement"),
-                                  subrow_title = "Freq",
+                                  Zs = c("person_freq","human_freq","individu_freq"),
+                                  names_legend = c("personne","humain","individu"),
+                                  subrow_title = "Fréquence",
                                   subcol_title = "Numéro de l'avis",
                                   mainrow_title = "Position relative de la phrase",
                                   maincol_title = "Cartes de chaleur de la fréquence de la présence de mots dans les phrases par groupe de phrase (2% quantile)",
-                                  colors_hexcodes = c("#40007F","#66CCFE","#91188E",
-                                                      "#FF0066","#107F80","#539027")
+                                  colors_hexcodes = c("#40007F","#91188E","#66CCFE")
                                   )
 dev.off()
 ```
@@ -168,9 +165,9 @@ pdf("../output/descriptive_figures/science_person_words_complexheatmaps.pdf", wi
 
 heatmap_figure_frequence_quantile(df_heatmap = df_heatmap,
                                   X="num",Y="quantile_group",
-                                  Zs = c("person_freq","human_freq",
+                                  Zs = c("person_freq","human_freq","individu_freq",
                                          "gen_freq","cellule_freq","vitro_freq"),
-                                  names_legend = c("personne","humain",
+                                  names_legend = c("personne","humain","individu",
                                                    "génétique","cellule","in vitro"
                                                    ),
                                   subrow_title = "Freq",
