@@ -23,7 +23,7 @@ source("helpers/df_to_matrix.R")
 source("helpers/heatmap.R")
 source("helpers/lexico_helper.R")
 
-save_figures = TRUE
+save_figures = FALSE
 cutpoints = c(0, 1e-04, 0.001, 0.01, 0.05, 0.1, 1)
 symbols = c("****", "***", "**", "*", "•","ns")
 significance = c("p < 0.0001", "p < 0.001", "p < 0.01", "p < 0.05", "p < 0.1", "p>0.1")
@@ -441,11 +441,66 @@ dev.off()
 
 #### Correlation matrix
 ```{r}
-base_sentences|>
+base_sentences_pivoted <- base_sentences|>
   pivot_longer(cols = c("personne","humain","individu"), names_to = "mot_cle",values_to = "presence")|>
-  select(mot_cle,presence,president,Date,theme,number_sentences,num,sentence_index)|>
-  sample(5)
+  filter(presence)|>
+  select(mot_cle,president,Date,theme,number_sentences,num,sentence_index)|>
+  mutate(unique_id = 10000 * num + sentence_index)
+
+max_number_sentence <- max(base_sentences$number_sentences)
+
+calculate_distances <- function(df_reference, df_comparison) {
+  distances <- df_reference |>
+    rowwise() |>
+    mutate(distance = min(abs(df_comparison$unique_id - unique_id))) |>
+    mutate(distance = ifelse(distance > max_number_sentence, Inf, distance))
+  return(distances$distance)
+}
+
+base_sentences_pivoted_personne <- base_sentences_pivoted |>
+  filter(mot_cle == "personne")
+
+base_sentences_pivoted_humain <- base_sentences_pivoted |>
+  filter(mot_cle == "humain")
+
+base_sentences_pivoted_individu <- base_sentences_pivoted |>
+  filter(mot_cle == "individu")
+
+base_sentences_pivoted_personne$distance_personne <- 0
+base_sentences_pivoted_personne$distance_humain <- calculate_distances(base_sentences_pivoted_personne, base_sentences_pivoted_humain)
+base_sentences_pivoted_personne$distance_individu <- calculate_distances(base_sentences_pivoted_personne, base_sentences_pivoted_individu)
+
+base_sentences_pivoted_humain$distance_personne <- calculate_distances(base_sentences_pivoted_humain, base_sentences_pivoted_personne)
+base_sentences_pivoted_humain$distance_humain <- 0
+base_sentences_pivoted_humain$distance_individu <- calculate_distances(base_sentences_pivoted_humain, base_sentences_pivoted_individu)
+
+base_sentences_pivoted_individu$distance_personne <- calculate_distances(base_sentences_pivoted_individu, base_sentences_pivoted_personne)
+base_sentences_pivoted_individu$distance_humain <- calculate_distances(base_sentences_pivoted_individu, base_sentences_pivoted_humain)
+base_sentences_pivoted_individu$distance_individu <- 0
+
+# Combined result
+base_sentences_distance <- bind_rows(base_sentences_pivoted_personne, base_sentences_pivoted_humain, base_sentences_pivoted_individu)|>
+  pivot_longer(cols = starts_with("distance_"), names_to = "comparaison", values_to = "distance") |>
+  mutate(comparaison = gsub("distance_", "", comparaison))|>
+  filter(mot_cle!=comparaison)|>
+  mutate(mot_cle = factor(mot_cle, levels = c("personne","humain","individu")),
+         comparaison = factor(comparaison, levels = c("personne","humain","individu")))
+
+
+# Display the result
+base_sentences_distance
+
 ```
+
+```{r}
+# Graphique avec les modifications
+ggboxplot(base_sentences_distance|>
+            filter(!is.infinite(distance)), x = "comparaison", y = "distance", facet.by = "president", fill = "mot_cle") +
+  theme_minimal()
+if(save_figures)
+  ggsave("../output/descriptive_figures/distance_personne_humain_individu.pdf")
+```
+
 
 ## Number according time
 ```{r}
