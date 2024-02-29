@@ -386,14 +386,14 @@ df_heatmap <- base_sentences |>
   group_by(num) |>
   mutate(quantile_group = ntile(position_in_avis, quantile))|>
   ungroup()|>
-  group_by(num,quantile_group,president,theme,number_sentences)|>
+  group_by(num,quantile_group,president,theme, number_sentences)|>
   mutate(n_in_quantile = n())|>
-  summarise(humain = sum(humain)/n_in_quantile,
-            personne = sum(personne)/n_in_quantile,
-            individu = sum(individu)/n_in_quantile,
-            nature = sum(nature)/n_in_quantile,
-            vivant = sum(vivant)/n_in_quantile,
-            environnement = sum(environnement)/n_in_quantile)
+  summarise(humain = mean(humain),
+            personne = mean(personne),
+            individu = mean(individu),
+            nature = mean(nature),
+            vivant = mean(vivant),
+            environnement = mean(environnement))
 ```
 Description :
 Pour chaque quantile, la couleur sur la carte de chaleur représente la fréquence relative d'un mot spécifique. Pour calculer cette fréquence, nous divisons le nombre d'occurrences du mot par le nombre total de phrases dans le quantile. Cette transformation fournit une mesure de la fréquence à laquelle le mot apparaît au sein du sous-ensemble de phrases représenté par chaque quantile, permettant ainsi de comparer l'utilisation du mot dans différentes parties du texte.
