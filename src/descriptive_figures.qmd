@@ -1,7 +1,45 @@
 ---
-title: "descriptive_figures"
-format: html
-editor: visual
+title: "CCNE Descriptive figures"
+author: "Léopold MAURICE, ENSAE"
+date: "2024-02-29"
+project: CCNE
+supervision: Pr. Emmanuel Didier, CMH/ENS/EHESS
+output-ext: html
+format:
+  html:
+    toc: true
+    number-sections: true
+    colorlinks: true
+    geometry:
+      - top=10mm
+      - left=20mm
+      - right=20mm
+      - bottom=10mm  
+      - heightrounded
+    highlight-style: github
+    fontfamily: libertinus
+    documentclass: report
+    fig-width: 12
+    fig-height: 9
+  pdf:
+    documentclass: report
+    papersize: a4
+    toc: true
+    toc-depth: 4
+    number-sections: true
+    number-depth: 3
+    colorlinks: true
+    fig-width: 20
+    fig-height: 15
+    keep-tex: false
+execute:
+  eval: true
+  message: false
+  warning: false
+  echo: false
+  output: true
+  error: true
+editor: source
 ---
 ```{r}
 pacman::p_load(arrow,
@@ -17,13 +55,14 @@ pacman::p_load(arrow,
                ggpubr,
                ggcorrplot,
                ComplexHeatmap,
-               circlize)
+               circlize,
+               patchwork)
 
 source("helpers/df_to_matrix.R")
 source("helpers/heatmap.R")
 source("helpers/lexico_helper.R")
 
-save_figures = FALSE
+save_figures = T
 cutpoints = c(0, 1e-04, 0.001, 0.01, 0.05, 0.1, 1)
 symbols = c("****", "***", "**", "*", "•","ns")
 significance = c("p < 0.0001", "p < 0.001", "p < 0.01", "p < 0.05", "p < 0.1", "p>0.1")
@@ -68,7 +107,7 @@ ggprism::prism_color_pal("evergreen")(6)
 nb_page_plot <- ggplot(base_avis, aes(x = Date, y = nb_pages)) +
   geom_point() +  
   geom_smooth(formula = 'y ~ x', method = "loess", se = FALSE, color = "#077E97") +  
-  theme_prism() +  
+  theme_pubclean() +
   labs(title = "Nombre de pages par avis",
        x = "Date",
        y = "Nombre de pages")
@@ -77,16 +116,16 @@ nb_page_plot <- ggplot(base_avis, aes(x = Date, y = nb_pages)) +
 nb_mots_plot <- ggplot(base_avis, aes(x = Date, y = nb_mots)) +
   geom_point() +  
   geom_smooth(formula = 'y ~ x', method = "loess", se = FALSE, color = "#C000C0") +  
-  theme_prism() +  
+  theme_pubclean() +  
   labs(title = "Nombre de mots par avis",
        x = "Date",
        y = "Nombre de mots")
 
 # Arrange the plots
-ggarrange(nb_page_plot, nb_mots_plot, ncol = 2)
+nb_page_plot + nb_mots_plot + plot_layout(ncol = 2)
 
 if(save_figures)
-  ggsave("../output/descriptive_figures/taille_avis_temps.pdf")
+  ggsave("../output/descriptive_figures/taille_avis_temps.png")
 ```
 
 
@@ -94,22 +133,27 @@ if(save_figures)
 
 ```{r}
 #| eval: true
-#| label: fig-avis_president
 #| fig-cap-location: bottom
 #| fig-cap: "Nombre d'avis par président"
 #| fig-env: "figure*"
+#| #| eval: true
+#| fig-width: 20
+#| fig-height: 15
+#| label: nb_avis_president
 
 ggplot(base_avis, aes(x = president, fill = theme)) +
   geom_bar() +
   scale_fill_prism(palette = "colors") +  
-  theme_prism() +  
+  theme_pubclean() +  
   labs(title = "Nombre d'avis par président du CCNE",
        x = "Président",
        y = "Nombre d'avis")+
   guides(fill = guide_legend(ncol = 2))+  # Mettre la légende sur deux colonnes
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
+        legend.key.size = unit(0.8, "cm"),
+        legend.position = "right")
 if(save_figures)
-  ggsave("../output/descriptive_figures/taille_avis_temps.pdf")
+  ggsave("../output/descriptive_figures/taille_avis_temps.png")
 ```
 
 ### Nombre de saisie par président
@@ -124,20 +168,19 @@ if(save_figures)
 ggplot(base_avis, aes(x = president, fill = saisine)) +
   geom_bar() +
   scale_fill_prism(palette = "winter_bright", labels = c("autosaisie","saisie")) +  
-  theme_prism() +  
+  theme_pubclean() +  
   labs(title = "Nombre d'avis par président du CCNE",
        x = "Président",
        y = "Nombre d'avis")+
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
 if(save_figures)
-  ggsave("../output/descriptive_figures/repartition_saisie_president.pdf")
+  ggsave("../output/descriptive_figures/repartition_saisie_president.png")
 ```
 
 ### Nombre de saisie par theme
 
 ```{r}
 #| eval: true
-#| label: fig-avis_president
 #| fig-cap-location: bottom
 #| fig-cap: "Nombre d'avis par theme"
 #| fig-env: "figure*"
@@ -145,13 +188,13 @@ if(save_figures)
 ggplot(base_avis, aes(x = theme, fill = saisine)) +
   geom_bar() +
   scale_fill_prism(palette = "winter_bright", labels = c("autosaisie","saisie")) +  
-  theme_prism() +  
+  theme_pubclean() +  
   labs(title = "Nombre d'avis par président du CCNE",
        x = "Président",
        y = "Nombre d'avis")+
   coord_flip()
 if(save_figures)
-  ggsave("../output/descriptive_figures/repartition_saisie_president.pdf")
+  ggsave("../output/descriptive_figures/repartition_saisie_president.png")
 ```
 
 
@@ -162,14 +205,14 @@ if(save_figures)
 ggplot(base_avis, aes(x = president,y=nb_pages, fill = president)) +
   geom_boxplot() +
   scale_fill_prism(palette = "winter_bright") +  
-  theme_prism() +  
+  theme_pubclean() +  
   labs(title = "Nombre de pages moyen par président du CCNE",
        x = "Président",
        y = "Nombre de pages")+ 
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
         legend.position = "none")
 if(save_figures)
-  ggsave("../output/descriptive_figures/taille_avis_president.pdf")
+  ggsave("../output/descriptive_figures/taille_avis_president.png")
 ```
 
 ### Nombre de phrase par président
@@ -182,7 +225,7 @@ base_sentences|>
   summarise(total = sum(number_sentences))|>
   ggbarplot(x = "president",y = "total",fill = "president")+
     scale_fill_prism(palette = "winter_bright") +  
-    theme_prism() +  
+    theme_pubclean() +  
     labs(title = "Total des phrases par president",
          x = "Mot clé",
          y = "Nombre de phrase")+
@@ -226,14 +269,14 @@ base_sentences|>
   ggbarplot(x = "mot_cle",y="phrases",fill = "president",
             label = TRUE, lab.col = "white", lab.pos = "in",lab.size = 3, lab.vjust = 1)+
     scale_fill_prism(palette = "winter_bright") +  
-    theme_prism() +  
+    theme_pubclean() +  
     labs(title = "Nombre de phrase avec mots clés",
          x = "Mot clé",
          y = "Nombre de phrase")+
   geom_text(data = nb_total_sentence, aes(x = mot_cle, y = total, label = paste("Total:",total)),
             position = position_dodge(width = 0.9), vjust = -0.5, size = 3, color = "black")
 if(save_figures)
-  ggsave("../output/descriptive_figures/nombre_phrase_personne_humain_individu.pdf")
+  ggsave("../output/descriptive_figures/nombre_phrase_personne_humain_individu.png")
 ```
 ##### Proportion président
 
@@ -246,13 +289,13 @@ base_sentences |>
   ggbarplot(x = "president", y = "phrases", fill = "mot_cle",
             label = TRUE, lab.col = "white", lab.pos = "in",lab.size = 3, lab.vjust = 0, lab.hjust = 1.1, lab.nb.digits = 1) +
   scale_fill_prism(palette = "winter_bright") +
-  theme_prism() +
+  theme_pubclean() +
   labs(title = "Proportion de phrase avec mots clés par president",
        x = "Mot clé",
        y = "Proportion de phrase (%)") +
   coord_flip()
 if (save_figures)
-  ggsave("../output/descriptive_figures/proportion_phrase_personne_humain_individu_president.pdf")
+  ggsave("../output/descriptive_figures/proportion_phrase_personne_humain_individu_president.png")
 ```
 ##### Distribution regroupé par avis
 ```{r}
@@ -278,7 +321,7 @@ base_sentences |>
   summarise(proportion = 100 * mean(presence)) |>
   ggboxplot(x = "president", y = "proportion", fill = "mot_cle", facet.by = "mot_cle") +
   scale_fill_prism(palette = "winter_bright") +
-  theme_prism() +
+  theme_pubclean() +
   labs(
     title = "Proportion de phrase avec mots clés par président",
     caption = paste("t-test, BH adjusted",signif_caption_text,sep = "\n"),
@@ -289,7 +332,7 @@ base_sentences |>
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
   stat_pvalue_manual(stat.test, label = "p.adj.signif", hide.ns = TRUE, y.position = 40, step.group.by = "mot_cle", step.increase = 0.08)
 if(save_figures)
-  ggsave("../output/descriptive_figures/proportion_personne_humain_individu_avis.pdf")
+  ggsave("../output/descriptive_figures/proportion_personne_humain_individu_avis.png")
 ```
 #### Nature
 
@@ -306,15 +349,16 @@ base_sentences |>
   summarise(phrases = sum(presence)) |>
   ggbarplot(x = "mot_cle", y = "phrases", fill = "president") +
   scale_fill_prism(palette = "winter_bright") +
-  theme_prism() +
+  theme_pubclean() +
   labs(title = "Nombre de phrase avec mots clés",
        x = "Mot clé",
        y = "Nombre de phrase") +
   geom_text(data = nb_total_sentence, aes(x = mot_cle, y = total, label = paste("Total:", total)),
-            position = position_dodge(width = 0.9), vjust = -0.5, size = 3, color = "black")
+            position = position_dodge(width = 0.9), vjust = -0.5, size = 3, color = "black")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
 
 if (save_figures)
-  ggsave("../output/descriptive_figures/nombre_phrase_nature.pdf")
+  ggsave("../output/descriptive_figures/nombre_phrase_nature.png")
 
 ```
 
@@ -328,15 +372,15 @@ base_sentences |>
   group_by(president, mot_cle) |>
   summarise(phrases = 100*mean(presence)) |>
   ggbarplot(x = "president", y = "phrases", fill = "mot_cle",
-            label = TRUE, lab.col = "white", lab.pos = "in",lab.size = 3, lab.vjust = 0, lab.hjust = 1.1, lab.nb.digits = 1) +
+            label = TRUE, lab.col = "white", lab.pos = "in",lab.size = 3, lab.vjust = 0, lab.hjust = 1.3, lab.nb.digits = 1) +
   scale_fill_prism(palette = "winter_bright") +
-  theme_prism() +
+  theme_pubclean() +
   labs(title = "Proportion de phrase avec mots clés par president",
        x = "Mot clé",
        y = "Proportion de phrase (%)") +
   coord_flip()
 if (save_figures)
-  ggsave("../output/descriptive_figures/proportion_phrase_nature_president.pdf")
+  ggsave("../output/descriptive_figures/proportion_phrase_nature_president.png")
 ```
 ##### Box plot proportion avis
 Boxplot de la distribution de la proportion de phrases contenant un mot clé parmi les phrases d'un avis.
@@ -361,7 +405,7 @@ base_sentences |>
   summarise(proportion = 100*mean(presence)) |>
   ggboxplot(x = "president", y = "proportion", fill = "mot_cle", facet.by = "mot_cle") +
   scale_fill_prism(palette = "winter_bright") +
-  theme_prism() +
+  theme_pubclean() +
   labs(title = "Proportion de phrase avec mots clés par president",
        caption = signif_caption_text,
        x = "Mot clé",
@@ -399,13 +443,17 @@ Description :
 Pour chaque quantile, la couleur sur la carte de chaleur représente la fréquence relative d'un mot spécifique. Pour calculer cette fréquence, nous divisons le nombre d'occurrences du mot par le nombre total de phrases dans le quantile. Cette transformation fournit une mesure de la fréquence à laquelle le mot apparaît au sein du sous-ensemble de phrases représenté par chaque quantile, permettant ainsi de comparer l'utilisation du mot dans différentes parties du texte.
 ###### Heatmap personne humain individu
 ```{r}
+#| eval: true
+#| fig-width: 20
+#| fig-height: 15
+#| label: hm_personne
 source("helpers/heatmap.R")
 plot_width = 20
 plot_height = 15
 
-pdf("../output/descriptive_figures/personne_humain_individu_complexheatmaps.pdf", width = plot_width, height = plot_height)  # Adjust size as needed
+  # Adjust size as needed
 
-heatmap_figure_frequence_quantile(df_heatmap = df_heatmap,
+hm_personne<- heatmap_figure_frequence_quantile(df_heatmap = df_heatmap,
                                   X="num",Y="quantile_group",
                                   Zs = c("personne","humain","individu"),
                                   names_legend = c("personne","humain","individu"),
@@ -415,17 +463,25 @@ heatmap_figure_frequence_quantile(df_heatmap = df_heatmap,
                                   maincol_title = "Cartes de chaleur de la fréquence de la présence de mots dans les phrases par groupe de phrase (2% quantile)",
                                   colors_hexcodes = c("#40007F","#91188E","#66CCFE")
                                   )
-dev.off()
+if(save_figures){
+  png("../output/descriptive_figures/personne_humain_individu_complexheatmaps.png", width = plot_width, height = plot_height)
+  draw(hm_personne)
+  dev.off()
+}
+
 ```
 ##### Heatmap nature vivant environnement
 ```{r}
+#| eval: true
+#| fig-width: 20
+#| fig-height: 15
+#| label: hm_nature
 source("helpers/heatmap.R")
 plot_width = 20
 plot_height = 15
 
-pdf("../output/descriptive_figures/nature_vivant_environnement_complexheatmaps.pdf", width = plot_width, height = plot_height)  # Adjust size as needed
 
-heatmap_figure_frequence_quantile(df_heatmap = df_heatmap,
+hm_nature<- heatmap_figure_frequence_quantile(df_heatmap = df_heatmap,
                                   X="num",Y="quantile_group",
                                   Zs = c("nature","vivant","environnement"),
                                   names_legend = c("nature","vivant","environnement"),
@@ -435,12 +491,22 @@ heatmap_figure_frequence_quantile(df_heatmap = df_heatmap,
                                   maincol_title = "Cartes de chaleur de la fréquence de la présence de mots dans les phrases par groupe de phrase (2% quantile)",
                                   colors_hexcodes = c("#005A00","#099963","#539027")
                                   )
-dev.off()
+
+if(save_figures){
+  png("../output/descriptive_figures/nature_vivant_environnement_complexheatmaps.png", width = plot_width, height = plot_height)  # Adjust size as needed
+  draw(hm_nature)
+  dev.off()
+
+}
 ```
 
 
-#### Correlation matrix
+#### Distance entre mots clés
 ```{r}
+#| eval: true
+#| fig-width: 20
+#| fig-height: 15
+#| label: distance
 base_sentences_pivoted <- base_sentences|>
   pivot_longer(cols = c("personne","humain","individu"), names_to = "mot_cle",values_to = "presence")|>
   filter(presence)|>
@@ -498,7 +564,7 @@ ggboxplot(base_sentences_distance|>
             filter(!is.infinite(distance)), x = "comparaison", y = "distance", facet.by = "president", fill = "mot_cle") +
   theme_minimal()
 if(save_figures)
-  ggsave("../output/descriptive_figures/distance_personne_humain_individu.pdf")
+  ggsave("../output/descriptive_figures/distance_personne_humain_individu.png")
 ```
 
 
@@ -517,8 +583,10 @@ plot_chiffre_temps <- ggplot(base_numbers, aes(x = Date, y = numbers_relative)) 
   geom_smooth(formula = 'y ~ x', method = "loess", se = FALSE, color = "#C000C0")+
   labs(y = "Nombre d'occurence/Nombre de mots (%)",  # Add y-axis label
        title = "Occurence relative des chiffres dans les avis,\n tous les chiffres confondus")+  # Add plot title)
-  theme_prism()   # Apply the theme_prism from ggprism
+  theme_pubclean()   # Apply the theme_prism from ggprism
+if(save_figures)
+  ggsave("../output/descriptive_figures/raw_number_time.png", 
+         plot = plot_chiffre_temps)
+plot_chiffre_temps
 
-ggsave("../output/descriptive_figures/raw_number_time.png", 
-       plot = plot_chiffre_temps)
 ```
