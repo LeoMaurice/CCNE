@@ -624,10 +624,10 @@ n_annoté <- 500
 
 # Création du dataframe
 stat_annotation <- data.frame(
-  tag = c("Agent responsable", "Humain comme empathie", "Genre/espèce humain.e", "Individu", 
-          "Matériel biologique", "Personne à protéger", "Personne relationnelle", "Poubelle"),
+  tag = factor(c("Agent responsable", "Humain comme empathie", "Genre/espèce humain.e", "Individu", "Matériel biologique", "Personne à protéger", "Personne relationnelle", "Poubelle"),
+               levels = rev(c("Agent responsable","Personne à protéger","Personne relationnelle","Individu","Matériel biologique","Genre/espèce humain.e","Humain comme empathie","Poubelle"))),
   Freq = c(75, 9, 65, 68, 92, 115, 64, 12)
-) %>%
+) |>
   mutate(FreqPerc = 100 * Freq / n_annoté)
 
 # Création du graphique avec ggbarplot
@@ -640,9 +640,9 @@ p <- ggbarplot(stat_annotation,
        y = "Fréquence (%)") +
   coord_flip() +  # Inverse les axes pour mieux visualiser les étiquettes
   geom_text(aes(label = Freq), position = position_dodge(width = 0.9), hjust = -0.2, size = 3.5)+
-   scale_fill_prism(palette = "winter_bright")
+   scale_fill_prism(palette = "office")
 
-if(T)
+if(save_figures)
   ggsave(paste0("../output/descriptive_figures/frequence_annotation_",n_annoté,".png"),width = 15, height = 12)
 
 ```
