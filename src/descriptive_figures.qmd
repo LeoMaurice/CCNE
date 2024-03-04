@@ -62,7 +62,7 @@ source("helpers/df_to_matrix.R")
 source("helpers/heatmap.R")
 source("helpers/lexico_helper.R")
 
-save_figures = T
+save_figures = F
 cutpoints = c(0, 1e-04, 0.001, 0.01, 0.05, 0.1, 1)
 symbols = c("****", "***", "**", "*", "•","ns")
 significance = c("p < 0.0001", "p < 0.001", "p < 0.01", "p < 0.05", "p < 0.1", "p>0.1")
@@ -189,8 +189,8 @@ ggplot(base_avis, aes(x = theme, fill = saisine)) +
   geom_bar() +
   scale_fill_prism(palette = "winter_bright", labels = c("autosaisie","saisie")) +  
   theme_pubclean() +  
-  labs(title = "Nombre d'avis par président du CCNE",
-       x = "Président",
+  labs(title = "Nombre d'avis par thème",
+       x = "Thème",
        y = "Nombre d'avis")+
   coord_flip()
 if(save_figures)
@@ -217,6 +217,7 @@ if(save_figures)
 
 ### Nombre de phrase par président
 
+#### Nombre total
 ```{r}
 base_sentences|>
   group_by(president,num,number_sentences)|>
@@ -231,8 +232,75 @@ base_sentences|>
          y = "Nombre de phrase")+
   coord_flip()
 ```
+#### Distirbution
+```{r}
+# Perform data manipulation and statistical testing
+stat.test <- base_sentences |>
+  group_by(president,num,number_sentences)|>
+  summarise()|>
+  ungroup() |>
+  t_test(number_sentences ~ president, p.adjust.method = "BH") |> 
+  add_significance(
+    cutpoints = cutpoints,
+    symbols = symbols
+  )
 
+base_sentences|>
+  group_by(president,num,number_sentences)|>
+  summarise()|>
+   ggboxplot(x = "president", y = "number_sentences", fill = "president")+
+    scale_fill_prism(palette = "winter_bright") +  
+    theme_pubclean() +  
+    labs(title = "Nombre moyen des phrases par avis",
+         x = "Mot clé",
+         y = "Nombre de phrase",
+         caption = paste("t-test, BH adjusted",signif_caption_text,sep = "\n"))+
+  stat_pvalue_manual(stat.test, label = "p.adj.signif", hide.ns = TRUE,y.position = 2000, step.increase = 0.04)
 
+```
+
+### Nombre de tableaux et graphiques par président
+
+```{r}
+base_avis|>
+  group_by(president)|>
+  summarise(n = sum(`tableaux et graphiques`))|>
+  ggbarplot(x = "president", y ="n",fill = "president")+
+  scale_fill_prism(palette = "winter_bright") +  
+    theme_pubclean() +  
+    labs(title = "Nombre de graphiques par président",
+         x = "Mot clé",
+         y = "Nombre de graphiques")+
+  coord_flip()
+```
+
+```{r}
+base_avis|>
+  group_by(president)|>
+  mutate(`tableaux et graphiques` = (`tableaux et graphiques`>=1))|>
+  summarise(n = sum(`tableaux et graphiques`))|>
+  ggbarplot(x = "president", y ="n",fill = "president")+
+  scale_fill_prism(palette = "winter_bright") +  
+    theme_pubclean() +  
+    labs(title = "Nombre d'avis avec au moins un graphique par président",
+         x = "Mot clé",
+         y = "Nombre d'avis")+
+  coord_flip()
+```
+### Nombre de dissensus par président
+
+```{r}
+base_avis|>
+  group_by(president)|>
+  summarise(n = sum(`divergence`))|>
+  ggbarplot(x = "president", y ="n",fill = "president")+
+  scale_fill_prism(palette = "winter_bright") +  
+    theme_pubclean() +  
+    labs(title = "Nombre d'avis avec une divergence par président",
+         x = "Mot clé",
+         y = "Nombre d'avis")+
+  coord_flip()
+```
 ## Description lexicographique
 
 ```{r}
@@ -306,7 +374,7 @@ stat.test <- base_sentences |>
   group_by(president, mot_cle, num) |>
   summarise(proportion = 100 * mean(presence)) |>
   ungroup() |>
-  group_by(mot_cle) |>
+  group_by(mot_cle) |> 
   t_test(proportion ~ president, p.adjust.method = "BH") |>
   add_significance(
     cutpoints = cutpoints,
@@ -567,6 +635,32 @@ if(save_figures)
   ggsave("../output/descriptive_figures/distance_personne_humain_individu.png")
 ```
 
+## Annotation
+```{r}
+n_annoté = 500
+
+# Création du dataframe
+stat_annotation <- data.frame(
+  tag = c("Agent responsable", "Humain comme empathie", "Genre/espèce humain.e", "Individu", 
+          "Matériel biologique", "Personne à protéger", "Personne relationnelle", "Poubelle"),
+  Freq = c(75, 9, 65, 68, 92, 115, 64, 12)
+)|>
+  mutate(FreqPerc = 100*Freq/n_annoté)
+
+# Création du graphique
+ggbarplot(stat_annotation, 
+          x = "tag", y = "FreqPerc", fill = "tag") +
+  theme_pubclean() +  # Applique le thème ggpubr_clean
+  labs(title = paste("Fréquence d'apparition des catégories pour", n_annoté, "annotations"),
+       x = "Catégorie",
+       y = "Fréquence (%)") +
+  coord_flip() +  # Inverse les axes pour mieux visualiser les étiquettes
+  scale_fill_prism(palette = "winter_bright")
+
+if(save_figures)
+  ggsave(paste0("../output/descriptive_figures/frequence_annotation_",n_annoté,".png"))
+
+```
 
 ## Number according time
 ```{r}
