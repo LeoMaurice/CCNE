@@ -67,7 +67,14 @@ cutpoints = c(0, 1e-04, 0.001, 0.01, 0.05, 0.1, 1)
 symbols = c("****", "***", "**", "*", "•","ns")
 significance = c("p < 0.0001", "p < 0.001", "p < 0.01", "p < 0.05", "p < 0.1", "p>0.1")
 signif_caption_text <- paste("Significance levels:\n", paste(symbols, ":", significance, collapse = ", "))
-text_size = 12
+text_size = 14
+
+theme_ready <- theme_pubclean()+
+    theme(text = element_text(size = text_size),
+        axis.title = element_text(size = text_size+2, face="bold"),
+        axis.text = element_text(size = text_size),
+        legend.title = element_text(size = text_size),
+        legend.text = element_text(size = text_size-2))
 ```
 # Ouverture base
 ```{r}
@@ -108,19 +115,19 @@ ggprism::prism_color_pal("evergreen")(6)
 nb_page_plot <- ggplot(base_avis, aes(x = Date, y = nb_pages)) +
   geom_point() +  
   geom_smooth(formula = 'y ~ x', method = "loess", se = FALSE, color = "#077E97") +  
-  theme_pubclean() +
   labs(title = "Nombre de pages par avis",
        x = "Date",
-       y = "Nombre de pages")
+       y = "Nombre de pages")+
+  theme_ready
 
 # Create the second plot
 nb_mots_plot <- ggplot(base_avis, aes(x = Date, y = nb_mots)) +
   geom_point() +  
   geom_smooth(formula = 'y ~ x', method = "loess", se = FALSE, color = "#C000C0") +  
-  theme_pubclean() +  
   labs(title = "Nombre de mots par avis",
        x = "Date",
-       y = "Nombre de mots")
+       y = "Nombre de mots")+
+  theme_ready
 
 # Arrange the plots
 nb_page_plot + nb_mots_plot + plot_layout(ncol = 2)
@@ -141,11 +148,11 @@ if(save_figures)
 ggplot(base_avis, aes(x = theme, fill = saisine)) +
   geom_bar() +
   scale_fill_prism(palette = "winter_bright", labels = c("autosaisie","saisie")) +  
-  theme_pubclean() +  
   labs(title = "Nombre d'avis par thème",
        x = "Thème",
        y = "Nombre d'avis")+
-  coord_flip()
+  coord_flip()+
+  theme_ready
 if(save_figures)
   ggsave("../output/descriptive_figures/repartition_saisie_president.png")
 ```
@@ -165,14 +172,14 @@ if(save_figures)
 ggplot(base_avis, aes(x = president, fill = theme)) +
   geom_bar() +
   scale_fill_prism(palette = "colors") +  
-  theme_pubclean() +  
   labs(title = "Nombre d'avis par président du CCNE",
        x = "Président",
        y = "Nombre d'avis")+
   guides(fill = guide_legend(ncol = 2))+  # Mettre la légende sur deux colonnes
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
         legend.key.size = unit(0.8, "cm"),
-        legend.position = "right")
+        legend.position = "right")+
+  theme_ready
 if(save_figures)
   ggsave("../output/descriptive_figures/taille_avis_temps.png")
 ```
@@ -188,12 +195,12 @@ if(save_figures)
 
 ggplot(base_avis, aes(x = president, fill = saisine)) +
   geom_bar() +
-  scale_fill_prism(palette = "winter_bright", labels = c("autosaisie","saisie")) +  
-  theme_pubclean() +  
+  theme_ready +  
   labs(title = "Nombre d'avis par président du CCNE",
        x = "Président",
        y = "Nombre d'avis")+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
+  theme_ready
 if(save_figures)
   ggsave("../output/descriptive_figures/repartition_saisie_president.png")
 ```
@@ -204,12 +211,12 @@ if(save_figures)
 ggplot(base_avis, aes(x = president,y=nb_pages, fill = president)) +
   geom_boxplot() +
   scale_fill_prism(palette = "winter_bright") +  
-  theme_pubclean() +  
   labs(title = "Nombre de pages moyen par président du CCNE",
        x = "Président",
        y = "Nombre de pages")+ 
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
-        legend.position = "none")
+        legend.position = "none")+
+  theme_ready
 if(save_figures)
   ggsave("../output/descriptive_figures/taille_avis_president.png")
 ```
@@ -233,13 +240,13 @@ base_sentences|>
   summarise()|>
    ggboxplot(x = "president", y = "number_sentences", fill = "president")+
     scale_fill_prism(palette = "winter_bright") +  
-    theme_pubclean() +  
     labs(title = "Nombre moyen des phrases par avis",
          x = "Mot clé",
          y = "Nombre de phrase",
          caption = paste("t-test, BH adjusted",signif_caption_text,sep = "\n"))+
   stat_pvalue_manual(test_result.t, label = "p.adj.signif", hide.ns = TRUE)+
-  stat_anova_test(label.y = 1900)
+  stat_anova_test(label.y = 1900)+
+  theme_ready
 
 ```
 
@@ -251,11 +258,11 @@ base_avis|>
   summarise(n = sum(`tableaux et graphiques`))|>
   ggbarplot(x = "president", y ="n",fill = "president")+
   scale_fill_prism(palette = "winter_bright") +  
-    theme_pubclean() +  
     labs(title = "Nombre de graphiques par président",
          x = "Mot clé",
          y = "Nombre de graphiques")+
-  coord_flip()
+  coord_flip()+
+  theme_ready
 ```
 
 ```{r}
@@ -265,11 +272,11 @@ base_avis|>
   summarise(n = sum(`tableaux et graphiques`))|>
   ggbarplot(x = "president", y ="n",fill = "president")+
   scale_fill_prism(palette = "winter_bright") +  
-    theme_pubclean() +  
     labs(title = "Nombre d'avis avec au moins un graphique par président",
          x = "Mot clé",
          y = "Nombre d'avis")+
-  coord_flip()
+  coord_flip()+
+  theme_ready
 ```
 #### Nombre de dissensus par président
 
@@ -279,11 +286,11 @@ base_avis|>
   summarise(n = sum(`divergence`))|>
   ggbarplot(x = "president", y ="n",fill = "president")+
   scale_fill_prism(palette = "winter_bright") +  
-    theme_pubclean() +  
     labs(title = "Nombre d'avis avec une divergence par président",
          x = "Mot clé",
          y = "Nombre d'avis")+
-  coord_flip()
+  coord_flip()+
+  theme_ready
 ```
 ## Description lexicographique
 
@@ -322,10 +329,10 @@ base_sentences|>
   ggbarplot(x = "mot_cle",y="phrases",fill = "president",
             label = TRUE, lab.col = "white", lab.pos = "in",lab.size = 3, lab.vjust = 1)+
     scale_fill_prism(palette = "winter_bright") +  
-    theme_pubclean() +  
     labs(title = "Nombre de phrase avec mots clés",
          x = "Mot clé",
          y = "Nombre de phrase")+
+  theme_ready+
   geom_text(data = nb_total_sentence, aes(x = mot_cle, y = total, label = paste("Total:",total)),
             position = position_dodge(width = 0.9), vjust = -0.5, size = 3, color = "black")
 if(save_figures)
@@ -342,11 +349,11 @@ base_sentences |>
   ggbarplot(x = "president", y = "phrases", fill = "mot_cle",
             label = TRUE, lab.col = "white", lab.pos = "in",lab.size = 3, lab.vjust = 0, lab.hjust = 1.1, lab.nb.digits = 1) +
   scale_fill_prism(palette = "winter_bright") +
-  theme_pubclean() +
   labs(title = "Proportion de phrase avec mots clés par president",
        x = "Mot clé",
        y = "Proportion de phrase (%)") +
-  coord_flip()
+  coord_flip()+
+  theme_ready
 if (save_figures)
   ggsave("../output/descriptive_figures/proportion_phrase_personne_humain_individu_president.png")
 ```
@@ -373,9 +380,7 @@ base_sentences |>
   group_by(president, mot_cle, num) |>
   summarise(proportion = 100 * mean(presence)) |>
   ggboxplot(x = "president", y = "proportion", fill = "mot_cle", facet.by = "mot_cle") +
-  scale_fill_prism(palette = "winter_bright") +
-  theme_pubclean() +
-  labs(
+  scale_fill_prism(palette = "winter_bright") +  labs(
     title = "Proportion de phrase avec mots clés par président",
     caption = paste("t-test, BH adjusted",signif_caption_text,sep = "\n"),
     x = "Mot clé",
@@ -383,6 +388,7 @@ base_sentences |>
     fill = "Phrase avec"
   ) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+  theme_ready+
   stat_pvalue_manual(test_result.t, label = "p.adj.signif", hide.ns = TRUE, y.position = 40, step.group.by = "mot_cle", step.increase = 0.08)
 if(save_figures)
   ggsave("../output/descriptive_figures/proportion_personne_humain_individu_avis.png")
@@ -402,7 +408,7 @@ base_sentences |>
   summarise(phrases = sum(presence)) |>
   ggbarplot(x = "mot_cle", y = "phrases", fill = "president") +
   scale_fill_prism(palette = "winter_bright") +
-  theme_pubclean() +
+  theme_ready +
   labs(title = "Nombre de phrase avec mots clés",
        x = "Mot clé",
        y = "Nombre de phrase") +
@@ -427,7 +433,7 @@ base_sentences |>
   ggbarplot(x = "president", y = "phrases", fill = "mot_cle",
             label = TRUE, lab.col = "white", lab.pos = "in",lab.size = 3, lab.vjust = 0, lab.hjust = 1.3, lab.nb.digits = 1) +
   scale_fill_prism(palette = "winter_bright") +
-  theme_pubclean() +
+  theme_ready +
   labs(title = "Proportion de phrase avec mots clés par president",
        x = "Mot clé",
        y = "Proportion de phrase (%)") +
@@ -458,7 +464,7 @@ base_sentences |>
   summarise(proportion = 100*mean(presence)) |>
   ggboxplot(x = "president", y = "proportion", fill = "mot_cle", facet.by = "mot_cle") +
   scale_fill_prism(palette = "winter_bright") +
-  theme_pubclean() +
+  theme_ready +
   labs(title = "Proportion de phrase avec mots clés par president",
        caption = signif_caption_text,
        x = "Mot clé",
@@ -491,7 +497,7 @@ base_sentences |>
   summarise(proportion = 100*mean(presence)) |>
   ggboxplot(x = "president", y = "proportion", fill = "mot_cle", facet.by = "mot_cle") +
   scale_fill_prism(palette = "winter_bright") +
-  theme_pubclean() +
+  theme_ready +
   labs(title = "Proportion de phrase avec mots clés par president",
        caption = signif_caption_text,
        x = "Mot clé",
@@ -499,7 +505,7 @@ base_sentences |>
        fill = "Phrase avec") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
   stat_pvalue_manual(test_result.t, label = "p.adj.signif", hide.ns = T, y.position = 15, step.group.by = "mot_cle",step.increase = 0.1)+
-  stat_anova_test(y.position =13)|>
+  stat_anova_test(y.position =13)+
   theme(text = element_text(size = text_size),
         axis.title = element_text(size = text_size+2, face="bold"),
         axis.text = element_text(size = text_size),
@@ -659,29 +665,30 @@ if(save_figures)
 
 ## Annotation
 ```{r}
-n_annoté <- 500
+n_annoté <- 700
 
 # Création du dataframe
 stat_annotation <- data.frame(
-  tag = factor(c("Agent responsable", "Humain comme empathie", "Genre/espèce humain.e", "Individu", "Matériel biologique", "Personne à protéger", "Personne relationnelle", "Poubelle"),
+  tag = factor(c("Agent responsable", "Genre/espèce humain.e", "Humain comme empathie", "Individu", "Matériel biologique", "Personne à protéger", "Personne relationnelle", "Poubelle"),
                levels = rev(c("Agent responsable","Personne à protéger","Personne relationnelle","Individu","Matériel biologique","Genre/espèce humain.e","Humain comme empathie","Poubelle"))),
-  Freq = c(75, 9, 65, 68, 92, 115, 64, 12)
+  Freq = c(104, 90,10 , 118, 130, 143, 97, 8)
 ) |>
   mutate(FreqPerc = 100 * Freq / n_annoté)
 
 # Création du graphique avec ggbarplot
 p <- ggbarplot(stat_annotation, 
           x = "tag", y = "FreqPerc", fill = "tag", 
-          color = "white", palette = "winter_bright") +
-  theme_pubclean() +  # Applique le thème ggpubr_clean
+          color = "white", palette = "winter_bright") + 
   labs(title = paste("Fréquence d'apparition des catégories pour", n_annoté, "annotations"),
        x = "Catégorie",
        y = "Fréquence (%)") +
   coord_flip() +  # Inverse les axes pour mieux visualiser les étiquettes
   geom_text(aes(label = Freq), position = position_dodge(width = 0.9), hjust = -0.2, size = 3.5)+
-   scale_fill_prism(palette = "office")
+   scale_fill_prism(palette = "office")+
+  theme_ready
 
-if(save_figures)
+
+if(T)
   ggsave(paste0("../output/descriptive_figures/frequence_annotation_",n_annoté,".png"),width = 15, height = 12)
 
 ```
@@ -701,7 +708,7 @@ plot_chiffre_temps <- ggplot(base_numbers, aes(x = Date, y = numbers_relative)) 
   geom_smooth(formula = 'y ~ x', method = "loess", se = FALSE, color = "#C000C0")+
   labs(y = "Nombre d'occurence/Nombre de mots (%)",  # Add y-axis label
        title = "Occurence relative des chiffres dans les avis,\n tous les chiffres confondus")+  # Add plot title)
-  theme_pubclean()   # Apply the theme_prism from ggprism
+  theme_ready   # Apply the theme_prism from ggprism
 if(save_figures)
   ggsave("../output/descriptive_figures/raw_number_time.png", 
          plot = plot_chiffre_temps)
