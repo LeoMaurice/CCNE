@@ -388,8 +388,8 @@ base_sentences |>
     y = "Proportion de phrase (%)",
     fill = "Phrase avec"
   ) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
   theme_ready()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
   stat_pvalue_manual(test_result.t, label = "p.adj.signif", hide.ns = TRUE, y.position = 40, step.group.by = "mot_cle", step.increase = 0.08)
 if(save_figures)
   ggsave("../output/descriptive_figures/proportion_personne_humain_individu_avis.png")
@@ -489,7 +489,8 @@ test_result.t <- base_sentences |>
   add_significance(
     cutpoints = cutpoints,
     symbols = symbols
-    )
+    )|>
+  add_xy_position()
 
 base_sentences |>
   pivot_longer(cols = c("vivant", "humanité"), names_to = "mot_cle", values_to = "presence") |>
@@ -505,8 +506,8 @@ base_sentences |>
        y = "Proportion de phrase (%)",
        fill = "Phrase avec") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
-  stat_pvalue_manual(test_result.t, label = "p.adj.signif", hide.ns = T, y.position = 15, step.group.by = "mot_cle",step.increase = 0.1)+
-  stat_anova_test(y.position =13)
+  stat_pvalue_manual(test_result.t, label = "p.adj.signif", hide.ns = T)+
+  stat_anova_test()
 
 if (save_figures)
   ggsave("../output/descriptive_figures/proportion_phrase_vivant_humanité.png")
@@ -526,7 +527,8 @@ test_result.t <- base_sentences |>
   add_significance(
     cutpoints = cutpoints,
     symbols = symbols
-    )
+    )|>
+  add_xy_position()
 
 base_sentences |>
   pivot_longer(cols = cols_to_plt, names_to = "mot_cle", values_to = "presence") |>
@@ -542,32 +544,32 @@ base_sentences |>
        y = "Proportion de phrase (%)",
        fill = "Phrase avec") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
-  stat_pvalue_manual(test_result.t, label = "p.adj.signif", hide.ns = T, y.position = 15, step.group.by = "mot_cle",step.increase = 0.1)+
-  stat_anova_test(y.position =13)
+  stat_pvalue_manual(test_result.t, label = "p.adj.signif", hide.ns = T)+
+  stat_anova_test()
 
 if (save_figures)
   ggsave("../output/descriptive_figures/proportion_phrase_dignité.png")
 ```
 
 ```{r}
-cols_to_plt = c("dignité","dignité_humaine")
-
-base_sentences |>
-  pivot_longer(cols = cols_to_plt, names_to = "mot_cle", values_to = "presence") |>
-  mutate(mot_cle = factor(mot_cle, levels = cols_to_plt)) |>
-  group_by(president, mot_cle, num) |>
-  summarise(proportion = 100*mean(presence)) |>
-  ggboxplot(x = "president", y = "proportion", fill = "mot_cle", facet.by = "mot_cle") +
-  scale_fill_prism(palette = "winter_bright") +
-  theme_ready() +
-  labs(title = "Proportion de phrase avec mots clés par president",
-       caption = signif_caption_text,
-       x = "Mot clé",
-       y = "Proportion de phrase (%)",
-       fill = "Phrase avec") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
-  t_test_pvalue(group.by_var="mot_cle")+
-  stat_anova_test(y.position =13)
+# cols_to_plt = c("dignité","dignité_humaine")
+# 
+# base_sentences |>
+#   pivot_longer(cols = cols_to_plt, names_to = "mot_cle", values_to = "presence") |>
+#   mutate(mot_cle = factor(mot_cle, levels = cols_to_plt)) |>
+#   group_by(president, mot_cle, num) |>
+#   summarise(proportion = 100*mean(presence)) |>
+#   ggboxplot(x = "president", y = "proportion", fill = "mot_cle", facet.by = "mot_cle") +
+#   scale_fill_prism(palette = "winter_bright") +
+#   theme_ready() +
+#   labs(title = "Proportion de phrase avec mots clés par president",
+#        caption = signif_caption_text,
+#        x = "Mot clé",
+#        y = "Proportion de phrase (%)",
+#        fill = "Phrase avec") +
+#   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
+#   t_test_pvalue(group.by_var="mot_cle")+
+#   stat_anova_test(y.position =13)
 ```
 
 ### Au niveau phrase
