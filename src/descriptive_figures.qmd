@@ -41,6 +41,7 @@ execute:
   error: true
 editor: source
 ---
+
 ```{r}
 require(pacman,quietly = F)
 
@@ -72,7 +73,9 @@ significance = c("p < 0.0001", "p < 0.001", "p < 0.01", "p < 0.05", "p < 0.1", "
 signif_caption_text <- paste("Significance levels:\n", paste(symbols, ":", significance, collapse = ", "))
 
 ```
+
 # Ouverture base
+
 ```{r}
 # base au niveau de phrases
 base_sentences <- arrow::read_feather('../data/intermediate/big/base_sentences.feather')
@@ -95,7 +98,9 @@ ggprism::prism_color_pal("evergreen")(6)
 # Descriptive figures
 
 ## Description métadonnées
+
 ### Divers
+
 #### Taille Avis temps
 
 ```{r}
@@ -132,7 +137,6 @@ if(save_figures)
   ggsave("../output/descriptive_figures/taille_avis_temps.png")
 ```
 
-
 #### Saisie par theme
 
 ```{r}
@@ -153,7 +157,9 @@ ggplot(base_avis, aes(x = theme, fill = saisine)) +
 if(save_figures)
   ggsave("../output/descriptive_figures/repartition_saisie_president.png")
 ```
+
 ### f(président)
+
 #### Avis par président
 
 ```{r}
@@ -220,6 +226,7 @@ if(save_figures)
 ```
 
 #### Phrase par président
+
 ```{r}
 # Perform data manipulation and statistical testing
 test_result.t <- base_sentences |>
@@ -276,6 +283,7 @@ base_avis|>
   coord_flip()+
   theme_ready()
 ```
+
 #### Nombre de dissensus par président
 
 ```{r}
@@ -290,6 +298,7 @@ base_avis|>
   coord_flip()+
   theme_ready()
 ```
+
 ## Description lexicographique
 
 ```{r}
@@ -311,12 +320,12 @@ base_sentences <- base_sentences |>
 
 ```
 
-
 ### President level
 
 #### Personne, humain, individu
 
 ##### Totaux
+
 ```{r}
 nb_total_sentence <- data.frame(mot_cle = c("personne","humain","individu"),
                                 total = c(sum(base_sentences$personne),sum(base_sentences$humain),sum(base_sentences$individu)))
@@ -338,6 +347,7 @@ base_sentences|>
 if(save_figures)
   ggsave("../output/descriptive_figures/nombre_phrase_personne_humain_individu.png")
 ```
+
 ##### Proportion président
 
 ```{r}
@@ -358,7 +368,9 @@ base_sentences |>
 if (save_figures)
   ggsave("../output/descriptive_figures/proportion_phrase_personne_humain_individu_president.png")
 ```
+
 ##### Distribution regroupé par avis
+
 ```{r}
 # Perform data manipulation and statistical testing
 test_result.t <- base_sentences |>
@@ -394,6 +406,7 @@ base_sentences |>
 if(save_figures)
   ggsave("../output/descriptive_figures/proportion_personne_humain_individu_avis.png")
 ```
+
 #### Nature
 
 ##### Nombre de phrase par mot clé
@@ -422,9 +435,10 @@ if (save_figures)
 
 ```
 
-##### Proportion de mots clés 
-Proportion de mots clés dans les phrases écrites sous une président
-Lecture : Sous Delfraissy, 1.5% des phrases publiées contenaient le mot nature.
+##### Proportion de mots clés
+
+Proportion de mots clés dans les phrases écrites sous une président Lecture : Sous Delfraissy, 1.5% des phrases publiées contenaient le mot nature.
+
 ```{r}
 base_sentences |>
   pivot_longer(cols = c("environnement", "vivant", "écosystème", "nature"), names_to = "mot_cle", values_to = "presence") |>
@@ -442,8 +456,11 @@ base_sentences |>
 if (save_figures)
   ggsave("../output/descriptive_figures/proportion_phrase_nature_president.png")
 ```
+
 ##### Box plot proportion avis
+
 Boxplot de la distribution de la proportion de phrases contenant un mot clé parmi les phrases d'un avis.
+
 ```{r}
 test_result.t <- base_sentences |>
   pivot_longer(cols = c("environnement", "vivant", "nature"), names_to = "mot_cle", values_to = "presence") |>
@@ -512,7 +529,9 @@ base_sentences |>
 if (save_figures)
   ggsave("../output/descriptive_figures/proportion_phrase_vivant_humanité.png")
 ```
+
 #### Dignité
+
 ```{r}
 
 cols_to_plt = c("dignité","dignité_humaine")
@@ -575,6 +594,7 @@ if (save_figures)
 ### Au niveau phrase
 
 #### Heatmap
+
 ```{r}
 # Assuming you have a data frame called 'base_sentences' with columns: num, human, person, societe, nature, position_in_avis
 quantile = 50
@@ -595,9 +615,9 @@ df_heatmap <- base_sentences |>
             vivant = mean(vivant),
             environnement = mean(environnement))
 ```
-Description :
-Pour chaque quantile, la couleur sur la carte de chaleur représente la fréquence relative d'un mot spécifique. Pour calculer cette fréquence, nous divisons le nombre d'occurrences du mot par le nombre total de phrases dans le quantile. Cette transformation fournit une mesure de la fréquence à laquelle le mot apparaît au sein du sous-ensemble de phrases représenté par chaque quantile, permettant ainsi de comparer l'utilisation du mot dans différentes parties du texte.
-###### Heatmap personne humain individu
+
+Description : Pour chaque quantile, la couleur sur la carte de chaleur représente la fréquence relative d'un mot spécifique. Pour calculer cette fréquence, nous divisons le nombre d'occurrences du mot par le nombre total de phrases dans le quantile. Cette transformation fournit une mesure de la fréquence à laquelle le mot apparaît au sein du sous-ensemble de phrases représenté par chaque quantile, permettant ainsi de comparer l'utilisation du mot dans différentes parties du texte. \###### Heatmap personne humain individu
+
 ```{r}
 #| eval: true
 #| fig-width: 20
@@ -626,7 +646,9 @@ if(save_figures){
 }
 
 ```
+
 ##### Heatmap nature vivant environnement
+
 ```{r}
 #| eval: true
 #| fig-width: 20
@@ -656,8 +678,8 @@ if(save_figures){
 }
 ```
 
-
 #### Distance entre mots clés
+
 ```{r}
 #| eval: true
 #| fig-width: 20
@@ -724,6 +746,7 @@ if(save_figures)
 ```
 
 ## Annotation
+
 ```{r}
 n_annoté <- 700
 
@@ -754,6 +777,7 @@ if(T)
 ```
 
 ## Number according time
+
 ```{r}
 base_numbers <- base_sentences |>
   rowwise() |>
