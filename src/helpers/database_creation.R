@@ -1,5 +1,8 @@
 # last modification
 # 31/01/2024
+require(pacman,quietly = T)
+pacman::p_load(tidyverse,
+               pdftools)
 
 president_CCNE_by_date <- Vectorize(function(date){
   # Définir l'ordre des niveaux du facteur
@@ -67,7 +70,47 @@ open_avis <- function(rescrap_texte=FALSE){
   return(base_avis_ccne)
 }
 
-join_metadata - function(base_avis_ccne){
+open_corrected_avis <- function(rescrap_texte=TRUE){
+  if(rescrap_texte){
+    # Définir le chemin vers le dossier contenant les fichiers PDF
+    dossier_avis <- "../data/raw/avis_corrected"
+    
+    # Liste des fichiers PDF dans le dossier
+    liste_fichiers <- list.files(path = dossier_avis, pattern = "\\.pdf$", full.names = TRUE)
+    
+    # Initialiser un data.frame vide
+    base_avis_ccne <- data.frame(num = integer(), avis = character(), 
+                                 nom_fichier = character(), nb_pages = integer(),
+                                 stringsAsFactors = FALSE)
+    
+    # Boucle pour lire chaque fichier PDF et extraire le texte
+    for (fichier in liste_fichiers) {
+      # Extraire le numéro du fichier
+      numero <- as.integer(strsplit(strsplit(basename(fichier), " ")[[1]][2], ".pdf")[[1]])
+      print(numero)
+      texte <- pdf_text(fichier)
+      
+      
+      nombre_page <- pdf_info(fichier)$pages
+      
+      texte <- paste(texte, collapse = " ")
+      
+      # Ajouter les données au data.frame
+      base_avis_ccne <- base_avis_ccne |>
+        bind_rows(data.frame(num = numero, 
+                             avis = texte,
+                             nom_fichier = basename(fichier),
+                             nb_pages = nombre_page,
+                             stringsAsFactors = FALSE))
+    }
+    saveRDS(base_avis_ccne, "../data/intermediate/base_corrected_avis_ccne.rds")
+  } else {
+    readRDS("../data/intermediate/base_corrected_avis_ccne.rds") -> base_avis_ccne
+  }
+  return(base_avis_ccne)
+}
+
+join_metadata <- function(base_avis_ccne){
   list_saisine_obligatoire <- c(
     "PR", #président
     "PM", #Premier Minsitre
@@ -86,9 +129,11 @@ join_metadata - function(base_avis_ccne){
   base_avis_ccne |>
     left_join(read_excel("../data/raw/collected_metadata/metadata_avis.xlsx", 
                          col_types = c("numeric", "date", "text", 
-                                       "text", "text", "text", "logical", 
-                                       "text", "text", "text", "date", "logical", 
-                                       "text", "logical", "text"))|>
+                                       "text", "text", "text", 
+                                       "logical", "text", "text", 
+                                       "text", "date", "logical", 
+                                       "text", "logical", "logical",
+                                       "text"))|>
                 mutate(saisine = saisine_precise %in% list_saisine_obligatoire,
                        date = as.Date(date)
                 )|>

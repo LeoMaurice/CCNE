@@ -1,0 +1,60 @@
+```{r}
+if (!require("pacman")) install.packages("pacman"); library(pacman)
+pacman::p_load(tidyverse,
+               lubridate,
+               here,
+               knitr,
+               
+               quanteda,
+               quanteda.textstats,
+               quanteda.textplots,
+
+               tidytext,
+                              
+               stm,
+               topicmodels,
+               LDAvis,
+               ldatuning,
+               lmtest,
+               
+               ggprism,
+               ggpmisc,
+               RJSONIO,
+               ggrepel,
+               ggcorrplot,
+               ggpubr,
+               
+               stringr,
+               readr,
+               readxl
+            )
+
+source("helpers/df_to_matrix.R")
+source("helpers/heatmap.R")
+source("helpers/lexico_helper.R")
+source("helpers/figures.R")
+source("helpers/database_creation.R")
+
+```
+
+
+
+```{r}
+open_corrected_avis() -> base_avis_ccne
+```
+
+```{r}
+join_metadata(base_avis_ccne) -> base_avis_ccne
+
+base_avis_ccne$avis <- base_avis_ccne$avis|>
+  str_replace_all("\t"," ")
+base_avis_ccne|>
+  rename(filename = num,
+         text = avis)|>
+  select(filename,text,Annee,Date,theme, Titre, president, nb_pages,nb_mots, saisine,divergence) -> base_avis_ccne
+```
+
+```{r}
+write.table(base_avis_ccne, file = "../data/intermediate/cortext/ccne_avis_utf8.tsv", sep = "\t", row.names = FALSE, col.names = TRUE, fileEncoding = "UTF-8")
+```
+
