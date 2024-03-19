@@ -47,7 +47,13 @@ open_corrected_avis() -> base_avis_ccne
 join_metadata(base_avis_ccne) -> base_avis_ccne
 
 base_avis_ccne$avis <- base_avis_ccne$avis|>
-  str_replace_all("\t"," ")
+  str_replace_all("\t"," ")|>
+  str_replace_all(";"," ")|>
+  str_replace_all('"'," ")
+base_avis_ccne$Titre <- base_avis_ccne$Titre|>
+  str_replace_all("\t"," ")|>
+  str_replace_all(";"," ")|>
+  str_replace_all('"'," ")
 base_avis_ccne|>
   rename(filename = num,
          text = avis)|>
@@ -55,6 +61,6 @@ base_avis_ccne|>
 ```
 
 ```{r}
-write.table(base_avis_ccne, file = "../data/intermediate/cortext/ccne_avis_utf8.tsv", sep = "\t", row.names = FALSE, col.names = TRUE, fileEncoding = "UTF-8")
+write.table(base_avis_ccne, file = "../data/intermediate/cortext/ccne_avis_utf8.csv", sep = ";", row.names = FALSE, col.names = TRUE, fileEncoding = "UTF-8")
 ```
 
