@@ -593,9 +593,9 @@ if(recompute_choix_K){
   diag <- searchK(stm_data$documents, stm_data$vocab, 
                   list_nb_topics_K, 
                   verbose=FALSE)
-  save(tp_nb,list_nb_topics_K,diag, file = "../data/intermediate/report/LDA_report_metrics.RData")
+  save(tp_nb,list_nb_topics_K,diag, file = "../data/intermediate/LDA_report/LDA_report_metrics.RData")
 } else{
-  load("../data/intermediate/report/LDA_report_metrics.RData")
+  load("../data/intermediate/LDA_report/LDA_report_metrics.RData")
 }
 
 ```
