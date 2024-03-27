@@ -93,10 +93,13 @@ from PyPDF2 import PdfReader, PdfFileReader
 from tika import parser as tika_parser  # for OCR
 from tqdm import tqdm
 
-def open_avis(rescrap_texte=False):
+def open_avis(rescrap_texte=False, use_acrobat_corrected_pdf=True):
     if rescrap_texte:
         # Définir le chemin vers le dossier contenant les fichiers PDF
-        dossier_avis = "../data/raw/avis"
+        if use_acrobat_corrected_pdf:
+            dossier_avis = "../data/raw/avis_corrected"
+        else:
+            dossier_avis = "../data/raw/avis"
 
         # Liste des fichiers PDF dans le dossier
         liste_fichiers = [os.path.join(dossier_avis, f) for f in os.listdir(dossier_avis) if f.endswith('.pdf')]
@@ -112,7 +115,7 @@ def open_avis(rescrap_texte=False):
                 # Extraire le numéro du fichier
                 numero = int(os.path.splitext(os.path.basename(fichier))[0].split()[1])
 
-                if numero in [69, 70, 71, 72, 76, 77, 78, 79, 80, 83, 84, 86, 89]:
+                if not use_acrobat_corrected_pdf and numero in [69, 70, 71, 72, 76, 77, 78, 79, 80, 83, 84, 86, 89]:
                     # Use OCR for bugged files
                     
                     texte = __extract_text_with_tesseract(fichier)
@@ -134,10 +137,16 @@ def open_avis(rescrap_texte=False):
         base_avis_ccne["avis"] = base_avis_ccne["avis"].apply(__clean_text)
 
         # Sauvegarder le DataFrame
-        base_avis_ccne.to_feather("../data/intermediate/base_avis_ccne.feather")
+        if use_acrobat_corrected_pdf:
+            base_avis_ccne.to_feather("../data/intermediate/base_avis_ccne_acrobat.feather")
+        else:
+            base_avis_ccne.to_feather("../data/intermediate/base_avis_ccne_ocr.feather")
     else:
-        # Lire le DataFrame à partir du fichier pickle
-        base_avis_ccne = pd.read_feather("../data/intermediate/base_avis_ccne.feather")
+        # Lire le DataFrame à partir du fichier feather
+        if use_acrobat_corrected_pdf:
+            base_avis_ccne = pd.read_feather("../data/intermediate/base_avis_ccne_acrobat.feather")
+        else:
+            base_avis_ccne = pd.read_feather("../data/intermediate/base_avis_ccne_ocr.feather")
 
     return base_avis_ccne
 
