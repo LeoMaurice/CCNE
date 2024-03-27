@@ -93,7 +93,7 @@ from PyPDF2 import PdfReader, PdfFileReader
 from tika import parser as tika_parser  # for OCR
 from tqdm import tqdm
 
-def open_avis(rescrap_texte=False, use_acrobat_corrected_pdf=True):
+def open_avis(rescrap_texte=False, use_acrobat_corrected_pdf=False):
     if rescrap_texte:
         # Définir le chemin vers le dossier contenant les fichiers PDF
         if use_acrobat_corrected_pdf:
