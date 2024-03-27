@@ -1,3 +1,7 @@
+# Model fils
+
+/src/models/
+
 # History files
 .Rhistory
 .Rapp.history
