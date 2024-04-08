@@ -1,6 +1,8 @@
 # Model fils
 /src/models/
 
+/data/ACL/anthology+abstracts.bib
+
 # History files
 .Rhistory
 .Rapp.history

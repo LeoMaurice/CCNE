@@ -1,0 +1,155 @@
+---
+title: "ACL analysis"
+author: "Léopold MAURICE, ENSAE"
+date: "2024-02-29"
+project: CCNE
+supervision: Pr. Emmanuel Didier, CMH/ENS/EHESS
+output-ext: html
+format:
+  html:
+    toc: true
+    number-sections: true
+    colorlinks: true
+    geometry:
+      - top=10mm
+      - left=20mm
+      - right=20mm
+      - bottom=10mm  
+      - heightrounded
+    highlight-style: github
+    fontfamily: libertinus
+    documentclass: report
+    fig-width: 12
+    fig-height: 9
+  pdf:
+    documentclass: report
+    papersize: a4
+    toc: true
+    toc-depth: 4
+    number-sections: true
+    number-depth: 3
+    colorlinks: true
+    fig-width: 20
+    fig-height: 15
+    keep-tex: false
+execute:
+  eval: true
+  message: false
+  warning: false
+  echo: false
+  output: true
+  error: true
+editor: source
+---
+
+```{r}
+require(pacman,quietly = F)
+
+pacman::p_load(arrow,
+               tidyverse,
+               reshape2,
+               rlang,
+               tidytext,
+
+               stats,
+               rstatix,
+               
+               ggplot2,
+               gridExtra,
+               ggprism,
+               ggpubr,
+               ggcorrplot,
+               ComplexHeatmap,
+               circlize,
+               patchwork)
+
+source("helpers/df_to_matrix.R")
+source("helpers/heatmap.R")
+source("helpers/lexico_helper.R")
+source("helpers/figures.R")
+
+save_figures = T
+cutpoints = c(0, 1e-04, 0.001, 0.01, 0.05, 0.1, 1)
+symbols = c("****", "***", "**", "*", "•","ns")
+significance = c("p < 0.0001", "p < 0.001", "p < 0.01", "p < 0.05", "p < 0.1", "p>0.1")
+signif_caption_text <- paste("Significance levels:\n", paste(symbols, ":", significance, collapse = ", "))
+
+```
+
+```{r}
+acl_proceedings <- read_delim("../data/ACL/acl_proceedings.csv", 
+    delim = ";", escape_double = FALSE, trim_ws = TRUE)|>
+  mutate(abstract = tolower(abstract),
+         title = tolower(title))|>
+  filter(!is.na(abstract))
+
+library(dplyr)
+library(rlang)
+
+keywords <- c(
+  "Neural Networks"="neural network",
+  "ML"="machine learning",
+  "LLM"="llm|large language model",
+  "TM"="topic model|topics|topics model",
+  "optimisation"="optimisation|optimization|optimize|optimise",
+  "bert"="bert",
+  "GPT"="gpt",
+  "lexico"="lexico",
+  "parsing"="parse|parsing",
+  "chatbot"="chatbot|chat",
+  "linguistic"="linguistic",
+  "lemmatization"="lemmatisation|lemmatization",
+  "syntax"="syntax",
+  "NER"="entity recognition|entities recognition"
+)
+
+for (key in names(keywords)){
+  acl_proceedings <- acl_proceedings %>%
+    mutate(!!key := str_count(abstract, pattern = keywords[key]))
+}
+
+```
+```{r}
+acl_proceedings %>%
+  pivot_longer(cols = names(keywords), names_to = "Motsclés",values_to = "Fréquence")%>%
+  ggplot(aes(x = year, y = Fréquence, color =Motsclés)) +
+  geom_jitter()+
+  labs(title = "Fréquence par abstract au cours des années",
+       x = "Année",
+       y = "Fréquence",
+       color = "Mot clé") +
+  theme_ready()
+```
+```{r}
+acl_proceedings %>%
+  pivot_longer(cols = names(keywords), names_to = "Motsclés",values_to = "Fréquence")%>%
+  mutate(sujet = Fréquence >0)%>%
+  group_by(Motsclés,year)%>%
+  summarise(Fréquence = 100*mean(sujet), rm.na= T)%>% 
+  ggscatter(x = "year",y = "Fréquence",facet.by = "Motsclés", color = "Motsclés") +
+  labs(title = "Fréquence des documents avec certains mots clés au cours des années",
+       x = "Année",
+       y = "Fréquence des documents (%)",
+       color = "Mot clé") +
+  theme_ready()
+    
+```
+
+```{r}
+data(stop_words)
+ngram_data <- acl_proceedings %>%
+  unnest_tokens(output = ngram, input = abstract, token = "ngrams", n = 2)  # Change 'n' as needed for different ngram sizes
+
+# Step 2: Remove stop words and possibly other irrelevant terms
+ngram_data <- ngram_data %>%
+  anti_join(stop_words)  # Assuming you have loaded stop words using `data(stop_words)`
+
+# Step 3: Count the frequency of ngrams for each year
+ngram_freq <- ngram_data %>%
+  count(Year, ngram) %>%
+  group_by(Year) %>%
+  mutate(rank = row_number()) %>%
+  filter(rank <= 5)  # Select top 5 ngrams for each year
+```
+
+
