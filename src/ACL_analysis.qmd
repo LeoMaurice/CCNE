@@ -81,16 +81,15 @@ acl_proceedings <- read_delim("../data/ACL/acl_proceedings.csv",
     delim = ";", escape_double = FALSE, trim_ws = TRUE)|>
   mutate(abstract = tolower(abstract),
          title = tolower(title))|>
+  mutate(abstract = gsub("\\d", "", abstract))|>
   filter(!is.na(abstract))
 
-library(dplyr)
-library(rlang)
-
 keywords <- c(
-  "Neural Networks"="neural network",
-  "ML"="machine learning",
+  "neural networks"="neural network",
+  "machine learning"="machine learning",
+  "transformers"="transformer",
   "LLM"="llm|large language model",
-  "TM"="topic model|topics|topics model",
+  "topics model"="topic model|topics|topics model|LDA",
   "optimisation"="optimisation|optimization|optimize|optimise",
   "bert"="bert",
   "GPT"="gpt",
@@ -100,7 +99,17 @@ keywords <- c(
   "linguistic"="linguistic",
   "lemmatization"="lemmatisation|lemmatization",
   "syntax"="syntax",
-  "NER"="entity recognition|entities recognition"
+  "name entity reco"="entity recognition|entities recognition",
+  "translation"="translate|traduction|translation",
+  "algo"="algorithm",
+  "structure"="structure",
+  "system" = "system",
+  "task"="task",
+  "tagging"="tagging",
+  "grammar"="grammar",
+  "morphology"="morphology|morphology",
+  "classification"="classification",
+  "annotation"="annotate|annotations"
 )
 
 for (key in names(keywords)){
@@ -109,36 +118,36 @@ for (key in names(keywords)){
 }
 
 ```
-```{r}
-acl_proceedings %>%
-  pivot_longer(cols = names(keywords), names_to = "Motsclés",values_to = "Fréquence")%>%
-  ggplot(aes(x = year, y = Fréquence, color =Motsclés)) +
-  geom_jitter()+
-  labs(title = "Fréquence par abstract au cours des années",
-       x = "Année",
-       y = "Fréquence",
-       color = "Mot clé") +
-  theme_ready()
-```
+
 ```{r}
 acl_proceedings %>%
   pivot_longer(cols = names(keywords), names_to = "Motsclés",values_to = "Fréquence")%>%
   mutate(sujet = Fréquence >0)%>%
   group_by(Motsclés,year)%>%
   summarise(Fréquence = 100*mean(sujet), rm.na= T)%>% 
+  mutate(Motsclés = factor(Motsclés, levels = c(
+    "linguistic",'grammar',"lexico","morphology","syntax",
+    "structure","system","algo","parsing","translation","tagging",
+    "chatbot","name entity reco","lemmatization","topics model",
+    "optimisation","machine learning","annotation","classification","task",
+    "neural networks","transformers","LLM","bert","GPT"
+                                                )))%>%
   ggscatter(x = "year",y = "Fréquence",facet.by = "Motsclés", color = "Motsclés") +
+  scale_y_log10()+
   labs(title = "Fréquence des documents avec certains mots clés au cours des années",
        x = "Année",
-       y = "Fréquence des documents (%)",
+       y = "Fréquence des documents (échelle log des %)",
        color = "Mot clé") +
-  theme_ready()
-    
+  theme_ready(text_size = 18)+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  guides(color = FALSE)
+ggsave("../output/acl/keywords_time.png", width = 28, height = 20, units = "cm")
 ```
 
 ```{r}
 data(stop_words)
 ngram_data <- acl_proceedings %>%
-  unnest_tokens(output = ngram, input = abstract, token = "ngrams", n = 2)  # Change 'n' as needed for different ngram sizes
+  unnest_tokens(output = word, input = abstract, token = "ngrams", n = 1)  # Change 'n' as needed for different ngram sizes
 
 # Step 2: Remove stop words and possibly other irrelevant terms
 ngram_data <- ngram_data %>%
@@ -146,10 +155,12 @@ ngram_data <- ngram_data %>%
 
 # Step 3: Count the frequency of ngrams for each year
 ngram_freq <- ngram_data %>%
-  count(Year, ngram) %>%
-  group_by(Year) %>%
-  mutate(rank = row_number()) %>%
-  filter(rank <= 5)  # Select top 5 ngrams for each year
+  count(year, word) %>%
+  arrange(n)%>%
+  group_by(year)%>%
+  top_n(5)
+
+ngram_freq
 ```
 
 

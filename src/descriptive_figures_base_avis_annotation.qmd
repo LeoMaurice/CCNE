@@ -748,13 +748,20 @@ if(save_figures)
 ## Annotation
 
 ```{r}
-n_annoté <- 700
+n_annoté <- 1400
 
 # Création du dataframe
+# stat_annotation <- data.frame(
+#   tag = factor(c("Agent responsable", "Genre/espèce humain.e", "Humain comme empathie", "Individu", "Matériel biologique", "Personne à protéger", "Personne relationnelle", "Poubelle"),
+#                levels = rev(c("Agent responsable","Personne à protéger","Personne relationnelle","Individu","Matériel biologique","Genre/espèce humain.e","Humain comme empathie","Poubelle"))),
+#   Freq = c(104, 90,10 , 118, 130, 143, 97, 8)
+# ) |>
+#   mutate(FreqPerc = 100 * Freq / n_annoté)
+
 stat_annotation <- data.frame(
-  tag = factor(c("Agent responsable", "Genre/espèce humain.e", "Humain comme empathie", "Individu", "Matériel biologique", "Personne à protéger", "Personne relationnelle", "Poubelle"),
-               levels = rev(c("Agent responsable","Personne à protéger","Personne relationnelle","Individu","Matériel biologique","Genre/espèce humain.e","Humain comme empathie","Poubelle"))),
-  Freq = c(104, 90,10 , 118, 130, 143, 97, 8)
+  tag = factor(c("Corps humain", "Genre/espèce humain.e", "Individu ou sujet", "Personne à protéger", "Personne relationnelle","Personne responsable et autonome", "Poubelle","Sentiment humain"),
+               levels = rev(c("Personne responsable et autonome","Personne à protéger","Personne relationnelle","Individu ou sujet","Corps humain","Genre/espèce humain.e","Sentiment humain","Poubelle"))),
+  Freq = c(239, 215,235 , 235, 225, 203, 12, 36)
 ) |>
   mutate(FreqPerc = 100 * Freq / n_annoté)
 

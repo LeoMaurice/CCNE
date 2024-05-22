@@ -76,3 +76,6 @@ data/raw/big
 
 # conda
 .conda/
+
+# zip
+*.zip
