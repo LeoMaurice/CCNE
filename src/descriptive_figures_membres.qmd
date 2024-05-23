@@ -148,9 +148,10 @@ metadata_auteur <- metadata_auteur%>%
                                        "théologien","profession du droit",
                                        "chercheur droit","chercheur SHS",
                                        "chercheur sciences exactes","inconnue")))
-```
-```{r}
 metadata_avis <- open_metadata()
+
+metadata_avis <- metadata_avis %>%
+  mutate_if(is.character, ~ na_if(., "NA"))
 
 # Fonction pour compléter les bases de données
 appariement_avis_membre <- function(metadata_auteur_intermediate, metadata_avis_intermediate) {
@@ -223,14 +224,20 @@ metadata_avis <- result$metadata_avis
 
 rm(result)
 ```
-```{r}
-#| eval: true
-# Filtrer les résultats pour afficher uniquement les documents avec au moins un NA dans ids_rapporteurs
-# metadata_avis %>%
-#   filter(sapply(ids_rapporteurs, function(x) any(is.na(x)))) %>%
-#   select(num, rapporteurs, ids_rapporteurs, membres_gt, ids_membres_gt)%>%
-#   View()
 
+
+```{r}
+#| eval: false
+
+metadata_avis %>%
+  filter(sapply(ids_rapporteurs, function(x) any(is.na(x)))) %>%
+  mutate(string_ids_rapporteurs = sapply(ids_rapporteurs, function(x) paste(x, collapse = ", ")))%>%
+  select(num, rapporteurs, string_ids_rapporteurs)%>%
+  View()
+```
+
+```{r}
+#| eval: false
 metadata_avis %>%
   filter(sapply(ids_membres_gt, function(x) any(is.na(x)))) %>%
   mutate(string_ids_membres_gt = sapply(ids_membres_gt, function(x) paste(x, collapse = ", ")))%>%
