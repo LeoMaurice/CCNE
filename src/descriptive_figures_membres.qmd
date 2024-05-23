@@ -246,6 +246,14 @@ metadata_avis %>%
 
 ```
 
+```{r}
+metadata_auteur <- metadata_auteur|>
+  mutate(nb_avis_as_rapporteur = sapply(avis_rapporteur, length),
+         nb_avis_as_membre_gt = sapply(avis_membre_gt, length),
+         nb_avis_as_participant = nb_avis_as_rapporteur + nb_avis_as_membre_gt)
+```
+
+
 
 # Nombre de membres
 
@@ -454,6 +462,110 @@ if(save_figures)
 ```
 
 On voit qu'il y a une différence de genre : il est plus dure de trouver certaines informations pour les femmes.
+
+# Nombre de participation à un avis, et différence selon la participation à l'écriture d'avis
+
+On se limite aux membres du CCNE qui l'ont rejoint après (ou égale) à 2002, car c'est à partir de là qu'on a des informations quasi exshaustives sur les auteurs des avis.
+
+```{r}
+#| fig-width: 12
+#| fig-height: 10
+metadata_auteur_2002 <- metadata_auteur|>
+  filter(début>= 2002 | début2 >= 2002)
+
+metadata_auteur_2002|>
+  gghistogram(x = "nb_avis_as_participant", fill = "sexe",#fill = "#004080",
+              position = position_stack(),
+              ylab = "Nombre de membre", xlab = "Nombre de participation à un avis")+
+  theme_ready()+
+  scale_fill_prism(palette = "floral")
+
+if(save_figures)
+  ggsave("../output/descriptive_members/histo_participation.png")
+```
+
+```{r}
+#| fig-width: 12
+#| fig-height: 10
+metadata_auteur_2002|>
+  gghistogram(x = "nb_avis_as_rapporteur", fill = "sexe",#fill = "#004080",
+              position = position_stack(),
+              ylab = "Nombre de membre", xlab = "Nombre de fois rapporteur d'un avis")+
+  theme_ready()+
+  scale_fill_prism(palette = "floral")
+
+if(save_figures)
+  ggsave("../output/descriptive_members/histo_nb_rapporteur.png")
+```
+
+```{r}
+#| fig-width: 12
+#| fig-height: 10
+metadata_auteur_2002|>
+  gghistogram(x = "nb_avis_as_membre_gt", fill = "sexe",#fill = "#004080",
+              position = position_stack(),
+              ylab = "Nombre de membre", xlab = "Nombre de fois membre d'un gt")+
+  theme_ready()+
+  scale_fill_prism(palette = "floral")
+
+if(save_figures)
+  ggsave("../output/descriptive_members/histo_nb_membre_gt.png")
+```
+```{r}
+metadata_auteur_2002 <- metadata_auteur_2002|>
+  mutate(once_rapporteur = nb_avis_as_rapporteur>0)
+
+
+```
+
+```{r}
+#| fig-width: 12
+#| fig-height: 10
+metadata_auteur_2002|>  
+  ggviolin(x='président_première_nomination',fill = 'once_rapporteur', y = 'durée_mandat',
+            ylab = "Durée total du mandat", xlab = "Président à la première nomination",
+            title = "Durée total des mandats effectués au CCNE\nselon le président à leur première nomination\net si a été au moins une fois rapporteur")+
+  theme_ready()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
+  scale_fill_prism(palette = "floral")+
+  labs(fill = "A été au moins une fois rapporteur")
+if(save_figures)
+  ggsave("../output/descriptive_members/durée_mandat_once_rapporteur_président.png")
+```
+
+Sans trop de surprise, les membres avec des mandats qui ont durés longtemps, ont souvent plus au moins une fois rapporteurs et inversement.
+
+```{r}
+#| fig-width: 12
+#| fig-height: 10
+metadata_auteur_2002|>  
+  ggviolin(x='président_première_nomination',fill = 'once_rapporteur', y = 'age_première_nomination',
+            ylab = "Age à la première nomination", xlab = "Président à la première nomination",
+            title = "Age à la première nomination au CCNE\nselon le président à leur première nomination\net si a été au moins une fois rapporteur")+
+  theme_ready()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
+  scale_fill_prism(palette = "floral")+
+  labs(fill = "A été au moins une fois rapporteur")
+if(save_figures)
+  ggsave("../output/descriptive_members/age_première_nomination_once_rapporteur_président.png")
+```
+Peut être une légère tendance à ce que les plus jeunes s'investissent plus mais rien d'évident.
+
+```{r}
+#| fig-width: 12
+#| fig-height: 10
+metadata_auteur|>  
+  ggboxplot(x='profession_recodée',fill = 'profession_recodée', y = 'nb_avis_as_rapporteur',
+            #facet.by = 'président_première_nomination',
+            ylab = "Nombre d'avis", xlab = "Profession",
+            title = "Nombre d'avis en tant que rapporteur\nselon leur profession")+
+  theme_ready()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
+  scale_fill_prism(palette = "floral")+
+  labs(fill = "Profession")+
+  guides(fill = guide_legend(title.position = "top"))
+```
+
 
 # Point sur la méthodologie
 

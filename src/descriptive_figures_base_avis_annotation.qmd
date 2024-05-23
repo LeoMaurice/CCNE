@@ -91,7 +91,8 @@ base_avis$president <- factor(base_avis$president, levels = levels_order)
 
 ```{r}
 #ggprism::preview_theme("colorblind_safe")
-ggprism::prism_color_pal("evergreen")(6)
+"#004080"
+ggprism::prism_color_pal("office")(5)
 
 ```
 
