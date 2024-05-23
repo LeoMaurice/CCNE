@@ -44,6 +44,7 @@ require(pacman,quietly = F)
 pacman::p_load(arrow,
                tidyverse,
                reshape2,
+               stringr,
 
                stats,
                rstatix,
@@ -148,6 +149,82 @@ metadata_auteur <- metadata_auteur%>%
                                        "chercheur droit","chercheur SHS",
                                        "chercheur sciences exactes","inconnue")))
 ```
+```{r}
+metadata_avis <- open_metadata()
+
+# Fonction pour compléter les bases de données
+appariement_avis_membre <- function(metadata_auteur_intermediate, metadata_avis_intermediate) {
+  # Séparer les rapporteurs et les membres_gt et créer une relation entre chaque auteur et le document
+  metadata_rapporteurs_long <- metadata_avis_intermediate %>%
+    select(num, rapporteurs) %>%
+    separate_rows(rapporteurs, sep = ",\\s*") %>%
+    rename(nom = rapporteurs) %>%
+    mutate(role_avis = 'rapporteur')
+
+  metadata_membres_gt_long <- metadata_avis_intermediate %>%
+    select(num, membres_gt) %>%
+    separate_rows(membres_gt, sep = ",\\s*") %>%
+    rename(nom = membres_gt) %>%
+    mutate(role_avis = 'membre_gt')
+
+  # Combiner les deux ensembles de données
+  metadata_avis_long <- bind_rows(
+    metadata_rapporteurs_long,
+    metadata_membres_gt_long
+  )
+
+  # Joindre les tables par le nom de l'auteur
+  metadata_avis_joined <- metadata_avis_long %>%
+    left_join(metadata_auteur, by = "nom")
+
+  # Attribuer à chaque personne la liste des numéros des documents dont il est rapporteur
+  auteurs_docs_rapporteurs <- metadata_avis_joined %>%
+    filter(role_avis == "rapporteur") %>%
+    group_by(id_membre, nom) %>%
+    summarise(avis_rapporteur = list(num), .groups = 'drop')
+
+  # Attribuer à chaque personne la liste des numéros des documents dont il est membre_gt
+  auteurs_docs_membres_gt <- metadata_avis_joined %>%
+    filter(role_avis == "membre_gt") %>%
+    group_by(id_membre, nom) %>%
+    summarise(avis_membre_gt = list(num), .groups = 'drop')
+
+  # Fusionner les informations des auteurs
+  metadata_auteur_intermediate <- metadata_auteur_intermediate %>%
+    left_join(auteurs_docs_rapporteurs, by = c("id_membre", "nom")) %>%
+    left_join(auteurs_docs_membres_gt, by = c("id_membre", "nom"))
+
+  # Attribuer à chaque document la liste des identifiants des rapporteurs
+  docs_ids_rapporteurs <- metadata_avis_joined %>%
+    filter(role_avis == "rapporteur") %>%
+    group_by(num) %>%
+    summarise(ids_rapporteurs = list(id_membre), .groups = 'drop')
+
+  # Attribuer à chaque document la liste des identifiants des membres_gt
+  docs_ids_membres_gt <- metadata_avis_joined %>%
+    filter(role_avis == "membre_gt") %>%
+    group_by(num) %>%
+    summarise(ids_membres_gt = list(id_membre), .groups = 'drop')
+
+  # Joindre les résultats pour avoir une vue complète par document
+  metadata_avis_intermediate <- metadata_avis_intermediate %>%
+    left_join(docs_ids_rapporteurs, by = "num") %>%
+    left_join(docs_ids_membres_gt, by = "num")
+
+  return(list(metadata_auteur = metadata_auteur_intermediate, metadata_avis = metadata_avis_intermediate))
+}
+
+# Appeler la fonction et obtenir les data.frames complétés
+result <- appariement_avis_membre(metadata_auteur, metadata_avis)
+
+# Récupérer les data.frames complétés
+metadata_auteur <- result$metadata_auteur
+metadata_avis <- result$metadata_avis
+
+rm(result)
+```
+
+
 # Nombre de membres
 
 ```{r}
@@ -344,7 +421,7 @@ metadata_auteur %>%
             position = position_stack(), 
             #label = TRUE,lab.nb.digits = 2,lab.pos = "in",
             ylab = "% des membres", xlab = "Sexe",
-            title = "Pourcentage des membre du CCNE\nselon leur âge soit collecté ou non")+
+            title = "Pourcentage des membre du CCNE\nselon que leur âge soit collecté ou non")+
   theme_ready()+
   scale_fill_prism(palette = "floral")+
   labs(fill = "Naissance inconnue")+

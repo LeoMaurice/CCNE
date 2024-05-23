@@ -132,7 +132,7 @@ open_corrected_avis <- function(rescrap_texte=TRUE){
   return(base_avis_ccne)
 }
 
-join_metadata <- function(base_avis_ccne){
+open_metadata <- function(){
   list_saisine_obligatoire <- c(
     "PR", #président
     "PM", #Premier Minsitre
@@ -148,18 +148,24 @@ join_metadata <- function(base_avis_ccne){
     "MILDT" # Mission Interministérielle de luttes contre la dépendance et la toxicomanie
   )
   
+  return(read_excel("../data/raw/collected_metadata/metadata_avis.xlsx", 
+             col_types = c("numeric", "date", "text", 
+                           "text", "text", "text", 
+                           "logical", "text", "text", 
+                           "text", "date", "logical", 
+                           "text", "logical", "logical",
+                           "text"))|>
+    mutate(saisine = saisine_precise %in% list_saisine_obligatoire,
+           date = as.Date(date)
+    )|>
+    select(num,saisine,rapporteurs, membres_gt,titre_court,titre,date,theme,divergence))
+}
+
+join_metadata <- function(base_avis_ccne){
+
+  
   base_avis_ccne |>
-    left_join(read_excel("../data/raw/collected_metadata/metadata_avis.xlsx", 
-                         col_types = c("numeric", "date", "text", 
-                                       "text", "text", "text", 
-                                       "logical", "text", "text", 
-                                       "text", "date", "logical", 
-                                       "text", "logical", "logical",
-                                       "text"))|>
-                mutate(saisine = saisine_precise %in% list_saisine_obligatoire,
-                       date = as.Date(date)
-                )|>
-                select(num,saisine,rapporteurs, membres_gt,titre_court,titre,date,theme,divergence))|>
+    left_join(open_metadata())|>
     mutate(nb_mots = str_count(avis, "\\w+"),
            president = sapply(date, president_CCNE_by_date))-> base_avis_ccne
   
