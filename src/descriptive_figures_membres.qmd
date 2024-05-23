@@ -1,10 +1,9 @@
 ---
 title: "CCNE Descriptive figures membres"
-author: "Léopold MAURICE, ENSAE"
-date: "2024-02-29"
+author: "Léopold MAURICE"
+date: "2024-05-23"
 project: CCNE
 supervision: Pr. Emmanuel Didier, CMH/ENS/EHESS
-output-ext: html
 format:
   html:
     toc: true
@@ -22,16 +21,13 @@ format:
     fig-width: 12
     fig-height: 9
   pdf:
-    documentclass: report
-    papersize: a4
+    documentclass: article
+    geometry: [left=1in, right=1in, top=1in, bottom=1in]
+    fontsize: 11pt
+    keep-tex: true
     toc: true
-    toc-depth: 4
+    toc-depth: 2
     number-sections: true
-    number-depth: 3
-    colorlinks: true
-    fig-width: 20
-    fig-height: 15
-    keep-tex: false
 execute:
   eval: true
   message: false
@@ -41,3 +37,340 @@ execute:
   error: true
 editor: source
 ---
+
+```{r}
+require(pacman,quietly = F)
+
+pacman::p_load(arrow,
+               tidyverse,
+               reshape2,
+
+               stats,
+               rstatix,
+               
+               ggplot2,
+               gridExtra,
+               ggprism,
+               ggpubr,
+               ggcorrplot,
+               ComplexHeatmap,
+               circlize,
+               patchwork,
+               rmarkdown,
+               readxl)
+
+source("helpers/database_creation.R")
+source("helpers/figures.R")
+
+save_figures = T
+cutpoints = c(0, 1e-04, 0.001, 0.01, 0.05, 0.1, 1)
+symbols = c("****", "***", "**", "*", "•","ns")
+significance = c("p < 0.0001", "p < 0.001", "p < 0.01", "p < 0.05", "p < 0.1", "p>0.1")
+signif_caption_text <- paste("Significance levels:\n", paste(symbols, ":", significance, collapse = ", "))
+
+```
+
+```{r}
+metadata_auteur <- read_excel("../data/raw/collected_metadata/metadata_auteur.xlsx", 
+    col_types = c("numeric", "text", "text", 
+        "text", "text", "text", "text", 
+        "text", "text", "numeric", "text", 
+        "text", "text", "skip"))
+
+metadata_auteur <- metadata_auteur|>
+  mutate(président = président == "TRUE")
+
+calcul_mandat_durée <- Vectorize(function(début,fin,début2,fin2){
+  if(is.na(début2))
+    return(fin - début + 1)
+  else 
+    return(fin - début + 1 + fin2 - début2 + 1)
+})
+
+NOW_year = 2024
+# Replace "NOW" with the current year in the specified columns using dplyr
+metadata_auteur <- metadata_auteur %>%
+  mutate(across(c(début, fin, début2, fin2), ~ ifelse(. == "NOW", NOW_year, .))) %>%
+  mutate(across(c(début, fin, début2, fin2), as.numeric))%>%
+  mutate(président_première_nomination = president_CCNE_by_year(début),
+         age_première_nomination = début - naissance + 1,
+         durée_mandat = calcul_mandat_durée(début,fin,début2,fin2))
+
+# recodage des professions avec une catégorie unique par membre du ccne
+recodage_profession <- Vectorize(function(profession, spécialité){
+  profession = strsplit(profession, ";")[[1]]
+  spécialité = strsplit(spécialité, ";")[[1]]
+  if('politicien' %in% profession | 'militant' %in% profession){
+    return('politicien ou militant') # un politicien qui fut médecin est classé comme politicien
+  }
+  else if('journaliste' %in% profession | 'presse' %in% profession){
+    return('journaliste/presse')
+  }
+  else if('théologien' %in% profession){
+    return('théologien')
+  }
+  else if('médecin' %in% profession & !('généraliste' %in% spécialité)){
+    return('médecin PUPH')
+  }
+  else if('biologiste' %in% profession | 'physiologie' %in% spécialité | 'pharmacologie' %in% spécialité){
+    return('chercheur bio')
+  }
+  else if('pharmacien' %in% profession | 'infirmier' %in% profession | 'infirmière' %in% profession | 'psychologue' %in% profession | 'généraliste' %in% spécialité | 'cadre supérieur santé' %in% profession)
+    return('autres professions santé')
+  else if('avocat' %in% profession | 'magistrat' %in% profession | 'juge' %in% profession | 'juriste' %in% profession)
+    return('profession du droit')
+  else if('haut fonctionnaire' %in% profession | 'ENArque' %in% profession | 'cadre' %in% profession | 'ingénieur' %in% profession)
+    return('cadre public/privé')
+  else if('chercheur' %in% profession | 'professeur agrégé' %in% profession | "professeur d'université" %in% profession){
+    if('droit' %in% spécialité)
+      return("chercheur droit")
+    if('sociologie' %in% spécialité | 'anthropologie' %in% spécialité | 'histoire' %in% spécialité | 'économie' %in% spécialité | 'psychologie' %in% spécialité | 'démographie' %in% spécialité | 'philosophie' %in% spécialité | 'géographie' %in% spécialité | 'judaïsme' %in% spécialité | 'sciences politiques'  %in% spécialité | 'littérature' %in% spécialité | 'musée' %in% spécialité | 'protestantisme' %in% spécialité
+)
+      return('chercheur SHS')
+    if('mathématiques' %in% spécialité | 'chimie' %in% spécialité | 'physique' %in% spécialité | 'informatique' %in% spécialité)
+      return('chercheur sciences exactes')
+  }
+  else{
+    return("inconnue")
+  }
+})
+
+metadata_auteur <- metadata_auteur%>%
+  mutate(profession_recodée = recodage_profession(profession,spécialité))%>%
+  mutate(profession_recodée = as.character(profession_recodée))%>%
+  mutate(profession_recodée = factor(profession_recodée, 
+                                     levels = c(
+                                       "médecin PUPH","chercheur bio",
+                                       "autres professions santé",
+                                       "politicien ou militant",
+                                       "cadre public/privé","journaliste/presse",
+                                       "théologien","profession du droit",
+                                       "chercheur droit","chercheur SHS",
+                                       "chercheur sciences exactes","inconnue")))
+```
+# Nombre de membres
+
+```{r}
+#| eval: false
+table(metadata_auteur$profession_recodée)
+```
+
+```{r}
+#| fig-width: 12
+#| fig-height: 10
+metadata_auteur|>
+  group_by(profession_recodée)|>
+  summarise(count = n())|>
+  ggbarplot(x='profession_recodée',fill = 'profession_recodée', y = 'count',
+            label = TRUE,
+            ylab = "Nombre de membres", xlab = "Profession",
+            title = "Nombre de membre du CCNE\nselon leur profession")+
+  theme_ready()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
+  scale_y_continuous(expand = expansion(mult = c(0, 1)))+
+  scale_fill_prism(palette = "floral")+
+  labs(fill = "Profession")
+
+if(save_figures)
+  ggsave("../output/descriptive_members/nombre_profession.png", width = 12, height = 8)
+```
+Sans trop d'étonnement, la profession dominante sont les médecins hospitaliers et universitaires (PUPH), suivi de près par les chercheurs en sciences humaines (en majorité en philosophie), puis les biologistes et les politiciens (dont un certain nombre sont des médecins, mais plutôt libéraux). Pour finir le droit est aussi bien représenté entre les membres du conseil d'état, de la cour de cassation, des juristes (de profession ou universitaires).
+```{r}
+#| fig-width: 12
+#| fig-height: 10
+metadata_auteur|>
+  group_by(président_première_nomination,sexe)|>
+  summarise(count = n())|>
+  ggbarplot(x='président_première_nomination',fill = 'sexe', y = 'count',
+            position = position_dodge(),
+            label = TRUE,
+            ylab = "Nombre de membres", xlab = "Président à la première nomination",
+            title = "Nombre de membre du CCNE\nselon leur genre et le président à leur première nomination")+
+  theme_ready()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
+  scale_y_continuous(expand = expansion(mult = c(0, 0.2)))+
+  scale_fill_prism(palette = "floral")+
+  labs(fill = "Sexe")
+
+if(save_figures)
+  ggsave("../output/descriptive_members/nombre_sexe_président.png")
+```
+
+```{r}
+#| fig-width: 12
+#| fig-height: 10
+metadata_auteur %>%
+  group_by(président_première_nomination, profession_recodée) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  group_by(président_première_nomination) %>%
+  mutate(total = sum(count), percentage = 100 * count / total) %>%
+  ungroup() %>%
+  select(-total)%>%
+  ggbarplot(x='président_première_nomination',fill = 'profession_recodée', y = 'percentage',
+            position = position_stack(), 
+            #label = TRUE,lab.nb.digits = 2,lab.pos = "in",
+            ylab = "% des membres", xlab = "Président à la première nomination",
+            title = "Pourcentage des membre du CCNE\nselon leur profession par leur président à leur première nomination")+
+  theme_ready()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
+  scale_fill_prism(palette = "floral")+
+  labs(fill = "Profession")+
+  guides(fill = guide_legend(title.position = "top"))
+
+if(save_figures)
+  ggsave("../output/descriptive_members/nombre_profession_président.png", width = 8, height = 10)
+```
+
+# durée mandat
+
+```{r}
+#| fig-width: 12
+#| fig-height: 10
+metadata_auteur|>  
+  ggviolin(x='président_première_nomination',fill = 'sexe', y = 'durée_mandat',
+            ylab = "Durée total du mandat", xlab = "Président à la première nomination",
+            title = "Durée total des mandats effectués au CCNE\nselon leur genre et le président à leur première nomination")+
+  theme_ready()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
+  scale_fill_prism(palette = "floral")
+if(save_figures)
+  ggsave("../output/descriptive_members/durée_mandat_sexe_président.png")
+```
+On voit que la durée du mandat est a eu tendance à baisser et à se normaliser autour de 5 ans, avec encore quelques personnes qui font plus.
+
+```{r}
+#| fig-width: 12
+#| fig-height: 10
+metadata_auteur|>  
+  ggboxplot(x='profession_recodée',fill = 'profession_recodée', y = 'durée_mandat',
+            #facet.by = 'président_première_nomination',
+            ylab = "Durée total du mandat", xlab = "Profession",
+            title = "Durée total des mandats effectués au CCNE\nselon leur profession")+
+  theme_ready()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
+  scale_fill_prism(palette = "floral")+
+  labs(fill = "Profession")+
+  guides(fill = guide_legend(title.position = "top"))
+
+if(save_figures)
+  ggsave("../output/descriptive_members/durée_mandat_profession.png", width = 12, height = 8)
+```
+
+```{r}
+#| eval: false
+metadata_auteur|>  
+  ggboxplot(x='nomination', y = 'durée_mandat',
+            #facet.by = 'président_première_nomination',
+            ylab = "Durée total du mandat", xlab = "Président à la première nomination",
+            title = "Durée total des mandats effectués au CCNE\nelon leurs entités nominatrices")+
+  theme_ready()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+
+if(save_figures)
+  ggsave("../output/descriptive_members/durée_mandat_nomination.png", width = 12, height = 8)
+```
+
+# âge à la première nomination
+
+```{r}
+#| fig-width: 12
+#| fig-height: 10
+metadata_auteur|>  
+  ggviolin(x='président_première_nomination',fill = 'sexe', y = 'age_première_nomination',
+            ylab = "âge à la première nomination", xlab = "Président à la première nomination",
+            title = "âge à la première nomination\nselon leur genre et le président à leur première nomination")+
+  theme_ready()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
+  scale_fill_prism(palette = "floral")
+if(save_figures)
+  ggsave("../output/descriptive_members/age_sexe_président.png")
+```
+
+
+```{r}
+#| fig-width: 12
+#| fig-height: 10
+metadata_auteur|>  
+  ggboxplot(x='profession_recodée',fill = 'profession_recodée', y = 'age_première_nomination',
+            #facet.by = 'président_première_nomination',
+            ylab = "âge à la première nomination", xlab = "Profession",
+            title = "âge à la première nomination au CCNE\nselon leur profession")+
+  theme_ready()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
+  scale_fill_prism(palette = "floral")+
+  labs(fill = "Profession")+
+  guides(fill = guide_legend(title.position = "top"))
+
+if(save_figures)
+  ggsave("../output/descriptive_members/age_profession.png", width = 12, height = 8)
+```
+
+```{r}
+#| eval: false
+
+metadata_auteur|>  
+  ggboxplot(x='nomination', y = 'age_première_nomination',
+            #facet.by = 'président_première_nomination',
+            ylab = "âge à la première nomination", xlab = "Entité nominatrice",
+            title = "âge à la première nomination au CCNE\nselon leurs entités nominatrices")+
+  theme_ready()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+
+if(save_figures)
+  ggsave("../output/descriptive_members/age_nomination.png", width = 12, height = 8)
+```
+Globalement les membres du CCNE sont assez âgés quand ils sont nommés pour la première fois, à l'exception notable des théologiens (toutes religions comprises). L'âge moyen est de 60 ans sur l'ensemble des membres. Aucune tendance en terme d'évolution de l'âge à la première nomination semble vraiment être identifiable.
+
+```{r}
+#| fig-width: 12
+#| fig-height: 10
+metadata_auteur|>
+  ggscatter(x = "début",y="age_première_nomination", xlab = "Année première nomination",ylab = "Age à la première nomination")
+```
+
+
+```{r}
+#| fig-width: 12
+#| fig-height: 10
+metadata_auteur %>%
+  mutate(naissance_inconnue = is.na(naissance))%>%
+  group_by(naissance_inconnue,sexe) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  group_by(sexe) %>%
+  mutate(total = sum(count), percentage = 100 * count / total) %>%
+  ungroup() %>%
+  select(-total)%>%
+  ggbarplot(x='sexe',fill = 'naissance_inconnue', y = 'percentage',
+            position = position_stack(), 
+            #label = TRUE,lab.nb.digits = 2,lab.pos = "in",
+            ylab = "% des membres", xlab = "Sexe",
+            title = "Pourcentage des membre du CCNE\nselon leur âge soit collecté ou non")+
+  theme_ready()+
+  scale_fill_prism(palette = "floral")+
+  labs(fill = "Naissance inconnue")+
+  guides(fill = guide_legend(title.position = "top"))
+
+if(save_figures)
+  ggsave("../output/descriptive_members/naissance_inconnue_sexe.png", width = 8, height = 10)
+```
+
+On voit qu'il y a une différence de genre : il est plus dure de trouver certaines informations pour les femmes.
+
+# Point sur la méthodologie
+
+Par simplicité, j'ai attribué à chaque membre le président en exercice au moment de sa nomination. Cela permet d'avoir un indicateur de temps simple pour comparer, mais cela ne donne pas à chaque instant t, la composition du CCNE. De plus je n'ai que les années de nomination, a moins d'aller sur le JORF pour trouver toutes les dates de nomination, mais celle du JORF sont souvent en retard sur les dates réelles. 
+
+Voici une description des 12 catégories de professions recodées:
+
+- **Politicien ou militant** : Inclut les personnes ayant une profession liée à la politique ou à l'activisme (notamment association de défense de la famille, beaucoup nommé par le Ministère de la famille), y compris ceux qui ont une carrière antérieure dans la médecine.
+- **Journaliste/presse** : Regroupe les individus travaillant dans le journalisme ou les médias, dont les patrons de presse.
+- **Théologien** : Comprend les personnes spécialisées dans la théologie, toutes religions comprises.
+- **Médecin PUPH** : Se réfère aux médecins Professeurs des Universités-Praticiens Hospitaliers (PUPH), excluant les généralistes et libéraux.
+- **Chercheur bio** : Regroupe les chercheurs en biologie, physiologie ou pharmacologie.
+- **Autres professions santé** : Inclut les pharmaciens, infirmiers, psychologues, généralistes, et cadres supérieurs de santé.
+- **Profession du droit** : Englobe les avocats, magistrats, juges et juristes, dont les conseillers d'état et membres de la cours de cassation.
+- **Cadre public/privé** : Regroupe les hauts fonctionnaires, enarques, cadres et ingénieurs. Un certain nombre de personnes ont été haut fonctionnaire puis cadre de grands groupes industriels notamment dans les personnes nommées par le ministère de l'industrie. Peut être faudrait il séparer les hauts fonctionnaires selon leur type de spécialité.
+- **Chercheur droit** : Juriste universitaire.
+- **Chercheur SHS (Sciences Humaines et Sociales)** : Inclut les chercheurs en sociologie, anthropologie, histoire, économie, psychologie, démographie, philosophie, géographie, sciences politiques, littérature, muséologie, et des spécialistes universitaires des religions (judaïsme notamment)
+- **Chercheur sciences exactes** : Regroupe les chercheurs en mathématiques, chimie, physique et informatique.
+- **Inconnue** : Catégorie pour les professions qui ne correspondent à aucune des précédentes ou dont les informations sont insuffisantes pour le recodage.
