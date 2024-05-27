@@ -276,7 +276,8 @@ metadata_auteur|>
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
   scale_y_continuous(expand = expansion(mult = c(0, 1)))+
   scale_fill_prism(palette = "floral")+
-  labs(fill = "Profession")
+  labs(fill = "Profession")+
+  labs(caption = "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture : Parmi les 282 membres repertoriés du CCNE, la profession majoritaire est médecin (PUPH) avec 87 membres.")
 
 if(save_figures)
   ggsave("../output/descriptive_members/nombre_profession.png", width = 12, height = 8)
@@ -297,7 +298,8 @@ metadata_auteur|>
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
   scale_y_continuous(expand = expansion(mult = c(0, 0.2)))+
   scale_fill_prism(palette = "floral")+
-  labs(fill = "Sexe")
+  labs(fill = "Sexe")+
+  labs(caption = "Graphique de l'auteur.\nDonnées collectées dans 40 ans de Bioéthique (Delfraissy 2023) et par l'auteur.\nLecture : Sous Bernard (83-91), il y a avait deux fois plus d'homme que de femmes nommées au CCNE.\nA partir d'Ameisen (12-15), ce ratio s'équilibre.")
 
 if(save_figures)
   ggsave("../output/descriptive_members/nombre_sexe_président.png")
@@ -334,12 +336,14 @@ if(save_figures)
 #| fig-width: 12
 #| fig-height: 10
 metadata_auteur|>  
-  ggviolin(x='président_première_nomination',fill = 'sexe', y = 'durée_mandat',
+  ggboxplot(x='président_première_nomination',fill = 'sexe', y = 'durée_mandat',
+            add = 'jitter',add.params = list(fill = 'sexe', shape = 21),
             ylab = "Durée total du mandat", xlab = "Président à la première nomination",
             title = "Durée total des mandats effectués au CCNE\nselon leur genre et le président à leur première nomination")+
   theme_ready()+
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
-  scale_fill_prism(palette = "floral")
+  scale_fill_prism(palette = "floral")+
+  labs(caption = "Graphique de l'auteur.\nDonnées collectées dans 40 ans de Bioéthique (Delfraissy 2023) et par l'auteur.\nLecture : Sous Bernard (83-91), les mandats pouvait s'étendre de deux ans à plus de 20 ans.\nAu cours du temps la durée s'est normalisée autour de 5 ans, avec des maximums à une 10 ans.\nChaque point représente un membre du CCNE, la barre noire la moyenne.")
 if(save_figures)
   ggsave("../output/descriptive_members/durée_mandat_sexe_président.png")
 ```
@@ -400,13 +404,15 @@ if(save_figures)
 metadata_auteur|>  
   ggboxplot(x='profession_recodée',fill = 'profession_recodée', y = 'age_première_nomination',
             #facet.by = 'président_première_nomination',
+            add = 'jitter',add.params = list(fill = 'profession_recodée', shape = 21),
             ylab = "âge à la première nomination", xlab = "Profession",
             title = "âge à la première nomination au CCNE\nselon leur profession")+
   theme_ready()+
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
   scale_fill_prism(palette = "floral")+
   labs(fill = "Profession")+
-  guides(fill = guide_legend(title.position = "top"))
+  guides(fill = guide_legend(title.position = "top"))+
+  labs(caption = "Graphique de l'auteur.\nDonnées collectées dans 40 ans de Bioéthique (Delfraissy 2023) et par l'auteur.\nLecture : L'âge moyen à la nomination au CCNE est de 60 ans.\nLes théologiens sont tendanciellement plus jeunes avec une première nomination à 50 ans en moyenne. ")
 
 if(save_figures)
   ggsave("../output/descriptive_members/age_profession.png", width = 12, height = 8)
@@ -435,27 +441,35 @@ metadata_auteur|>
   ggscatter(x = "début",y="age_première_nomination", xlab = "Année première nomination",ylab = "Age à la première nomination")
 ```
 
-
 ```{r}
 #| fig-width: 12
 #| fig-height: 10
+library(dplyr)
+library(ggpubr)
+library(ggplot2)
+
 metadata_auteur %>%
-  mutate(naissance_inconnue = is.na(naissance))%>%
-  group_by(naissance_inconnue,sexe) %>%
+  mutate(naissance_inconnue = is.na(naissance)) %>%
+  group_by(naissance_inconnue, sexe) %>%
   summarise(count = n(), .groups = 'drop') %>%
   group_by(sexe) %>%
   mutate(total = sum(count), percentage = 100 * count / total) %>%
   ungroup() %>%
-  select(-total)%>%
-  ggbarplot(x='sexe',fill = 'naissance_inconnue', y = 'percentage',
+  select(-total) %>%
+  ggbarplot(x = 'sexe', fill = 'naissance_inconnue', y = 'percentage',
             position = position_stack(), 
-            #label = TRUE,lab.nb.digits = 2,lab.pos = "in",
             ylab = "% des membres", xlab = "Sexe",
-            title = "Pourcentage des membre du CCNE\nselon que leur âge soit collecté ou non")+
-  theme_ready()+
-  scale_fill_prism(palette = "floral")+
-  labs(fill = "Naissance inconnue")+
-  guides(fill = guide_legend(title.position = "top"))
+            title = "Pourcentage des membres du CCNE\nselon que leur âge soit collecté ou non") +
+  theme_ready() +
+  scale_fill_prism(palette = "floral") +
+  scale_fill_manual(
+    values = c("FALSE" = "#7CA0D4", "TRUE" = "#A48AD3"), 
+    labels = c("FALSE" = "FAUX", "TRUE" = "VRAI"),
+    name = "Naissance inconnue"
+  ) +
+  guides(fill = guide_legend(title.position = "top")) +
+  labs(caption = "Graphique de l'auteur.\nDonnées collectées dans 40 ans de Bioéthique (Delfraissy 2023) et par l'auteur.\nLecture : La collecte des dates de naissance des femmes est plus parcellaire,\navec plus de 25% des femmes sans cette information.")
+
 
 if(save_figures)
   ggsave("../output/descriptive_members/naissance_inconnue_sexe.png", width = 8, height = 10)
@@ -476,9 +490,10 @@ metadata_auteur_2002 <- metadata_auteur|>
 metadata_auteur_2002|>
   gghistogram(x = "nb_avis_as_participant", fill = "sexe",#fill = "#004080",
               position = position_stack(),
-              ylab = "Nombre de membre", xlab = "Nombre de participation à un avis")+
+              ylab = "Nombre de membres", xlab = "Nombre de participation à un avis")+
   theme_ready()+
-  scale_fill_prism(palette = "floral")
+  scale_fill_prism(palette = "floral")+
+  labs(caption = "Graphique de l'auteur.\nDonnées collectées dans 40 ans de Bioéthique (Delfraissy 2023) et par l'auteur.\nLecture : Sur les 151 membres nommés à partir de 2002,\n24 ont participé à un groupe de travail,\navec une égale répartition homme femme.")
 
 if(save_figures)
   ggsave("../output/descriptive_members/histo_participation.png")
@@ -492,7 +507,8 @@ metadata_auteur_2002|>
               position = position_stack(),
               ylab = "Nombre de membre", xlab = "Nombre de fois rapporteur d'un avis")+
   theme_ready()+
-  scale_fill_prism(palette = "floral")
+  scale_fill_prism(palette = "floral")+
+  labs(caption = "Graphique de l'auteur.\nDonnées collectées dans 40 ans de Bioéthique (Delfraissy 2023) et par l'auteur.\nLecture : Sur les 151 membres nommés à partir de 2002,\nPlus de la moitié n'ont pas participé une fois en tant que rapporteur.")
 
 if(save_figures)
   ggsave("../output/descriptive_members/histo_nb_rapporteur.png")
@@ -564,8 +580,138 @@ metadata_auteur|>
   scale_fill_prism(palette = "floral")+
   labs(fill = "Profession")+
   guides(fill = guide_legend(title.position = "top"))
+
+if(save_figures)
+  ggsave("../output/descriptive_members/nb_avis_as_rapporteur_profession.png", width = 10, height = 8)
 ```
 
+```{r}
+#| fig-width: 12
+#| fig-height: 10
+metadata_auteur_2002 %>%
+  group_by(once_rapporteur, profession_recodée) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  group_by(profession_recodée) %>%
+  mutate(total = sum(count), percentage = 100 * count / total) %>%
+  ungroup() %>%
+  select(-total)%>%
+  ggbarplot(x='profession_recodée',fill = 'once_rapporteur', y = 'percentage',
+            position = position_stack(), 
+            #label = TRUE,lab.nb.digits = 2,lab.pos = "in",
+            ylab = "% des membres", xlab = "Profession",
+            title = "Pourcentage des membre du CCNE\nselon leur profession\net selon le fait d'avoir participé en tant que rapporteur")+
+  theme_ready()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
+  scale_fill_prism(palette = "floral")+
+  labs(fill = "A participé en tant que rapporteur")+
+  guides(fill = guide_legend(title.position = "top"))
+if(save_figures)
+  ggsave("../output/descriptive_members/pourcentage_profession_once_rapporteur.png", width = 8, height = 10)
+```
+
+```{r}
+#| fig-width: 12
+#| fig-height: 10
+metadata_auteur_2002 %>%
+  mutate(nb_avis_as_rapporteur_discretized = case_when(
+    nb_avis_as_rapporteur == 0 ~ "0",
+    nb_avis_as_rapporteur == 1 ~ "1",
+    nb_avis_as_rapporteur == 2 ~ "2",
+    nb_avis_as_rapporteur >= 3 ~ "3+",
+  ))%>%
+  group_by(nb_avis_as_rapporteur_discretized, profession_recodée) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  group_by(profession_recodée) %>%
+  mutate(total = sum(count), percentage = 100 * count / total) %>%
+  ungroup() %>%
+  select(-total)%>%
+  ggbarplot(x='profession_recodée',fill = 'nb_avis_as_rapporteur_discretized', y = 'percentage',
+            position = position_stack(), 
+            #label = TRUE,lab.nb.digits = 2,lab.pos = "in",
+            ylab = "% des membres", xlab = "Profession",
+            title = "Pourcentage des membre du CCNE\nselon leur profession\net selon le nombre d'avis en tant que rapporteur")+
+  theme_ready()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
+  scale_fill_prism(palette = "floral")+
+  labs(fill = "Nombre d'avis en tant que rapporteurs")+
+  guides(fill = guide_legend(title.position = "top"))+
+  labs(caption = "Graphique de l'auteur.\nDonnées collectées dans 40 ans de Bioéthique (Delfraissy 2023) et par l'auteur.\nLecture : Sur les membres PUPH nommés après 2002, plus de la moitié à participé au moins une fois en tant que rapporteur.")
+
+
+if(save_figures)
+  ggsave("../output/descriptive_members/pourcentage_profession_nb_avis_as_rapporteur.png", width = 8, height = 10)
+```
+
+```{r}
+#| fig-width: 12
+#| fig-height: 10
+metadata_auteur_2002 %>%
+  mutate(nb_avis_as_rapporteur_discretized = case_when(
+    nb_avis_as_rapporteur == 0 ~ "0",
+    nb_avis_as_rapporteur == 1 ~ "1",
+    nb_avis_as_rapporteur == 2 ~ "2",
+    nb_avis_as_rapporteur >= 3 ~ "3+",
+  ))%>%
+  group_by(nb_avis_as_rapporteur_discretized, président_première_nomination) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  group_by(président_première_nomination) %>%
+  mutate(total = sum(count), percentage = 100 * count / total) %>%
+  ungroup() %>%
+  select(-total)%>%
+  ggbarplot(x='président_première_nomination',fill = 'nb_avis_as_rapporteur_discretized', y = 'percentage',
+            position = position_stack(), 
+            #label = TRUE,lab.nb.digits = 2,lab.pos = "in",
+            ylab = "% des membres", xlab = "Président à la première nomination",
+            title = "Pourcentage des membre du CCNE\nselon le président à leur première nomination\net selon le nombre d'avis en tant que rapporteur")+
+  theme_ready()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
+  scale_fill_prism(palette = "floral")+
+  labs(fill = "Nombre d'avis en tant que rapporteurs")+
+  guides(fill = guide_legend(title.position = "top"))
+
+if(save_figures)
+  ggsave("../output/descriptive_members/pourcentage_président_nb_avis_as_rapporteur.png", width = 8, height = 10)
+```
+```{r}
+metadata_auteur_2002|>
+  ggscatter(x = "durée_mandat",y = "nb_avis_as_rapporteur", color = "sexe",
+            xlab = "Durée totale du mandat", ylab = "Nombre d'avis en tant que rapporteur")+
+  theme_ready()+
+  scale_fill_prism(palette = "floral")
+```
+```{r}
+metadata_auteur_2002|>
+  ggscatter(x = "durée_mandat",y = "nb_avis_as_participant", color = "sexe",
+            xlab = "Durée totale du mandat", ylab = "Nombre d'avis en tant que participant")+
+  theme_ready()+
+  scale_fill_prism(palette = "floral")
+```
+
+```{r}
+#| fig-width: 12
+#| fig-height: 10
+metadata_auteur_2002 %>%
+  group_by(once_rapporteur, président_première_nomination, profession_recodée) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  group_by(once_rapporteur,président_première_nomination) %>%
+  mutate(total = sum(count), percentage = 100 * count / total) %>%
+  ungroup() %>%
+  select(-total)%>%
+  ggbarplot(x='président_première_nomination',fill = 'profession_recodée', y = 'percentage',
+            facet.by = 'once_rapporteur',
+            position = position_stack(), 
+            #label = TRUE,lab.nb.digits = 2,lab.pos = "in",
+            ylab = "% des membres", xlab = "Président à la première nomination",
+            title = "Pourcentage des membre du CCNE\nselon le président à leur première nomination\net selon le nombre d'avis en tant que rapporteur")+
+  theme_ready()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
+  scale_fill_prism(palette = "floral")+
+  labs(fill = "Nombre d'avis en tant que rapporteurs")+
+  guides(fill = guide_legend(title.position = "top"))
+
+if(save_figures)
+  ggsave("../output/descriptive_members/pourcentage_président_once_rapporteur_profession.png", width = 8, height = 10)
+```
 
 # Point sur la méthodologie
 
