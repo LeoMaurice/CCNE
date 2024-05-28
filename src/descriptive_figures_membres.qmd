@@ -712,7 +712,33 @@ metadata_auteur_2002 %>%
 if(save_figures)
   ggsave("../output/descriptive_members/pourcentage_président_once_rapporteur_profession.png", width = 8, height = 10)
 ```
+```{r}
+#| fig-width: 12
+#| fig-height: 10
+metadata_auteur_2002 %>%
+  mutate(once_rapporteur = ifelse(once_rapporteur,'VRAI','FAUX'))%>%
+  group_by(once_rapporteur, profession_recodée) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  group_by(once_rapporteur) %>%
+  mutate(total = sum(count), percentage = 100 * count / total) %>%
+  ungroup() %>%
+  select(-total)%>%
+  ggbarplot(x='once_rapporteur',fill = 'profession_recodée', y = 'percentage',
+            position = position_stack(), 
+            #label = TRUE,lab.nb.digits = 2,lab.pos = "in",
+            ylab = "% des membres", xlab = "a été au moins\nune fois rapporteur",
+            title = "Pourcentage des membres du CCNE (nommés après 2002)\nselon avoir été rapporteur et la profession.")+
+  theme_ready()+
+  scale_fill_prism(palette = "floral")+
+  labs(fill = "Profession")+
+  guides(fill = guide_legend(title.position = "top"))+
+  rotate()+
+  grids(axis = "x")
+  labs(caption = "Graphique de l'auteur.\nDonnées collectées dans les avis et de l'auteur.\nLecture : 40% des membres qui ont été rapporteurs sont des médecins PUPH,\nce qui est dix points de plus que le pourcentage qu'ils occupent en tant que membres du CCNE.")
 
+if(save_figures)
+  ggsave("../output/descriptive_members/pourcentage_once_rapporteur_profession.png", width = 8, height = 10)
+```
 # Point sur la méthodologie
 
 Par simplicité, j'ai attribué à chaque membre le président en exercice au moment de sa nomination. Cela permet d'avoir un indicateur de temps simple pour comparer, mais cela ne donne pas à chaque instant t, la composition du CCNE. De plus je n'ai que les années de nomination, a moins d'aller sur le JORF pour trouver toutes les dates de nomination, mais celle du JORF sont souvent en retard sur les dates réelles. 
