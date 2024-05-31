@@ -1,6 +1,8 @@
 # Model fils
 /src/models/
 
+/src/LLM/models/
+
 /data/ACL/anthology+abstracts.bib
 
 # History files
