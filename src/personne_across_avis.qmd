@@ -1,0 +1,154 @@
+---
+title: "CCNE Personne across avis"
+author: "Léopold MAURICE"
+date: "2024-06-05"
+project: CCNE
+supervision: Pr. Emmanuel Didier, CMH/ENS/EHESS
+format:
+  html:
+    toc: true
+    number-sections: true
+    colorlinks: true
+    geometry:
+      - top=10mm
+      - left=20mm
+      - right=20mm
+      - bottom=10mm  
+      - heightrounded
+    highlight-style: github
+    fontfamily: libertinus
+    documentclass: report
+    fig-width: 12
+    fig-height: 9
+  pdf:
+    documentclass: article
+    geometry: [left=1in, right=1in, top=1in, bottom=1in]
+    fontsize: 11pt
+    keep-tex: true
+    toc: true
+    toc-depth: 2
+    number-sections: true
+execute:
+  eval: true
+  message: false
+  warning: false
+  echo: false
+  output: true
+  error: true
+editor: source
+---
+
+```{r}
+require(pacman,quietly = F)
+
+pacman::p_load(arrow,
+               tidyverse,
+               reshape2,
+               stringr,
+
+               stats,
+               rstatix,
+               
+               ggplot2,
+               gridExtra,
+               ggprism,
+               ggpubr,
+               ggcorrplot,
+               ComplexHeatmap,
+               circlize,
+               patchwork,
+               rmarkdown,
+               readxl,
+               readr)
+
+source("helpers/database_creation.R")
+source("helpers/figures.R")
+
+save_figures = T
+cutpoints = c(0, 1e-04, 0.001, 0.01, 0.05, 0.1, 1)
+symbols = c("****", "***", "**", "*", "•","ns")
+significance = c("p < 0.0001", "p < 0.001", "p < 0.01", "p < 0.05", "p < 0.1", "p>0.1")
+signif_caption_text <- paste("Significance levels:\n", paste(symbols, ":", significance, collapse = ", "))
+
+```
+
+```{r}
+predictions_BERT <- read_csv("../data/intermediate/predictions/predictions_camemBERT_1400annotations_5classes_2024-06-04.csv", 
+    col_types = cols(sentence_id = col_integer(), 
+        pred_label = col_integer())) %>%
+  mutate(
+    sentence_index = as.numeric(substr(sentence_id, nchar(as.character(sentence_id)) - 3, nchar(as.character(sentence_id)))),
+    num = as.numeric(substr(sentence_id, 1, nchar(as.character(sentence_id)) - 4))
+  )
+
+recat <- c("Corps humain" = "Corps humain",
+           "Genre/espèce humaine" = "Genre/espèce humaine",
+           "Individu ou sujet" = "Individu ou sujet",
+           "Personne à protéger" = "Personne droits et devoirs",
+           "Personne responsable et autonome" = "Personne droits et devoirs",
+           "Personne relationnelle" = "Personne relationnelle",
+           "Sentiment humain" = "Genre/espèce humaine",
+           "Poubelle" = "Poubelle")
+
+annotations <- read_csv("../data/intermediate/annotations/personne_withSentence_1400annotations_2024-06-03_ActiveTigger.csv")%>%
+  rename(annotation_label = Personne)%>%
+  mutate(training_label = recode(annotation_label, !!!recat))%>%
+  select(sentence_id,training_label,annotation_label)
+
+# base avec métadonnées au niveau des avis, sans découper au niveau des phrases
+base_avis <- arrow::read_feather('../data/intermediate/big/base_avis.feather')
+levels_order <- c( "Bernard (83-91)", "Changeux (92-99)","Sicard (00-08)", "Grimfeld (09-11)", "Ameisen (12-15)", "Delfraissy (16-)")
+
+base_avis$president <- factor(base_avis$president, levels = levels_order)
+
+predictions <- predictions_BERT %>%
+  left_join(annotations, by = "sentence_id")%>%
+  mutate(label = ifelse(!is.na(training_label), training_label, pred_Personne))%>%
+  filter(label != "Poubelle")%>%
+  left_join(base_avis, by = "num")
+```
+
+```{r}
+#| fig-width: 12
+#| fig-height: 10
+predictions %>%
+  group_by(president, label) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  group_by(president) %>%
+  mutate(total = sum(count), percentage = 100 * count / total) %>%
+  ungroup() %>%
+  select(-total)%>%
+  ggbarplot(x='president',fill = 'label', y = 'percentage',
+            position = position_stack(), 
+            #label = TRUE,lab.nb.digits = 2,lab.pos = "in",
+            ylab = "% des phrases", xlab = "Président",
+            title = "Pourcentage des phrases\nselon leur labelisationn\net selon le président au moment de la publication de l'avis")+
+  theme_ready()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
+  scale_fill_prism(palette = "floral")+
+  labs(fill = "Label")+
+  guides(fill = guide_legend(title.position = "top"))
+```
+
+```{r}
+#| fig-width: 12
+#| fig-height: 10
+predictions %>%
+  mutate(month = format(Date, "%Y-%m"))%>%
+  group_by(month, label) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  group_by(month) %>%
+  mutate(total = sum(count), percentage = 100 * count / total) %>%
+  ungroup() %>%
+  select(-total)%>%
+# Graphique en aires empilées
+ggplot(aes(x = month, y = percentage, fill = label)) +
+  geom_area(position = "stack") +
+  theme_ready()+
+  scale_fill_prism(palette = "floral")+
+  labs(fill = "Label",
+       title = "Proportion des catégories au fil du temps", x = "Mois", y = "Nombre de phrases")+
+  guides(fill = guide_legend(title.position = "top"))
+
+```
+
