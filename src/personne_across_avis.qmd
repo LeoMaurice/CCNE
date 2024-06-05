@@ -105,7 +105,10 @@ predictions <- predictions_BERT %>%
   left_join(annotations, by = "sentence_id")%>%
   mutate(label = ifelse(!is.na(training_label), training_label, pred_Personne))%>%
   filter(label != "Poubelle")%>%
-  left_join(base_avis, by = "num")
+  left_join(base_avis, by = "num")%>%
+  mutate(label = factor(label, levels = c("Personne relationnelle","Individu ou sujet","Genre/espèce humaine",
+                                         "Corps humain","Personne droits et devoirs")),
+         Date = as.Date(Date))
 ```
 
 ```{r}
@@ -130,25 +133,162 @@ predictions %>%
   guides(fill = guide_legend(title.position = "top"))
 ```
 
-```{r}
+```{r, fig.width=20, fig.height=15}
 #| fig-width: 12
 #| fig-height: 10
-predictions %>%
-  mutate(month = format(Date, "%Y-%m"))%>%
-  group_by(month, label) %>%
+
+# Convert Date to quarter
+predictions <- predictions %>%
+  mutate(quarter = paste0(year(Date), "-Q", quarter(Date)))
+
+# Get all unique labels
+all_labels <- unique(predictions$label)
+
+# Get all unique quarters
+all_quarters <- predictions %>%
+  mutate(quarter = paste0(year(Date), "-Q", quarter(Date))) %>%
+  arrange(Date) %>%
+  distinct(quarter) %>%
+  pull(quarter)
+# Create a numeric sequence for quarters
+quarter_numeric <- 1:length(all_quarters)
+
+# Map quarters to numeric sequence
+quarter_map <- data.frame(quarter = all_quarters, quarter_num = quarter_numeric)
+
+# Complete missing values with 0 and compute percentages
+temp <- predictions %>%
+  mutate(quarter = factor(quarter, levels = all_quarters)) %>%
+  group_by(quarter, label) %>%
   summarise(count = n(), .groups = 'drop') %>%
-  group_by(month) %>%
-  mutate(total = sum(count), percentage = 100 * count / total) %>%
+  group_by(quarter) %>%
+  mutate(percentage = 100 * count / sum(count)) %>%
   ungroup() %>%
-  select(-total)%>%
+  complete(quarter = all_quarters, label = all_labels, fill = list(percentage = 0)) %>%
+  left_join(quarter_map, by = "quarter")
+
 # Graphique en aires empilées
-ggplot(aes(x = month, y = percentage, fill = label)) +
-  geom_area(position = "stack") +
-  theme_ready()+
-  scale_fill_prism(palette = "floral")+
-  labs(fill = "Label",
-       title = "Proportion des catégories au fil du temps", x = "Mois", y = "Nombre de phrases")+
+ggplot(temp, aes(x = quarter_num, y = percentage, fill = label)) +
+  geom_area(position = "stack", alpha = 0.8) +
+  theme_ready() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+  scale_fill_prism(palette = "floral") +
+  scale_color_prism(palette = "floral") +
+  scale_x_continuous(breaks = quarter_numeric, labels = all_quarters) +
+  labs(fill = "Label", color = "Label",
+       title = "Proportion des catégories au fil du temps", x = "Trimestre", y = "Pourcentage") +
   guides(fill = guide_legend(title.position = "top"))
 
+
+```
+
+
+```{r, fig.width=20, fig.height=15}
+# Convert Date to semester
+predictions <- predictions %>%
+  mutate(semester = paste0(year(Date), "-S", ifelse(month(Date) <= 6, 1, 2)))
+
+# Get all unique labels
+all_labels <- unique(predictions$label)
+
+# Get all unique semesters and order them chronologically
+all_semesters <- predictions %>%
+  arrange(Date) %>%
+  distinct(semester) %>%
+  pull(semester)
+
+# Create a numeric sequence for semesters
+semester_numeric <- seq_along(all_semesters)
+
+# Map semesters to numeric sequence
+semester_map <- data.frame(semester = all_semesters, semester_num = semester_numeric)
+
+# Complete missing values with 0 and compute percentages
+temp <- predictions %>%
+  mutate(semester = factor(semester, levels = all_semesters)) %>%
+  group_by(semester, label) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  group_by(semester) %>%
+  mutate(percentage = 100 * count / sum(count)) %>%
+  ungroup() %>%
+  complete(semester = all_semesters, label = all_labels, fill = list(percentage = 0)) %>%
+  left_join(semester_map, by = "semester")
+
+# Graphique en aires empilées
+ggplot(temp, aes(x = semester_num, y = percentage, fill = label)) +
+  geom_area(position = "stack", alpha = 0.8) +
+  geom_line(position = "stack", color = "black", linetype = "dashed", size =1)+
+  theme_ready() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+  scale_fill_prism(palette = "floral") +
+  scale_x_continuous(breaks = semester_numeric, labels = all_semesters) +
+  labs(fill = "Label", color = "Label",
+       title = "Proportion des catégories au fil du temps", x = "Semestre", y = "Pourcentage") +
+  guides(fill = guide_legend(title.position = "top"))
+```
+```{r, fig.width=20, fig.height=10}
+# Convert Date to year
+predictions <- predictions %>%
+  mutate(year = year(Date))
+
+# Get all unique labels
+all_labels <- unique(predictions$label)
+
+# Get all unique years and order them chronologically
+all_years <- sort(unique(predictions$year))
+
+# Complete missing values with 0 and compute percentages
+temp <- predictions %>%
+  group_by(year, label) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  group_by(year) %>%
+  mutate(percentage = 100 * count / sum(count)) %>%
+  ungroup() %>%
+  complete(year = all_years, label = all_labels, fill = list(percentage = 0))
+
+# Graphique en aires empilées
+ggplot(temp, aes(x = year, y = percentage, fill = label)) +
+  geom_area(position = "stack", alpha = 0.8) +
+  geom_line(position = "stack", color = "black", linetype = "dashed", size =1)+
+  theme_ready() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+  scale_fill_prism(palette = "floral") +
+  scale_x_continuous(breaks = all_years) +
+  labs(fill = "Label", color = "Label",
+       title = "Proportion des catégories au fil du temps", x = "Année", y = "Pourcentage") +
+  guides(fill = guide_legend(title.position = "top"))
+```
+```{r, fig.width=20, fig.height=15}
+# Convert Date to two-year steps
+predictions <- predictions %>%
+  mutate(two_year = year(Date) %/% 2 * 2)
+
+# Get all unique labels
+all_labels <- unique(predictions$label)
+
+# Get all unique two-year steps and order them chronologically
+all_two_years <- sort(unique(predictions$two_year))
+
+# Complete missing values with 0 and compute percentages
+temp <- predictions %>%
+  group_by(two_year, label) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  group_by(two_year) %>%
+  mutate(percentage = 100 * count / sum(count)) %>%
+  ungroup() %>%
+  complete(two_year = all_two_years, label = all_labels, fill = list(percentage = 0))
+
+
+# Graphique en aires empilées
+ggplot(temp, aes(x = two_year, y = percentage, fill = label)) +
+  geom_area(position = "stack", alpha = 0.8) +
+  theme_ready() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+  scale_fill_prism(palette = "floral") +
+  scale_color_prism(palette = "floral") +
+  scale_x_continuous(breaks = seq_along(all_two_years), labels = all_two_years) +
+  labs(fill = "Label", color = "Label",
+       title = "Proportion des catégories au fil du temps", x = "Deux ans", y = "Pourcentage") +
+  guides(fill = guide_legend(title.position = "top"))
 ```
 
