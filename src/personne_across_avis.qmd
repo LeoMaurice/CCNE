@@ -256,7 +256,7 @@ metadata_avis_2002 <- metadata_avis %>%
   arrange(num)
 
 plot_theme_titre_par_avis <- ggplot(metadata_avis_2002, aes(x = factor(num), y = 0)) +
-  geom_text(aes(label = paste(num,titre_court, theme, sep = " | ")), angle = 90, vjust = -0.5, check_overlap = TRUE, size = 6) +
+  geom_text(aes(label = paste(num,titre_court, theme, sep = " | ")), angle = 90, vjust = -0.5, check_overlap = TRUE, size = 10) +
   theme_void() +
   theme(
     plot.margin = margin(t = 20, r = 20, b = 20, l = 20)
@@ -265,7 +265,7 @@ plot_theme_titre_par_avis <- ggplot(metadata_avis_2002, aes(x = factor(num), y =
 # Graphique en barres empilées
 plot_categorie_par_avis <- ggplot(percentage_categorie, aes(x = factor(num), y = percentage, fill = label)) +
   geom_bar(stat = "identity", position = "stack", alpha = 0.8) +
-  theme_ready(text_size = 25) +
+  theme_ready(text_size = 35) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
   scale_fill_prism(palette = "floral") +
   labs(fill = "Label", color = "Label",
@@ -274,14 +274,15 @@ plot_categorie_par_avis <- ggplot(percentage_categorie, aes(x = factor(num), y =
 
 # Graphique en barres empilées
 plot_participation_par_avis <- ggplot(percentage_participation, aes(x = factor(num), y = percentage, fill = profession_recodée)) +
-  geom_bar(stat = "identity", position = "stack", alpha = 0.8) +
-  theme_ready(text_size = 25) +
+  geom_bar(stat = "identity", position = "stack", alpha = 0.8, color = "black") +
+  theme_ready(text_size = 35) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
   scale_fill_prism(palette = "floral") +
   labs(fill = "Profession", color = "Profession",
-       title = "Proportion des professions au fil du temps par avis", x = "Numéro avis", y = "Pourcentage") +
+       title = "Proportion des professions au fil du temps par avis", x = "Numéro avis et date de publication", y = "Pourcentage") +
   guides(fill = guide_legend(title.position = "top")) +
-  scale_x_discrete(labels = metadata_avis_2002$labels)
+  scale_x_discrete(labels = metadata_avis_2002$labels)+
+  labs(caption = "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture :Par exemple, l'avis 86 (publié le 04/11/2004) - qui parle de la commercialisation des autotests, dans le thème maladies génétique - a été à 100% écrit par un PUPH et réfère à 50% à la personne en tant qu'entité juridique.")
 
 # Utiliser grid.arrange pour arranger les graphiques
 participation_categories_across_avis <- grid.arrange(
@@ -289,7 +290,7 @@ participation_categories_across_avis <- grid.arrange(
   plot_categorie_par_avis,
   plot_participation_par_avis,
   ncol = 1,
-  heights = c(5, 5, 5)  # Ajuster la hauteur relative pour donner plus d'espace aux textes
+  heights = c(10, 7, 7)  # Ajuster la hauteur relative pour donner plus d'espace aux textes
 )
 ```
 
