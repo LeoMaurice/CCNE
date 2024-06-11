@@ -110,7 +110,9 @@ predictions <- predictions_BERT %>%
                                          "Corps humain","Personne droits et devoirs")),
          Date = as.Date(Date))
 ```
+# Classifications across time
 
+## Presidents
 ```{r}
 #| fig-width: 12
 #| fig-height: 10
@@ -132,7 +134,7 @@ predictions %>%
   labs(fill = "Label")+
   guides(fill = guide_legend(title.position = "top"))
 ```
-
+## Quarters
 ```{r, fig.width=20, fig.height=15}
 #| fig-width: 12
 #| fig-height: 10
@@ -182,50 +184,7 @@ ggplot(temp, aes(x = quarter_num, y = percentage, fill = label)) +
 
 ```
 
-
-```{r, fig.width=20, fig.height=15}
-# Convert Date to semester
-predictions <- predictions %>%
-  mutate(semester = paste0(year(Date), "-S", ifelse(month(Date) <= 6, 1, 2)))
-
-# Get all unique labels
-all_labels <- unique(predictions$label)
-
-# Get all unique semesters and order them chronologically
-all_semesters <- predictions %>%
-  arrange(Date) %>%
-  distinct(semester) %>%
-  pull(semester)
-
-# Create a numeric sequence for semesters
-semester_numeric <- seq_along(all_semesters)
-
-# Map semesters to numeric sequence
-semester_map <- data.frame(semester = all_semesters, semester_num = semester_numeric)
-
-# Complete missing values with 0 and compute percentages
-temp <- predictions %>%
-  mutate(semester = factor(semester, levels = all_semesters)) %>%
-  group_by(semester, label) %>%
-  summarise(count = n(), .groups = 'drop') %>%
-  group_by(semester) %>%
-  mutate(percentage = 100 * count / sum(count)) %>%
-  ungroup() %>%
-  complete(semester = all_semesters, label = all_labels, fill = list(percentage = 0)) %>%
-  left_join(semester_map, by = "semester")
-
-# Graphique en aires empilées
-ggplot(temp, aes(x = semester_num, y = percentage, fill = label)) +
-  geom_area(position = "stack", alpha = 0.8) +
-  geom_line(position = "stack", color = "black", linetype = "dashed", size =1)+
-  theme_ready() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
-  scale_fill_prism(palette = "floral") +
-  scale_x_continuous(breaks = semester_numeric, labels = all_semesters) +
-  labs(fill = "Label", color = "Label",
-       title = "Proportion des catégories au fil du temps", x = "Semestre", y = "Pourcentage") +
-  guides(fill = guide_legend(title.position = "top"))
-```
+## Year
 ```{r, fig.width=20, fig.height=10}
 # Convert Date to year
 predictions <- predictions %>%
@@ -258,37 +217,79 @@ ggplot(temp, aes(x = year, y = percentage, fill = label)) +
        title = "Proportion des catégories au fil du temps", x = "Année", y = "Pourcentage") +
   guides(fill = guide_legend(title.position = "top"))
 ```
-```{r, fig.width=20, fig.height=15}
-# Convert Date to two-year steps
-predictions <- predictions %>%
-  mutate(two_year = year(Date) %/% 2 * 2)
 
-# Get all unique labels
-all_labels <- unique(predictions$label)
+# Classification compared to rapporteur by avis
+need to run descriptive figures membres avant
+```{r, fig.width=40, fig.height=30}
+# Exploser la colonne avis_rapporteur pour avoir une ligne par personne et par avis
+metadata_avis_membre <- metadata_auteur_2002 %>%
+  unnest(avis_rapporteur)
 
-# Get all unique two-year steps and order them chronologically
-all_two_years <- sort(unique(predictions$two_year))
+# Combiner les trois opérations en une seule
+percentage_participation <- metadata_avis_membre %>%
+  group_by(avis_rapporteur) %>%
+  mutate(total_count = n()) %>%
+  group_by(avis_rapporteur, profession_recodée) %>%
+  summarise(
+    profession_count = n(),
+    total_count = first(total_count)
+  ) %>%
+  mutate(percentage = 100 * profession_count / total_count) %>%
+  select(avis_rapporteur, profession_recodée, percentage) %>%
+  rename(num = avis_rapporteur)
 
-# Complete missing values with 0 and compute percentages
-temp <- predictions %>%
-  group_by(two_year, label) %>%
+num_with_rapporteur_info <- unique(percentage_participation$num)
+
+percentage_categorie <- predictions %>%
+  filter(num %in% num_with_rapporteur_info) %>%
+  group_by(num, label) %>%
   summarise(count = n(), .groups = 'drop') %>%
-  group_by(two_year) %>%
+  group_by(num) %>%
   mutate(percentage = 100 * count / sum(count)) %>%
-  ungroup() %>%
-  complete(two_year = all_two_years, label = all_labels, fill = list(percentage = 0))
+  ungroup()
 
+# Ajouter les annotations pour les dates sous les graphiques
+metadata_avis_2002 <- metadata_avis %>%
+  filter(num %in% num_with_rapporteur_info) %>%
+  mutate(date_labels = format(date, "%Y/%m/%d")) %>%
+  mutate(labels = paste(date_labels, num)) %>%
+  arrange(num)
 
-# Graphique en aires empilées
-ggplot(temp, aes(x = two_year, y = percentage, fill = label)) +
-  geom_area(position = "stack", alpha = 0.8) +
-  theme_ready() +
+plot_theme_titre_par_avis <- ggplot(metadata_avis_2002, aes(x = factor(num), y = 0)) +
+  geom_text(aes(label = paste(num,titre_court, theme, sep = " | ")), angle = 90, vjust = -0.5, check_overlap = TRUE, size = 6) +
+  theme_void() +
+  theme(
+    plot.margin = margin(t = 20, r = 20, b = 20, l = 20)
+  )
+
+# Graphique en barres empilées
+plot_categorie_par_avis <- ggplot(percentage_categorie, aes(x = factor(num), y = percentage, fill = label)) +
+  geom_bar(stat = "identity", position = "stack", alpha = 0.8) +
+  theme_ready(text_size = 25) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
   scale_fill_prism(palette = "floral") +
-  scale_color_prism(palette = "floral") +
-  scale_x_continuous(breaks = seq_along(all_two_years), labels = all_two_years) +
   labs(fill = "Label", color = "Label",
-       title = "Proportion des catégories au fil du temps", x = "Deux ans", y = "Pourcentage") +
+       title = "Proportion des catégories au fil du temps par avis", x = "Numéro avis", y = "Pourcentage") +
   guides(fill = guide_legend(title.position = "top"))
+
+# Graphique en barres empilées
+plot_participation_par_avis <- ggplot(percentage_participation, aes(x = factor(num), y = percentage, fill = profession_recodée)) +
+  geom_bar(stat = "identity", position = "stack", alpha = 0.8) +
+  theme_ready(text_size = 25) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+  scale_fill_prism(palette = "floral") +
+  labs(fill = "Profession", color = "Profession",
+       title = "Proportion des professions au fil du temps par avis", x = "Numéro avis", y = "Pourcentage") +
+  guides(fill = guide_legend(title.position = "top")) +
+  scale_x_discrete(labels = metadata_avis_2002$labels)
+
+# Utiliser grid.arrange pour arranger les graphiques
+participation_categories_across_avis <- grid.arrange(
+  plot_theme_titre_par_avis,
+  plot_categorie_par_avis,
+  plot_participation_par_avis,
+  ncol = 1,
+  heights = c(5, 5, 5)  # Ajuster la hauteur relative pour donner plus d'espace aux textes
+)
 ```
 
