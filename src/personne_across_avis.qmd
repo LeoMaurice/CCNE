@@ -54,6 +54,7 @@ pacman::p_load(arrow,
                ggprism,
                ggpubr,
                ggcorrplot,
+               ggalluvial,
                ComplexHeatmap,
                circlize,
                patchwork,
@@ -220,6 +221,8 @@ ggplot(temp, aes(x = year, y = percentage, fill = label)) +
 
 # Classification compared to rapporteur by avis
 need to run descriptive figures membres avant
+
+## bar plot
 ```{r, fig.width=40, fig.height=30}
 # Exploser la colonne avis_rapporteur pour avoir une ligne par personne et par avis
 metadata_avis_membre <- metadata_auteur_2002 %>%
@@ -229,13 +232,13 @@ metadata_avis_membre <- metadata_auteur_2002 %>%
 percentage_participation <- metadata_avis_membre %>%
   group_by(avis_rapporteur) %>%
   mutate(total_count = n()) %>%
-  group_by(avis_rapporteur, profession_recodée) %>%
+  group_by(avis_rapporteur, profession_recodée, id_membre) %>%
   summarise(
     profession_count = n(),
     total_count = first(total_count)
   ) %>%
   mutate(percentage = 100 * profession_count / total_count) %>%
-  select(avis_rapporteur, profession_recodée, percentage) %>%
+  select(avis_rapporteur, profession_recodée,id_membre, percentage) %>%
   rename(num = avis_rapporteur)
 
 num_with_rapporteur_info <- unique(percentage_participation$num)
@@ -274,7 +277,7 @@ plot_categorie_par_avis <- ggplot(percentage_categorie, aes(x = factor(num), y =
 
 # Graphique en barres empilées
 plot_participation_par_avis <- ggplot(percentage_participation, aes(x = factor(num), y = percentage, fill = profession_recodée)) +
-  geom_bar(stat = "identity", position = "stack", alpha = 0.8, color = "black") +
+  geom_bar(stat = "identity", position = "stack", alpha = 1, color = "black") +
   theme_ready(text_size = 35) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
   scale_fill_prism(palette = "floral") +
@@ -282,7 +285,7 @@ plot_participation_par_avis <- ggplot(percentage_participation, aes(x = factor(n
        title = "Proportion des professions au fil du temps par avis", x = "Numéro avis et date de publication", y = "Pourcentage") +
   guides(fill = guide_legend(title.position = "top")) +
   scale_x_discrete(labels = metadata_avis_2002$labels)+
-  labs(caption = "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture :Par exemple, l'avis 86 (publié le 04/11/2004) - qui parle de la commercialisation des autotests, dans le thème maladies génétique - a été à 100% écrit par un PUPH et réfère à 50% à la personne en tant qu'entité juridique.")
+  labs(caption = "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture : Par exemple, l'avis 86 (publié le 04/11/2004) - qui parle de la commercialisation des autotests, dans le thème maladies génétique - a été à 100% écrit par un PUPH et réfère à 50% à la personne en tant qu'entité juridique.")
 
 # Utiliser grid.arrange pour arranger les graphiques
 participation_categories_across_avis <- grid.arrange(
@@ -292,5 +295,64 @@ participation_categories_across_avis <- grid.arrange(
   ncol = 1,
   heights = c(10, 7, 7)  # Ajuster la hauteur relative pour donner plus d'espace aux textes
 )
+```
+## Alluvial plot
+
+```{r, fig.width=40, fig.height=30}
+metadata_avis_membre %>%
+  rename(num = avis_rapporteur) %>%
+  left_join(
+    predictions %>%
+  filter(num %in% num_with_rapporteur_info) %>%
+  group_by(num, label) %>%
+  summarise(nb_phrases = n(), .groups = 'drop'), by = "num"
+  )%>%
+  # on obtient là un df avec pour chaque personne, pour chaque avis, pour chaque catégorie textuelle
+  ggplot(aes(axis1 = président_première_nomination, axis2 = label, y = nb_phrases))+
+  geom_alluvium(aes(fill = profession_recodée),
+                curve_type = "sine")+
+  geom_stratum()+
+  geom_text(stat = "stratum",
+            aes(label = after_stat(stratum)),
+            size = 30) +
+  scale_x_discrete(limits = c("Président", "Catégorie phrase"),
+                   expand = c(0.15, 0.05)) +
+  theme_ready(text_size = 35)+
+  scale_fill_prism(palette = "floral")+
+  guides(fill = guide_legend(title.position = "top"))+
+  labs(ylab = "Nombre de phrase", fill = "Profession recodée")
+
+
+
+```
+
+
+```{r, fig.width=30, fig.height=30}
+metadata_avis_membre %>%
+  rename(num = avis_rapporteur) %>%
+  left_join(
+    predictions %>%
+  filter(num %in% num_with_rapporteur_info) %>%
+  group_by(num, label) %>%
+  summarise(nb_phrases = n(), .groups = 'drop'), by = "num"
+  )%>%
+  # on obtient là un df avec pour chaque personne, pour chaque avis, pour chaque catégorie textuelle
+  ggplot(aes(axis1 = profession_recodée, axis2 = label, y = nb_phrases))+
+  geom_alluvium(aes(fill = profession_recodée),
+                curve_type = "sine")+
+  geom_stratum()+
+  geom_text(stat = "stratum",
+            aes(label = after_stat(stratum)),
+            size = 15) +
+  scale_x_discrete(limits = c("Profession", "Catégorie phrase"),
+                   expand = c(0.15, 0.05)) +
+  theme_ready(text_size = 35)+
+  scale_fill_prism(palette = "floral")+
+  guides(fill = guide_legend(title.position = "top"))+
+  labs(ylab = "Nombre de phrase", fill = "Profession recodée",
+       caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: La majorité des phrases co-signées par les biologistes sont classées dans genre/espèce humaine.")
+
+
+
 ```
 
