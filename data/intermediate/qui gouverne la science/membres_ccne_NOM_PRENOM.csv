@@ -1,149 +1,149 @@
 id_membre;nom;sexe;profession;spécialité;naissance;NOM_PRENOM
-20;Carole Widmaier;F;chercheur;philosophie;1975;WIDMAIER_Carole
-13;Sylvie-Anne Goldberg;F;chercheur;judaïsme;;GOLDBERG_Sylvie-Anne
-39;Valérie Masson-Delmotte;H;chercheur;physique;1971;MASSON-DELMOTTE_Valérie
-48;Didier Martin;H;"politicien;médecin";neurologie;1956;MARTIN_Didier
-60;François Stasse;H;magistrat;"";1948;STASSE_François
-66;Anne Caron-Déglise;F;magistrat;"";1959;CARON-DÉGLISE_Anne
-91;Angèle Consoli;F;médecin;psychiatrie;1972;CONSOLI_Angèle
-126;Séverine Laboué;F;haut fonctionnaire;"";1981;LABOUÉ_Séverine
-134;Rachel Bocher;F;médecin;psychiatrie;;BOCHER_Rachel
-142;Ariane Giacobino;F;médecin;génétique;;GIACOBINO_Ariane
-148;Laurent Chambaud;H;médecin;santé publique;;CHAMBAUD_Laurent
-182;François-Xavier Maquart;H;biologiste;"";1952;MAQUART_François-Xavier
-189;Lluís Quintana-Murci;H;biologiste;génétique;1970;QUINTANA-MURCI_Lluís
-208;Jean-Antoine Girault;H;médecin;neurologie;1955;GIRAULT_Jean-Antoine
-261;Didier Dreyfuss;H;médecin;réanimation;;DREYFUSS_Didier
-276;Michel Badré;H;haut fonctionnaire;environnement;1948;BADRÉ_Michel
-277;Didier Fassin;H;chercheur;sociologie;1955;FASSIN_Didier
-278;Yvanie Caillé;F;"ingénieur;militant";"";1974;CAILLÉ_Yvanie
-279;Noémie Nauleau;F;"référent handicap;militant";"";1985;NAULEAU_Noémie
-280;Jean-Louis Haurié;H;militant;"";;HAURIÉ_Jean-Louis
-281;Sylviane Giampino;F;"psychologue;militant";"";;GIAMPINO_Sylviane
-282;Cécile Duflot;F;politicien;écologie;;DUFLOT_Cécile
-65;Françoise Kamara;F;magistrat;"";1952;KAMARA_Françoise
-74;Annabel Desgrées du Loû;F;chercheur;démographie;1968;DESGRÉES@DU@LOÛ_Annabel
-104;Alain Claeys;H;politicien;"";1948;CLAEYS_Alain
-112;Gilles Bœuf;H;biologiste;biologie marine;1950;BŒUF_Gilles
-118;Jean-Emmanuel Ray;H;chercheur;droit;1952;RAY_Jean-Emmanuel
-156;Karine Lefeuvre;F;chercheur;droit;1971;LEFEUVRE_Karine
-162;Fabrice Gzil;H;chercheur;philosophie;1974;GZIL_Fabrice
-188;Alain Prochianz;H;biologiste;neurologie;1948;PROCHIANZ_Alain
-202;Arnold Munnich;H;médecin;"génétique;pédiatrie";1949;MUNNICH_Arnold
-260;Michèle Cottier;F;médecin;"";1957;COTTIER_Michèle
-243;Emmanuel Didier;H;chercheur;sociologie;1970;DIDIER_Emmanuel
-259;Anne Pellé;F;chercheur;physiologie;;PELLÉ_Anne
-6;Jean-François Delfraissy;H;médecin;"infectiologie;immunologie";1948;DELFRAISSY_Jean-François
-12;Cynthia Fleury;F;chercheur;philosophie;1974;FLEURY_Cynthia
-19;Marion Muller-Colard;F;théologien;protestantisme;1978;MULLER-COLARD_Marion
-47;Marc Delatte;H;"politicien;médecin";généraliste;1961;DELATTE_Marc
-55;Corinne Imbert;F;"politicien;pharmacien";"";1958;IMBERT_Corinne
-59;Caroline Martin;F;magistrat;"";1955;MARTIN_Caroline
-73;Claire Hédon;F;journaliste;"";1962;HÉDON_Claire
-80;Karine Lefeuvre;F;professeur d'université;droit;1971;LEFEUVRE_Karine
-86;Alexandra Benachi;F;médecin;gynécologie;;BENACHI_Alexandra
-90;Claude Kirchner;H;chercheur;informatique;1951;KIRCHNER_Claude
-119;Florence Jusot;F;chercheur;économie;1974;JUSOT_Florence
-125;Lionel Naccache;H;médecin;neurologie;1969;NACCACHE_Lionel
-176;Jean-François Bach;H;médecin;immunologie;1940;BACH_Jean-François
-214;Gilles Adda;H;"ingénieur;ITA";informatique;1959;ADDA_Gilles
-229;Catherine Patrat;F;médecin;embryologie;;PATRAT_Catherine
-234;Claude Delpuech;H;"ingénieur;ITA";physique;;DELPUECH_Claude
-258;Fabienne Blaise;F;chercheur;littérature;1957;BLAISE_Fabienne
-26;Abdennour Bidar;H;ENArque;éducation;1971;BIDAR_Abdennour
-32;Dominique Quinio;F;journaliste;catholicisme;;QUINIO_Dominique
-64;Pierre Delmas-Goyon;H;magistrat;"";1952;DELMAS-GOYON_Pierre
-103;Sophie Crozier;F;médecin;neurologie;;CROZIER_Sophie
-111;Carine Camby;F;ENArque;"";1961;CAMBY_Carine
-117;Martine Le Friant;F;chercheur;droit;1955;LE@FRIANT_Martine
-168;Yves Charpenel;H;magistrat;"";1950;CHARPENEL_Yves
-196;Thomas Bourgeron;H;biologiste;génétique;1965;BOURGERON_Thomas
-201;Anne Durandy-Torre;F;médecin;"";1948;DURANDY-TORRE_Anne
-242;Marc Abeles;H;chercheur;anthropologie;1950;ABELES_Marc
-249;Mounira Amor-Guéret;F;biologiste;oncologie;;AMOR-GUÉRET_Mounira
-268;Véronique Fournier;F;médecin;"cardiologie;santé publique";1954;FOURNIER_Véronique
-11;Lionel Naccache;H;médecin;neurologie;1969;NACCACHE_Lionel
-18;Marianne Carbonnier-Burkard;F;chercheur;histoire;1949;CARBONNIER-BURKARD_Marianne
-38;Frédéric Worms;H;chercheur;philosophie;1964;WORMS_Frédéric
-54;Michelle Meunier;F;"politicien;éducateur";enfance;1956;MEUNIER_Michelle
-58;Jean-Marie Delarue;H;magistrat;"";1945;DELARUE_Jean-Marie
-72;Jean-Pierre Mignard;H;"politicien;avocat";"";1951;MIGNARD_Jean-Pierre
-85;Frédérique Kuttenn;F;médecin;endocrinologie;;KUTTENN_Frédérique
-96;Hervé Chneiweiss;H;médecin;"neurologie;génétique";1957;CHNEIWEISS_Hervé
-133;Florence Gruat;F;cadre supérieur santé;"";1957;GRUAT_Florence
-141;François Ansermet;H;médecin;psychiatre;1952;ANSERMET_François
-147;Cynthia Fleury;F;chercheur;"psychologie;philosophie";1974;FLEURY_Cynthia
-181;Jean-Noël Fiessinger;H;médecin;cardiologie;1942;FIESSINGER_Jean-Noël
-207;Laure Coulombel;F;médecin;"";1950;COULOMBEL_Laure
-241;Marie-Angèle Hermitte;F;chercheur;droit;1948;HERMITTE_Marie-Angèle
-257;Xavier Vandendriessche;H;chercheur;droit;1961;VANDENDRIESSCHE_Xavier
-37;André Glucksman;H;professeur agrégé;philosophie;1937;GLUCKSMAN_André
-53;Bernard Cazeau;H;"politicien;médecin";"";1939;CAZEAU_Bernard
-79;Dominique Thouvenin;F;professeur d'université;droit;1953;THOUVENIN_Dominique
-116;Régis Aubry;H;médecin;soin palliatifs;1958;AUBRY_Régis
-155;Michel Van Praët;H;chercheur;musée;1949;VAN@PRAËT_Michel
-161;Christiane Basset;F;militant;famille;1946;BASSET_Christiane
-175;Jean-Pierre Kahane;H;chercheur;mathématiques;1926;KAHANE_Jean-Pierre
-187;Claudine Tiercelin;F;chercheur;philosophie;1952;TIERCELIN_Claudine
-195;Margaret Buckingham;F;biologiste;développement;1945;BUCKINGHAM_Margaret
-213;Alice René;F;"";neurologie;1977;RENÉ_Alice
-224;Francis Puech;H;médecin;gynécologie;;PUECH_Francis
-267;Didier Truchet;H;chercheur;droit;1948;TRUCHET_Didier
-275;Pierre-Henri Duée;H;biologiste;agronomie;;DUÉE_Pierre-Henri
-10;Michaël Azoulay;H;théologien;judaïsme;1971;AZOULAY_Michaël
-17;Louis Schweitzer;H;théologien;protestantisme;;SCHWEITZER_Louis
-36;Luc Ferry;H;chercheur;philosophie;1951;FERRY_Luc
-89;Bertrand Weil;H;médecin;"";1935;WEIL_Bertrand
-132;François Beaufils;H;médecin;pédiatrie;1939;BEAUFILS_François
-140;Sylvie Cazalot;F;infirmière;"";;CAZALOT_Sylvie
-146;Joëlle Belaisch-Allart;F;médecin;gynécologie;1953;BELAISCH-ALLART_Joëlle
-174;Gérard Ferey;H;chercheur;chimie;1941;FEREY_Gérard
-212;Danièle Siroux;F;"juriste;ITA";"";;SIROUX_Danièle
-228;Yves Agid;H;médecin;"";1940;AGID_Yves
-233;Jean-Louis Vildé;H;médecin;épidémiologie;1938;VILDÉ_Jean-Louis
-256;Claude Matuchansky;H;médecin;gastro-entérologue;1941;MATUCHANSKY_Claude
-274;Emmanuel Jolivet;H;médecin;"réanimation;pédiatrie";1979;JOLIVET_Emmanuel
-4;Alain Grimfeld;H;médecin;pédiatrie;1941;GRIMFELD_Alain
-25;Ali Benmakhlouf;H;chercheur;philosophie;1959;BENMAKHLOUF_Ali
-31;Xavier Lacroix;H;théologien;catholicisme;;LACROIX_Xavier
-63;Frédérique Dreifuss-Netter;F;magistrat;"";1950;DREIFUSS-NETTER_Frédérique
-102;Alain Cordier;H;haut fonctionnaire;"";1954;CORDIER_Alain
-110;André Comte-Sponville;H;chercheur;philosophie;1952;COMTE-SPONVILLE_André
-124;Anne-Marie Dickelé;F;psychologue;"";;DICKELÉ_Anne-Marie
-167;Claire Legras;F;magistrat;"";1973;LEGRAS_Claire
-173;Pierre Joliot;H;biologiste;"";1932;JOLIOT_Pierre
-200;Marie-Germaine Bousser;F;médecin;neurologie;1943;BOUSSER_Marie-Germaine
-223;Annick Alpérovitch;F;médecin;épidémiologie;1941;ALPÉROVITCH_Annick
-240;Roger-Pol Droit;H;"chercheur;journaliste";philosophie;1949;DROIT_Roger-Pol
-248;Patrick Gaudray;H;biologiste;génétique;1951;GAUDRAY_Patrick
-255;Georges Faure;H;chercheur;droit;1960;FAURE_Georges
-5;Jean-Claude Ameisen;H;médecin;immunologie;1951;AMEISEN_Jean-Claude
-9;Haïm Korsia;H;théologien;judaïsme;1963;KORSIA_Haïm
-16;Olivier Abel;H;chercheur;protestantisme;1953;ABEL_Olivier
-52;Marie-Thérèse Hermange;H;politicien;"";1937;HERMANGE_Marie-Thérèse
-57;Michel Roux;H;magistrat;"";1935;ROUX_Michel
-62;Philippe Waquet;H;magistrat;"";1933;WAQUET_Philippe
-71;Lucien Neuwirth;H;politicien;"";1924;NEUWIRTH_Lucien
-84;Dominique Stoppa-Lyonnet;F;médecin;génétique;1956;STOPPA-LYONNET_Dominique
-88;Christian de Rouffignac;H;biologiste;cellulaire;1945;DE@ROUFFIGNAC_Christian
-95;Philippe Rouvillois;H;ENArque;"";1935;ROUVILLOIS_Philippe
-123;Alain Grimfeld;H;médecin;pédiatrie;1941;GRIMFELD_Alain
-131;Bernard Kanovitch;H;médecin;rhumathologie;;KANOVITCH_Bernard
-172;Robert Nauquet;H;"médecin;biologiste";neurologie;1923;NAUQUET_Robert
-180;Claude Sureau;H;médecin;"";1927;SUREAU_Claude
-227;Alain Fischer;H;médecin;"génétique;immunologie";1949;FISCHER_Alain
-273;Pierre Le Neindre;H;biologiste;agronomie;;LE@NEINDRE_Pierre
-46;Jean Bardet;H;"politicien;médecin";cardiologie;1941;BARDET_Jean
-115;Pierre Le Coz;H;chercheur;philosophie;1964;LE@COZ_Pierre
-145;Jacqueline Mandelbaum;F;médecin;reproduction;1946;MANDELBAUM_Jacqueline
-154;Alain-Gérard Slama;H;journaliste;"";1942;SLAMA_Alain-Gérard
-160;Chantal Lebatard;F;militant;famille;;LEBATARD_Chantal
-186;Mireille Delmas-Marty;F;chercheur;droit;1941;DELMAS-MARTY_Mireille
-194;Pascale Cossart;F;biologiste;microbiologie;1948;COSSART_Pascale
-199;Claude Kordon;F;biologiste;"";1934;KORDON_Claude
-222;Carole Moquin-Pattey;F;chercheur;pharmacologie;;MOQUIN-PATTEY_Carole
-266;Claude Burlet;H;médecin;"";1942;BURLET_Claude
-272;Yves Chupeau;H;biologiste;cellulaire;1944;CHUPEAU_Yves
-45;Alain Claeys;H;politicien;économie;1948;CLAEYS_Alain
-51;Jean-Louis Lorrain;H;"politicien;médecin";"";1948;LORRAIN_Jean-Louis
-70;Anne Cambon-Thomsen;F;médecin;"immunologie;génétique";1949;CAMBON-THOMSEN_Anne
+20;Carole Widmaier;F;chercheur;philosophie;1975;WIDMAIER_CAROLE
+13;Sylvie-Anne Goldberg;F;chercheur;judaïsme;;GOLDBERG_SYLVIE-ANNE
+39;Valérie Masson-Delmotte;H;chercheur;physique;1971;MASSON-DELMOTTE_VALERIE
+48;Didier Martin;H;"politicien;médecin";neurologie;1956;MARTIN_DIDIER
+60;François Stasse;H;magistrat;"";1948;STASSE_FRANCOIS
+66;Anne Caron-Déglise;F;magistrat;"";1959;CARON-DEGLISE_ANNE
+91;Angèle Consoli;F;médecin;psychiatrie;1972;CONSOLI_ANGELE
+126;Séverine Laboué;F;haut fonctionnaire;"";1981;LABOUE_SEVERINE
+134;Rachel Bocher;F;médecin;psychiatrie;;BOCHER_RACHEL
+142;Ariane Giacobino;F;médecin;génétique;;GIACOBINO_ARIANE
+148;Laurent Chambaud;H;médecin;santé publique;;CHAMBAUD_LAURENT
+182;François-Xavier Maquart;H;biologiste;"";1952;MAQUART_FRANCOIS-XAVIER
+189;Lluís Quintana-Murci;H;biologiste;génétique;1970;QUINTANA-MURCI_LLUIS
+208;Jean-Antoine Girault;H;médecin;neurologie;1955;GIRAULT_JEAN-ANTOINE
+261;Didier Dreyfuss;H;médecin;réanimation;;DREYFUSS_DIDIER
+276;Michel Badré;H;haut fonctionnaire;environnement;1948;BADRE_MICHEL
+277;Didier Fassin;H;chercheur;sociologie;1955;FASSIN_DIDIER
+278;Yvanie Caillé;F;"ingénieur;militant";"";1974;CAILLE_YVANIE
+279;Noémie Nauleau;F;"référent handicap;militant";"";1985;NAULEAU_NOEMIE
+280;Jean-Louis Haurié;H;militant;"";;HAURIE_JEAN-LOUIS
+281;Sylviane Giampino;F;"psychologue;militant";"";;GIAMPINO_SYLVIANE
+282;Cécile Duflot;F;politicien;écologie;;DUFLOT_CECILE
+65;Françoise Kamara;F;magistrat;"";1952;KAMARA_FRANCOISE
+74;Annabel Desgrées du Loû;F;chercheur;démographie;1968;DESGREES@DU@LOU_ANNABEL
+104;Alain Claeys;H;politicien;"";1948;CLAEYS_ALAIN
+112;Gilles Bœuf;H;biologiste;biologie marine;1950;BOUF_GILLES
+118;Jean-Emmanuel Ray;H;chercheur;droit;1952;RAY_JEAN-EMMANUEL
+156;Karine Lefeuvre;F;chercheur;droit;1971;LEFEUVRE_KARINE
+162;Fabrice Gzil;H;chercheur;philosophie;1974;GZIL_FABRICE
+188;Alain Prochianz;H;biologiste;neurologie;1948;PROCHIANZ_ALAIN
+202;Arnold Munnich;H;médecin;"génétique;pédiatrie";1949;MUNNICH_ARNOLD
+260;Michèle Cottier;F;médecin;"";1957;COTTIER_MICHELE
+243;Emmanuel Didier;H;chercheur;sociologie;1970;DIDIER_EMMANUEL
+259;Anne Pellé;F;chercheur;physiologie;;PELLE_ANNE
+6;Jean-François Delfraissy;H;médecin;"infectiologie;immunologie";1948;DELFRAISSY_JEAN-FRANCOIS
+12;Cynthia Fleury;F;chercheur;philosophie;1974;FLEURY_CYNTHIA
+19;Marion Muller-Colard;F;théologien;protestantisme;1978;MULLER-COLARD_MARION
+47;Marc Delatte;H;"politicien;médecin";généraliste;1961;DELATTE_MARC
+55;Corinne Imbert;F;"politicien;pharmacien";"";1958;IMBERT_CORINNE
+59;Caroline Martin;F;magistrat;"";1955;MARTIN_CAROLINE
+73;Claire Hédon;F;journaliste;"";1962;HEDON_CLAIRE
+80;Karine Lefeuvre;F;professeur d'université;droit;1971;LEFEUVRE_KARINE
+86;Alexandra Benachi;F;médecin;gynécologie;;BENACHI_ALEXANDRA
+90;Claude Kirchner;H;chercheur;informatique;1951;KIRCHNER_CLAUDE
+119;Florence Jusot;F;chercheur;économie;1974;JUSOT_FLORENCE
+125;Lionel Naccache;H;médecin;neurologie;1969;NACCACHE_LIONEL
+176;Jean-François Bach;H;médecin;immunologie;1940;BACH_JEAN-FRANCOIS
+214;Gilles Adda;H;"ingénieur;ITA";informatique;1959;ADDA_GILLES
+229;Catherine Patrat;F;médecin;embryologie;;PATRAT_CATHERINE
+234;Claude Delpuech;H;"ingénieur;ITA";physique;;DELPUECH_CLAUDE
+258;Fabienne Blaise;F;chercheur;littérature;1957;BLAISE_FABIENNE
+26;Abdennour Bidar;H;ENArque;éducation;1971;BIDAR_ABDENNOUR
+32;Dominique Quinio;F;journaliste;catholicisme;;QUINIO_DOMINIQUE
+64;Pierre Delmas-Goyon;H;magistrat;"";1952;DELMAS-GOYON_PIERRE
+103;Sophie Crozier;F;médecin;neurologie;;CROZIER_SOPHIE
+111;Carine Camby;F;ENArque;"";1961;CAMBY_CARINE
+117;Martine Le Friant;F;chercheur;droit;1955;LE@FRIANT_MARTINE
+168;Yves Charpenel;H;magistrat;"";1950;CHARPENEL_YVES
+196;Thomas Bourgeron;H;biologiste;génétique;1965;BOURGERON_THOMAS
+201;Anne Durandy-Torre;F;médecin;"";1948;DURANDY-TORRE_ANNE
+242;Marc Abeles;H;chercheur;anthropologie;1950;ABELES_MARC
+249;Mounira Amor-Guéret;F;biologiste;oncologie;;AMOR-GUERET_MOUNIRA
+268;Véronique Fournier;F;médecin;"cardiologie;santé publique";1954;FOURNIER_VERONIQUE
+11;Lionel Naccache;H;médecin;neurologie;1969;NACCACHE_LIONEL
+18;Marianne Carbonnier-Burkard;F;chercheur;histoire;1949;CARBONNIER-BURKARD_MARIANNE
+38;Frédéric Worms;H;chercheur;philosophie;1964;WORMS_FREDERIC
+54;Michelle Meunier;F;"politicien;éducateur";enfance;1956;MEUNIER_MICHELLE
+58;Jean-Marie Delarue;H;magistrat;"";1945;DELARUE_JEAN-MARIE
+72;Jean-Pierre Mignard;H;"politicien;avocat";"";1951;MIGNARD_JEAN-PIERRE
+85;Frédérique Kuttenn;F;médecin;endocrinologie;;KUTTENN_FREDERIQUE
+96;Hervé Chneiweiss;H;médecin;"neurologie;génétique";1957;CHNEIWEISS_HERVE
+133;Florence Gruat;F;cadre supérieur santé;"";1957;GRUAT_FLORENCE
+141;François Ansermet;H;médecin;psychiatre;1952;ANSERMET_FRANCOIS
+147;Cynthia Fleury;F;chercheur;"psychologie;philosophie";1974;FLEURY_CYNTHIA
+181;Jean-Noël Fiessinger;H;médecin;cardiologie;1942;FIESSINGER_JEAN-NOEL
+207;Laure Coulombel;F;médecin;"";1950;COULOMBEL_LAURE
+241;Marie-Angèle Hermitte;F;chercheur;droit;1948;HERMITTE_MARIE-ANGELE
+257;Xavier Vandendriessche;H;chercheur;droit;1961;VANDENDRIESSCHE_XAVIER
+37;André Glucksman;H;professeur agrégé;philosophie;1937;GLUCKSMAN_ANDRE
+53;Bernard Cazeau;H;"politicien;médecin";"";1939;CAZEAU_BERNARD
+79;Dominique Thouvenin;F;professeur d'université;droit;1953;THOUVENIN_DOMINIQUE
+116;Régis Aubry;H;médecin;soin palliatifs;1958;AUBRY_REGIS
+155;Michel Van Praët;H;chercheur;musée;1949;VAN@PRAET_MICHEL
+161;Christiane Basset;F;militant;famille;1946;BASSET_CHRISTIANE
+175;Jean-Pierre Kahane;H;chercheur;mathématiques;1926;KAHANE_JEAN-PIERRE
+187;Claudine Tiercelin;F;chercheur;philosophie;1952;TIERCELIN_CLAUDINE
+195;Margaret Buckingham;F;biologiste;développement;1945;BUCKINGHAM_MARGARET
+213;Alice René;F;"";neurologie;1977;RENE_ALICE
+224;Francis Puech;H;médecin;gynécologie;;PUECH_FRANCIS
+267;Didier Truchet;H;chercheur;droit;1948;TRUCHET_DIDIER
+275;Pierre-Henri Duée;H;biologiste;agronomie;;DUEE_PIERRE-HENRI
+10;Michaël Azoulay;H;théologien;judaïsme;1971;AZOULAY_MICHAEL
+17;Louis Schweitzer;H;théologien;protestantisme;;SCHWEITZER_LOUIS
+36;Luc Ferry;H;chercheur;philosophie;1951;FERRY_LUC
+89;Bertrand Weil;H;médecin;"";1935;WEIL_BERTRAND
+132;François Beaufils;H;médecin;pédiatrie;1939;BEAUFILS_FRANCOIS
+140;Sylvie Cazalot;F;infirmière;"";;CAZALOT_SYLVIE
+146;Joëlle Belaisch-Allart;F;médecin;gynécologie;1953;BELAISCH-ALLART_JOELLE
+174;Gérard Ferey;H;chercheur;chimie;1941;FEREY_GERARD
+212;Danièle Siroux;F;"juriste;ITA";"";;SIROUX_DANIELE
+228;Yves Agid;H;médecin;"";1940;AGID_YVES
+233;Jean-Louis Vildé;H;médecin;épidémiologie;1938;VILDE_JEAN-LOUIS
+256;Claude Matuchansky;H;médecin;gastro-entérologue;1941;MATUCHANSKY_CLAUDE
+274;Emmanuel Jolivet;H;médecin;"réanimation;pédiatrie";1979;JOLIVET_EMMANUEL
+4;Alain Grimfeld;H;médecin;pédiatrie;1941;GRIMFELD_ALAIN
+25;Ali Benmakhlouf;H;chercheur;philosophie;1959;BENMAKHLOUF_ALI
+31;Xavier Lacroix;H;théologien;catholicisme;;LACROIX_XAVIER
+63;Frédérique Dreifuss-Netter;F;magistrat;"";1950;DREIFUSS-NETTER_FREDERIQUE
+102;Alain Cordier;H;haut fonctionnaire;"";1954;CORDIER_ALAIN
+110;André Comte-Sponville;H;chercheur;philosophie;1952;COMTE-SPONVILLE_ANDRE
+124;Anne-Marie Dickelé;F;psychologue;"";;DICKELE_ANNE-MARIE
+167;Claire Legras;F;magistrat;"";1973;LEGRAS_CLAIRE
+173;Pierre Joliot;H;biologiste;"";1932;JOLIOT_PIERRE
+200;Marie-Germaine Bousser;F;médecin;neurologie;1943;BOUSSER_MARIE-GERMAINE
+223;Annick Alpérovitch;F;médecin;épidémiologie;1941;ALPEROVITCH_ANNICK
+240;Roger-Pol Droit;H;"chercheur;journaliste";philosophie;1949;DROIT_ROGER-POL
+248;Patrick Gaudray;H;biologiste;génétique;1951;GAUDRAY_PATRICK
+255;Georges Faure;H;chercheur;droit;1960;FAURE_GEORGES
+5;Jean-Claude Ameisen;H;médecin;immunologie;1951;AMEISEN_JEAN-CLAUDE
+9;Haïm Korsia;H;théologien;judaïsme;1963;KORSIA_HAIM
+16;Olivier Abel;H;chercheur;protestantisme;1953;ABEL_OLIVIER
+52;Marie-Thérèse Hermange;H;politicien;"";1937;HERMANGE_MARIE-THERESE
+57;Michel Roux;H;magistrat;"";1935;ROUX_MICHEL
+62;Philippe Waquet;H;magistrat;"";1933;WAQUET_PHILIPPE
+71;Lucien Neuwirth;H;politicien;"";1924;NEUWIRTH_LUCIEN
+84;Dominique Stoppa-Lyonnet;F;médecin;génétique;1956;STOPPA-LYONNET_DOMINIQUE
+88;Christian de Rouffignac;H;biologiste;cellulaire;1945;DE@ROUFFIGNAC_CHRISTIAN
+95;Philippe Rouvillois;H;ENArque;"";1935;ROUVILLOIS_PHILIPPE
+123;Alain Grimfeld;H;médecin;pédiatrie;1941;GRIMFELD_ALAIN
+131;Bernard Kanovitch;H;médecin;rhumathologie;;KANOVITCH_BERNARD
+172;Robert Nauquet;H;"médecin;biologiste";neurologie;1923;NAUQUET_ROBERT
+180;Claude Sureau;H;médecin;"";1927;SUREAU_CLAUDE
+227;Alain Fischer;H;médecin;"génétique;immunologie";1949;FISCHER_ALAIN
+273;Pierre Le Neindre;H;biologiste;agronomie;;LE@NEINDRE_PIERRE
+46;Jean Bardet;H;"politicien;médecin";cardiologie;1941;BARDET_JEAN
+115;Pierre Le Coz;H;chercheur;philosophie;1964;LE@COZ_PIERRE
+145;Jacqueline Mandelbaum;F;médecin;reproduction;1946;MANDELBAUM_JACQUELINE
+154;Alain-Gérard Slama;H;journaliste;"";1942;SLAMA_ALAIN-GERARD
+160;Chantal Lebatard;F;militant;famille;;LEBATARD_CHANTAL
+186;Mireille Delmas-Marty;F;chercheur;droit;1941;DELMAS-MARTY_MIREILLE
+194;Pascale Cossart;F;biologiste;microbiologie;1948;COSSART_PASCALE
+199;Claude Kordon;F;biologiste;"";1934;KORDON_CLAUDE
+222;Carole Moquin-Pattey;F;chercheur;pharmacologie;;MOQUIN-PATTEY_CAROLE
+266;Claude Burlet;H;médecin;"";1942;BURLET_CLAUDE
+272;Yves Chupeau;H;biologiste;cellulaire;1944;CHUPEAU_YVES
+45;Alain Claeys;H;politicien;économie;1948;CLAEYS_ALAIN
+51;Jean-Louis Lorrain;H;"politicien;médecin";"";1948;LORRAIN_JEAN-LOUIS
+70;Anne Cambon-Thomsen;F;médecin;"immunologie;génétique";1949;CAMBON-THOMSEN_ANNE
