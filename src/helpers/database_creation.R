@@ -154,11 +154,11 @@ open_metadata <- function(){
                            "logical", "text", "text", 
                            "text", "date", "logical", 
                            "text", "logical", "logical",
-                           "text"))|>
+                           "text","text"))|>
     mutate(saisine = saisine_precise %in% list_saisine_obligatoire,
            date = as.Date(date)
     )|>
-    select(num,saisine,rapporteurs, membres_gt,titre_court,titre,date,theme,divergence))
+    select(num,saisine,rapporteurs, membres_gt,titre_court,titre,date,theme,divergence, citations_autres_avis))
 }
 
 join_metadata <- function(base_avis_ccne){
