@@ -177,3 +177,8 @@ join_metadata <- function(base_avis_ccne){
   
   return(base_avis_ccne)
 }
+
+is_president_CCNE <- function(nomination) {
+  components <- strsplit(nomination, ";")[[1]]
+  "PR" %in% components
+}

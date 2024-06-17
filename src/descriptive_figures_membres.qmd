@@ -839,9 +839,30 @@ membres_ccne_qgs <- inner_join(metadata_auteur_2002,QGS%>%
 
 ```{r}
 membres_ccne_qgs|>
-  ggscatter(x = "nb_avis_as_participant",y = "nb_affiliations", color = "sexe",
-            xlab = "Durée totale du mandat", ylab = "Nombre d'avis en tant que participant")+
+  ggscatter(x = "nb_avis_as_participant",y = "nb_affiliations", shape = "sexe", color = "profession_recodée",
+            xlab = "Nombre d'avis en tant que participant", ylab = "Nombre d'affiliations (QGS)")+
   theme_ready()+
   scale_fill_prism(palette = "floral")
 ```
 
+```{r, fig.width=11, fig.height=7}
+membres_ccne_qgs|>
+  ggscatter(x = "nb_avis_as_rapporteur",y = "nb_affiliations", shape = "sexe", color = "profession_recodée",
+            size = 4,
+            xlab = "Nombre d'avis en tant que rapporteur", ylab = "Nombre d'affiliations (QGS)")+
+  geom_text(
+  data = subset(membres_ccne_qgs, sapply(nomination, is_president_CCNE)),
+  aes(label = nom),
+  vjust = -1, hjust = 0.5, size = 3, color = "red"
+)+
+  theme_ready(text_size = 16)+
+  scale_color_prism(palette = "floral")+
+  guides(color = guide_legend(title.position = "top"),
+         shape = guide_legend(title.position = "top")) +
+  labs(title = "Investissement en tant que rapporteurs,\ncomparés à l'investissement dans la direction de la science\n(membres nomminé après 2002)",
+       color = "Profession",
+       caption = "Graphique de l'auteur.\nDonnées collectées par l'auteur; et issues de la base Qui Gouverne la Science (Laillier et Topalov 2022).\nLecture : L'investissement dans des institutions de gouvernance de la science semble aller à l'opposé de l'investissement au CCNE.")
+
+if(save_figures)
+  ggsave("../output/descriptive_members/rapporteur_vs_qgs.png", width = 8, height = 10)
+```
