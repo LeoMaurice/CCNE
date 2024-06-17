@@ -757,3 +757,91 @@ Voici une description des 12 catégories de professions recodées:
 - **Chercheur SHS (Sciences Humaines et Sociales)** : Inclut les chercheurs en sociologie, anthropologie, histoire, économie, psychologie, démographie, philosophie, géographie, sciences politiques, littérature, muséologie, et des spécialistes universitaires des religions (judaïsme notamment)
 - **Chercheur sciences exactes** : Regroupe les chercheurs en mathématiques, chimie, physique et informatique.
 - **Inconnue** : Catégorie pour les professions qui ne correspondent à aucune des précédentes ou dont les informations sont insuffisantes pour le recodage.
+
+# Qui gouverne la science
+
+```{r}
+QGS <- read_csv("../data/intermediate/qui gouverne la science/sele_Matrice.csv")%>%
+  select(-...1)%>%
+  rename(sexe.qgs = sexe.x,
+         sexe.leo = sexe.y,
+         nom.leo = nom.y,
+         nom.qgs = nom,
+         summary = '0')
+
+# Apply the function to remove columns with only zeros from column 6 to column 424
+# Function to remove columns with only zeros in a specified range and move the last 6 columns to the beginning
+remove_zero_and_reorder <- function(df, start_col, end_col, num_last_cols) {
+  # Identify the last 'num_last_cols' columns
+  last_cols <- tail(names(df), num_last_cols)
+  
+  # Subset the data frame to the specified range
+  sub_df <- df[, start_col:end_col]
+  
+  # Identify columns that are not full of zeros
+  non_zero_cols <- colSums(sub_df != 0) > 0
+  
+  # Columns to keep (including non-zero columns)
+  cols_to_keep <- c(last_cols, names(df)[1:(start_col - 1)], names(df)[start_col:end_col][non_zero_cols])
+  
+  # Reorder the columns
+  result_df <- df[, cols_to_keep]
+  
+  return(result_df)
+}
+
+# Define the range and number of last columns to move
+QGS <- remove_zero_and_reorder(QGS, 6, 417, 6)
+
+QGS$nb_affiliations <- rowSums(QGS[, 11:90])
+
+# Get the current column names
+col_names <- colnames(QGS)
+
+# Define the new order of columns
+new_order <- c(col_names[1:9], "nb_affiliations", col_names[10:(ncol(QGS) - 1)])
+
+# Reorder the data frame
+QGS <- QGS[, new_order]
+
+# je m'étais trompé dans le genre de 
+# Valérie Masson-Delmotte (F et non H)
+# et de Dominique Thouvenin (H et non F)
+# je corrige dans le fichier sele_Matrice et dans metadata_auteur 
+# mais pas dans les fichiers envoyés à Joël pour garder l'historique
+# First test is sexe.leo == sexe.qgs
+print(any(QGS$sexe.leo!=QGS$sexe.qgs))
+# Maintenant let's look at the actual affiliations
+
+QGS%>%
+  select(id_membre, nom.leo, profession, spécialité, naissance, sexe.leo, nb_affiliations,summary)%>%
+  View()
+
+
+# Problème je crois : deux Louis Schweitzer, l'un haut fonctionnaire et ancien PDG de renault, l'autre pasteur.
+
+id_membres_faux_appareillement = c(17)
+QGS%>%
+  filter(!(id_membre %in% id_membres_faux_appareillement)) -> QGS
+```
+
+```{r}
+# base ultra détaillée
+# faut il que je reclassifie certains membres du ccne puph en biologiste
+detailled_qgs_few_members <- read_csv("../data/intermediate/qui gouverne la science/sele_Base.csv")
+
+```
+
+```{r}
+membres_ccne_qgs <- inner_join(metadata_auteur_2002,QGS%>%
+                                 select(id_membre,nb_affiliations), by = "id_membre")
+```
+
+```{r}
+membres_ccne_qgs|>
+  ggscatter(x = "nb_avis_as_participant",y = "nb_affiliations", color = "sexe",
+            xlab = "Durée totale du mandat", ylab = "Nombre d'avis en tant que participant")+
+  theme_ready()+
+  scale_fill_prism(palette = "floral")
+```
+
