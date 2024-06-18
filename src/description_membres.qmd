@@ -63,7 +63,7 @@ pacman::p_load(arrow,
 source("helpers/database_creation.R")
 source("helpers/figures.R")
 
-save_figures = T
+save_figures = F
 cutpoints = c(0, 1e-04, 0.001, 0.01, 0.05, 0.1, 1)
 symbols = c("****", "***", "**", "*", "•","ns")
 significance = c("p < 0.0001", "p < 0.001", "p < 0.01", "p < 0.05", "p < 0.1", "p>0.1")
@@ -223,44 +223,38 @@ metadata_auteur <- result$metadata_auteur
 metadata_avis <- result$metadata_avis
 
 rm(result)
-```
 
-
-```{r}
-#| eval: false
-
-metadata_avis %>%
-  filter(sapply(ids_rapporteurs, function(x) any(is.na(x)))) %>%
-  mutate(string_ids_rapporteurs = sapply(ids_rapporteurs, function(x) paste(x, collapse = ", ")))%>%
-  select(num, rapporteurs, string_ids_rapporteurs)%>%
-  View()
-```
-
-```{r}
-#| eval: false
-metadata_avis %>%
-  filter(sapply(ids_membres_gt, function(x) any(is.na(x)))) %>%
-  mutate(string_ids_membres_gt = sapply(ids_membres_gt, function(x) paste(x, collapse = ", ")))%>%
-  select(num, membres_gt, string_ids_membres_gt)%>%
-  View()
-
-```
-
-```{r}
 metadata_auteur <- metadata_auteur|>
   mutate(nb_avis_as_rapporteur = sapply(avis_rapporteur, length),
          nb_avis_as_membre_gt = sapply(avis_membre_gt, length),
          nb_avis_as_participant = nb_avis_as_rapporteur + nb_avis_as_membre_gt)
 ```
 
+# Point sur la méthodologie
+
+Par simplicité, j'ai attribué à chaque membre le président en exercice au moment de sa nomination. Cela permet d'avoir un indicateur de temps simple pour comparer, mais cela ne donne pas à chaque instant t, la composition du CCNE. De plus je n'ai que les années de nomination, a moins d'aller sur le JORF pour trouver toutes les dates de nomination, mais celle du JORF sont souvent en retard sur les dates réelles. 
+
+Voici une description des 12 catégories de professions recodées:
+
+- **Politicien ou militant** : Inclut les personnes ayant une profession liée à la politique ou à l'activisme (notamment association de défense de la famille, beaucoup nommé par le Ministère de la famille), y compris ceux qui ont une carrière antérieure dans la médecine.
+- **Journaliste/presse** : Regroupe les individus travaillant dans le journalisme ou les médias, dont les patrons de presse.
+- **Théologien** : Comprend les personnes spécialisées dans la théologie, toutes religions comprises.
+- **Médecin PUPH** : Se réfère aux médecins Professeurs des Universités-Praticiens Hospitaliers (PUPH), excluant les généralistes et libéraux.
+- **Chercheur bio** : Regroupe les chercheurs en biologie, physiologie ou pharmacologie.
+- **Autres professions santé** : Inclut les pharmaciens, infirmiers, psychologues, généralistes, et cadres supérieurs de santé.
+- **Profession du droit** : Englobe les avocats, magistrats, juges et juristes, dont les conseillers d'état et membres de la cours de cassation.
+- **Cadre public/privé** : Regroupe les hauts fonctionnaires, enarques, cadres et ingénieurs. Un certain nombre de personnes ont été haut fonctionnaire puis cadre de grands groupes industriels notamment dans les personnes nommées par le ministère de l'industrie. Peut être faudrait il séparer les hauts fonctionnaires selon leur type de spécialité.
+- **Chercheur droit** : Juriste universitaire.
+- **Chercheur SHS (Sciences Humaines et Sociales)** : Inclut les chercheurs en sociologie, anthropologie, histoire, économie, psychologie, démographie, philosophie, géographie, sciences politiques, littérature, muséologie, et des spécialistes universitaires des religions (judaïsme notamment)
+- **Chercheur sciences exactes** : Regroupe les chercheurs en mathématiques, chimie, physique et informatique.
+- **Inconnue** : Catégorie pour les professions qui ne correspondent à aucune des précédentes ou dont les informations sont insuffisantes pour le recodage.
 
 
-# Nombre de membres
+# Description des membres du CCNE
 
-```{r}
-#| eval: false
-table(metadata_auteur$profession_recodée)
-```
+## Nombre de membres
+
+### Selon la profession
 
 ```{r}
 #| fig-width: 12
@@ -283,6 +277,9 @@ if(save_figures)
   ggsave("../output/descriptive_members/nombre_profession.png", width = 12, height = 8)
 ```
 Sans trop d'étonnement, la profession dominante sont les médecins hospitaliers et universitaires (PUPH), suivi de près par les chercheurs en sciences humaines (en majorité en philosophie), puis les biologistes et les politiciens (dont un certain nombre sont des médecins, mais plutôt libéraux). Pour finir le droit est aussi bien représenté entre les membres du conseil d'état, de la cour de cassation, des juristes (de profession ou universitaires).
+
+### Selon le genre
+
 ```{r}
 #| fig-width: 12
 #| fig-height: 10
@@ -305,32 +302,9 @@ if(save_figures)
   ggsave("../output/descriptive_members/nombre_sexe_président.png")
 ```
 
-```{r}
-#| fig-width: 12
-#| fig-height: 10
-metadata_auteur %>%
-  group_by(président_première_nomination, profession_recodée) %>%
-  summarise(count = n(), .groups = 'drop') %>%
-  group_by(président_première_nomination) %>%
-  mutate(total = sum(count), percentage = 100 * count / total) %>%
-  ungroup() %>%
-  select(-total)%>%
-  ggbarplot(x='président_première_nomination',fill = 'profession_recodée', y = 'percentage',
-            position = position_stack(), 
-            #label = TRUE,lab.nb.digits = 2,lab.pos = "in",
-            ylab = "% des membres", xlab = "Président à la première nomination",
-            title = "Pourcentage des membre du CCNE\nselon leur profession par leur président à leur première nomination")+
-  theme_ready()+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
-  scale_fill_prism(palette = "floral")+
-  labs(fill = "Profession")+
-  guides(fill = guide_legend(title.position = "top"))
+## durée mandat
 
-if(save_figures)
-  ggsave("../output/descriptive_members/nombre_profession_président.png", width = 8, height = 10)
-```
-
-# durée mandat
+### Selon le genre et le président
 
 ```{r}
 #| fig-width: 12
@@ -349,55 +323,8 @@ if(save_figures)
 ```
 On voit que la durée du mandat est a eu tendance à baisser et à se normaliser autour de 5 ans, avec encore quelques personnes qui font plus.
 
-```{r}
-#| fig-width: 12
-#| fig-height: 10
-metadata_auteur|>  
-  ggboxplot(x='profession_recodée',fill = 'profession_recodée', y = 'durée_mandat',
-            #facet.by = 'président_première_nomination',
-            ylab = "Durée total du mandat", xlab = "Profession",
-            title = "Durée total des mandats effectués au CCNE\nselon leur profession")+
-  theme_ready()+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
-  scale_fill_prism(palette = "floral")+
-  labs(fill = "Profession")+
-  guides(fill = guide_legend(title.position = "top"))
-
-if(save_figures)
-  ggsave("../output/descriptive_members/durée_mandat_profession.png", width = 12, height = 8)
-```
-
-```{r}
-#| eval: false
-metadata_auteur|>  
-  ggboxplot(x='nomination', y = 'durée_mandat',
-            #facet.by = 'président_première_nomination',
-            ylab = "Durée total du mandat", xlab = "Président à la première nomination",
-            title = "Durée total des mandats effectués au CCNE\nelon leurs entités nominatrices")+
-  theme_ready()+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
-
-if(save_figures)
-  ggsave("../output/descriptive_members/durée_mandat_nomination.png", width = 12, height = 8)
-```
-
-# âge à la première nomination
-
-```{r}
-#| fig-width: 12
-#| fig-height: 10
-metadata_auteur|>  
-  ggviolin(x='président_première_nomination',fill = 'sexe', y = 'age_première_nomination',
-            ylab = "âge à la première nomination", xlab = "Président à la première nomination",
-            title = "âge à la première nomination\nselon leur genre et le président à leur première nomination")+
-  theme_ready()+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
-  scale_fill_prism(palette = "floral")
-if(save_figures)
-  ggsave("../output/descriptive_members/age_sexe_président.png")
-```
-
-
+## Âge à la première nomination
+### Selon la profession
 ```{r}
 #| fig-width: 12
 #| fig-height: 10
@@ -418,29 +345,9 @@ if(save_figures)
   ggsave("../output/descriptive_members/age_profession.png", width = 12, height = 8)
 ```
 
-```{r}
-#| eval: false
-
-metadata_auteur|>  
-  ggboxplot(x='nomination', y = 'age_première_nomination',
-            #facet.by = 'président_première_nomination',
-            ylab = "âge à la première nomination", xlab = "Entité nominatrice",
-            title = "âge à la première nomination au CCNE\nselon leurs entités nominatrices")+
-  theme_ready()+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
-
-if(save_figures)
-  ggsave("../output/descriptive_members/age_nomination.png", width = 12, height = 8)
-```
 Globalement les membres du CCNE sont assez âgés quand ils sont nommés pour la première fois, à l'exception notable des théologiens (toutes religions comprises). L'âge moyen est de 60 ans sur l'ensemble des membres. Aucune tendance en terme d'évolution de l'âge à la première nomination semble vraiment être identifiable.
 
-```{r}
-#| fig-width: 12
-#| fig-height: 10
-metadata_auteur|>
-  ggscatter(x = "début",y="age_première_nomination", xlab = "Année première nomination",ylab = "Age à la première nomination")
-```
-
+## Complétude des données récoltées
 ```{r}
 #| fig-width: 12
 #| fig-height: 10
@@ -479,7 +386,9 @@ On voit qu'il y a une différence de genre : il est plus dure de trouver certain
 
 # Nombre de participation à un avis, et différence selon la participation à l'écriture d'avis
 
-On se limite aux membres du CCNE qui l'ont rejoint après (ou égale) à 2002, car c'est à partir de là qu'on a des informations quasi exshaustives sur les auteurs des avis.
+On se limite aux membres du CCNE qui l'ont rejoint après (ou égale) à 2002, car c'est à partir de là qu'on a des informations quasi exhaustive sur les auteurs des avis.
+
+## Histo participation
 
 ```{r}
 #| fig-width: 12
@@ -498,7 +407,7 @@ metadata_auteur_2002|>
 if(save_figures)
   ggsave("../output/descriptive_members/histo_participation.png")
 ```
-
+## Histo rapporteurs
 ```{r}
 #| fig-width: 12
 #| fig-height: 10
@@ -515,99 +424,13 @@ if(save_figures)
 ```
 
 ```{r}
-#| fig-width: 12
-#| fig-height: 10
-metadata_auteur_2002|>
-  gghistogram(x = "nb_avis_as_membre_gt", fill = "sexe",#fill = "#004080",
-              position = position_stack(),
-              ylab = "Nombre de membre", xlab = "Nombre de fois membre d'un gt")+
-  theme_ready()+
-  scale_fill_prism(palette = "floral")
-
-if(save_figures)
-  ggsave("../output/descriptive_members/histo_nb_membre_gt.png")
-```
-```{r}
 metadata_auteur_2002 <- metadata_auteur_2002|>
   mutate(once_rapporteur = nb_avis_as_rapporteur>0)
 
 
 ```
 
-```{r}
-#| fig-width: 12
-#| fig-height: 10
-metadata_auteur_2002|>  
-  ggviolin(x='président_première_nomination',fill = 'once_rapporteur', y = 'durée_mandat',
-            ylab = "Durée total du mandat", xlab = "Président à la première nomination",
-            title = "Durée total des mandats effectués au CCNE\nselon le président à leur première nomination\net si a été au moins une fois rapporteur")+
-  theme_ready()+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
-  scale_fill_prism(palette = "floral")+
-  labs(fill = "A été au moins une fois rapporteur")
-if(save_figures)
-  ggsave("../output/descriptive_members/durée_mandat_once_rapporteur_président.png")
-```
-
-Sans trop de surprise, les membres avec des mandats qui ont durés longtemps, ont souvent plus au moins une fois rapporteurs et inversement.
-
-```{r}
-#| fig-width: 12
-#| fig-height: 10
-metadata_auteur_2002|>  
-  ggviolin(x='président_première_nomination',fill = 'once_rapporteur', y = 'age_première_nomination',
-            ylab = "Age à la première nomination", xlab = "Président à la première nomination",
-            title = "Age à la première nomination au CCNE\nselon le président à leur première nomination\net si a été au moins une fois rapporteur")+
-  theme_ready()+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
-  scale_fill_prism(palette = "floral")+
-  labs(fill = "A été au moins une fois rapporteur")
-if(save_figures)
-  ggsave("../output/descriptive_members/age_première_nomination_once_rapporteur_président.png")
-```
-Peut être une légère tendance à ce que les plus jeunes s'investissent plus mais rien d'évident.
-
-```{r}
-#| fig-width: 12
-#| fig-height: 10
-metadata_auteur|>  
-  ggboxplot(x='profession_recodée',fill = 'profession_recodée', y = 'nb_avis_as_rapporteur',
-            #facet.by = 'président_première_nomination',
-            ylab = "Nombre d'avis", xlab = "Profession",
-            title = "Nombre d'avis en tant que rapporteur\nselon leur profession")+
-  theme_ready()+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
-  scale_fill_prism(palette = "floral")+
-  labs(fill = "Profession")+
-  guides(fill = guide_legend(title.position = "top"))
-
-if(save_figures)
-  ggsave("../output/descriptive_members/nb_avis_as_rapporteur_profession.png", width = 10, height = 8)
-```
-
-```{r}
-#| fig-width: 12
-#| fig-height: 10
-metadata_auteur_2002 %>%
-  group_by(once_rapporteur, profession_recodée) %>%
-  summarise(count = n(), .groups = 'drop') %>%
-  group_by(profession_recodée) %>%
-  mutate(total = sum(count), percentage = 100 * count / total) %>%
-  ungroup() %>%
-  select(-total)%>%
-  ggbarplot(x='profession_recodée',fill = 'once_rapporteur', y = 'percentage',
-            position = position_stack(), 
-            #label = TRUE,lab.nb.digits = 2,lab.pos = "in",
-            ylab = "% des membres", xlab = "Profession",
-            title = "Pourcentage des membre du CCNE\nselon leur profession\net selon le fait d'avoir participé en tant que rapporteur")+
-  theme_ready()+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
-  scale_fill_prism(palette = "floral")+
-  labs(fill = "A participé en tant que rapporteur")+
-  guides(fill = guide_legend(title.position = "top"))
-if(save_figures)
-  ggsave("../output/descriptive_members/pourcentage_profession_once_rapporteur.png", width = 8, height = 10)
-```
+## Rapporteurs selon profession
 
 ```{r}
 #| fig-width: 12
@@ -642,76 +465,7 @@ if(save_figures)
   ggsave("../output/descriptive_members/pourcentage_profession_nb_avis_as_rapporteur.png", width = 8, height = 10)
 ```
 
-```{r}
-#| fig-width: 12
-#| fig-height: 10
-metadata_auteur_2002 %>%
-  mutate(nb_avis_as_rapporteur_discretized = case_when(
-    nb_avis_as_rapporteur == 0 ~ "0",
-    nb_avis_as_rapporteur == 1 ~ "1",
-    nb_avis_as_rapporteur == 2 ~ "2",
-    nb_avis_as_rapporteur >= 3 ~ "3+",
-  ))%>%
-  group_by(nb_avis_as_rapporteur_discretized, président_première_nomination) %>%
-  summarise(count = n(), .groups = 'drop') %>%
-  group_by(président_première_nomination) %>%
-  mutate(total = sum(count), percentage = 100 * count / total) %>%
-  ungroup() %>%
-  select(-total)%>%
-  ggbarplot(x='président_première_nomination',fill = 'nb_avis_as_rapporteur_discretized', y = 'percentage',
-            position = position_stack(), 
-            #label = TRUE,lab.nb.digits = 2,lab.pos = "in",
-            ylab = "% des membres", xlab = "Président à la première nomination",
-            title = "Pourcentage des membre du CCNE\nselon le président à leur première nomination\net selon le nombre d'avis en tant que rapporteur")+
-  theme_ready()+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
-  scale_fill_prism(palette = "floral")+
-  labs(fill = "Nombre d'avis en tant que rapporteurs")+
-  guides(fill = guide_legend(title.position = "top"))
 
-if(save_figures)
-  ggsave("../output/descriptive_members/pourcentage_président_nb_avis_as_rapporteur.png", width = 8, height = 10)
-```
-```{r}
-metadata_auteur_2002|>
-  ggscatter(x = "durée_mandat",y = "nb_avis_as_rapporteur", color = "sexe",
-            xlab = "Durée totale du mandat", ylab = "Nombre d'avis en tant que rapporteur")+
-  theme_ready()+
-  scale_fill_prism(palette = "floral")
-```
-```{r}
-metadata_auteur_2002|>
-  ggscatter(x = "durée_mandat",y = "nb_avis_as_participant", color = "sexe",
-            xlab = "Durée totale du mandat", ylab = "Nombre d'avis en tant que participant")+
-  theme_ready()+
-  scale_fill_prism(palette = "floral")
-```
-
-```{r}
-#| fig-width: 12
-#| fig-height: 10
-metadata_auteur_2002 %>%
-  group_by(once_rapporteur, président_première_nomination, profession_recodée) %>%
-  summarise(count = n(), .groups = 'drop') %>%
-  group_by(once_rapporteur,président_première_nomination) %>%
-  mutate(total = sum(count), percentage = 100 * count / total) %>%
-  ungroup() %>%
-  select(-total)%>%
-  ggbarplot(x='président_première_nomination',fill = 'profession_recodée', y = 'percentage',
-            facet.by = 'once_rapporteur',
-            position = position_stack(), 
-            #label = TRUE,lab.nb.digits = 2,lab.pos = "in",
-            ylab = "% des membres", xlab = "Président à la première nomination",
-            title = "Pourcentage des membre du CCNE\nselon le président à leur première nomination\net selon le nombre d'avis en tant que rapporteur")+
-  theme_ready()+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
-  scale_fill_prism(palette = "floral")+
-  labs(fill = "Nombre d'avis en tant que rapporteurs")+
-  guides(fill = guide_legend(title.position = "top"))
-
-if(save_figures)
-  ggsave("../output/descriptive_members/pourcentage_président_once_rapporteur_profession.png", width = 8, height = 10)
-```
 ```{r}
 #| fig-width: 12
 #| fig-height: 10
@@ -733,34 +487,51 @@ metadata_auteur_2002 %>%
   labs(fill = "Profession")+
   guides(fill = guide_legend(title.position = "top"))+
   rotate()+
-  grids(axis = "x")
+  grids(axis = "x")+
   labs(caption = "Graphique de l'auteur.\nDonnées collectées dans les avis et de l'auteur.\nLecture : 40% des membres qui ont été rapporteurs sont des médecins PUPH,\nce qui est dix points de plus que le pourcentage qu'ils occupent en tant que membres du CCNE.")
 
 if(save_figures)
   ggsave("../output/descriptive_members/pourcentage_once_rapporteur_profession.png", width = 8, height = 10)
 ```
-# Point sur la méthodologie
 
-Par simplicité, j'ai attribué à chaque membre le président en exercice au moment de sa nomination. Cela permet d'avoir un indicateur de temps simple pour comparer, mais cela ne donne pas à chaque instant t, la composition du CCNE. De plus je n'ai que les années de nomination, a moins d'aller sur le JORF pour trouver toutes les dates de nomination, mais celle du JORF sont souvent en retard sur les dates réelles. 
 
-Voici une description des 12 catégories de professions recodées:
+# Composition des rapporteurs par avis
 
-- **Politicien ou militant** : Inclut les personnes ayant une profession liée à la politique ou à l'activisme (notamment association de défense de la famille, beaucoup nommé par le Ministère de la famille), y compris ceux qui ont une carrière antérieure dans la médecine.
-- **Journaliste/presse** : Regroupe les individus travaillant dans le journalisme ou les médias, dont les patrons de presse.
-- **Théologien** : Comprend les personnes spécialisées dans la théologie, toutes religions comprises.
-- **Médecin PUPH** : Se réfère aux médecins Professeurs des Universités-Praticiens Hospitaliers (PUPH), excluant les généralistes et libéraux.
-- **Chercheur bio** : Regroupe les chercheurs en biologie, physiologie ou pharmacologie.
-- **Autres professions santé** : Inclut les pharmaciens, infirmiers, psychologues, généralistes, et cadres supérieurs de santé.
-- **Profession du droit** : Englobe les avocats, magistrats, juges et juristes, dont les conseillers d'état et membres de la cours de cassation.
-- **Cadre public/privé** : Regroupe les hauts fonctionnaires, enarques, cadres et ingénieurs. Un certain nombre de personnes ont été haut fonctionnaire puis cadre de grands groupes industriels notamment dans les personnes nommées par le ministère de l'industrie. Peut être faudrait il séparer les hauts fonctionnaires selon leur type de spécialité.
-- **Chercheur droit** : Juriste universitaire.
-- **Chercheur SHS (Sciences Humaines et Sociales)** : Inclut les chercheurs en sociologie, anthropologie, histoire, économie, psychologie, démographie, philosophie, géographie, sciences politiques, littérature, muséologie, et des spécialistes universitaires des religions (judaïsme notamment)
-- **Chercheur sciences exactes** : Regroupe les chercheurs en mathématiques, chimie, physique et informatique.
-- **Inconnue** : Catégorie pour les professions qui ne correspondent à aucune des précédentes ou dont les informations sont insuffisantes pour le recodage.
+```{r, fig.width=30, fig.height=12}
+# Exploser la colonne avis_rapporteur pour avoir une ligne par personne et par avis
+metadata_avis_membre <- metadata_auteur_2002 %>%
+  unnest(avis_rapporteur)
 
-# Qui gouverne la science
+# Combiner les trois opérations en une seule
+percentage_participation <- metadata_avis_membre %>%
+  group_by(avis_rapporteur) %>%
+  mutate(total_count = n()) %>%
+  group_by(avis_rapporteur, profession_recodée, id_membre) %>%
+  summarise(
+    profession_count = n(),
+    total_count = first(total_count)
+  ) %>%
+  mutate(percentage = 100 * profession_count / total_count) %>%
+  select(avis_rapporteur, profession_recodée,id_membre, percentage) %>%
+  rename(num = avis_rapporteur)
+
+# Graphique en barres empilées
+plot_participation_par_avis <- ggplot(percentage_participation, aes(x = factor(num), y = percentage, fill = profession_recodée)) +
+  geom_bar(stat = "identity", position = "stack", alpha = 1, color = "black") +
+  theme_ready(text_size = 35) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+  scale_fill_prism(palette = "floral") +
+  labs(fill = "Profession", color = "Profession",
+       title = "Proportion des professions au fil du temps par avis", x = "Numéro avis et date de publication", y = "Pourcentage") +
+  guides(fill = guide_legend(title.position = "top")) +
+  labs(caption = "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture : L'avis 92 a été écrit par deux PUPH et un politicien ou militant.")
+plot_participation_par_avis
+```
+
+# Liens avec les institutions dirigeantes (QGS)
 
 ```{r}
+#| output: false
 QGS <- read_csv("../data/intermediate/qui gouverne la science/sele_Matrice.csv")%>%
   select(-...1)%>%
   rename(sexe.qgs = sexe.x,
@@ -813,9 +584,9 @@ QGS <- QGS[, new_order]
 print(any(QGS$sexe.leo!=QGS$sexe.qgs))
 # Maintenant let's look at the actual affiliations
 
-QGS%>%
-  select(id_membre, nom.leo, profession, spécialité, naissance, sexe.leo, nb_affiliations,summary)%>%
-  View()
+# QGS%>%
+#   select(id_membre, nom.leo, profession, spécialité, naissance, sexe.leo, nb_affiliations,summary)%>%
+#   View()
 
 
 # Problème je crois : deux Louis Schweitzer, l'un haut fonctionnaire et ancien PDG de renault, l'autre pasteur.
@@ -833,50 +604,61 @@ detailled_qgs_few_members <- read_csv("../data/intermediate/qui gouverne la scie
 ```
 
 ```{r}
-membres_ccne_qgs <- inner_join(metadata_auteur_2002,QGS%>%
-                                 select(id_membre,nb_affiliations), by = "id_membre")
+membres_ccne_qgs <- left_join(metadata_auteur_2002,QGS%>%
+                                 select(id_membre,nb_affiliations), by = "id_membre")%>%
+  mutate(nb_affiliations = ifelse(is.na(nb_affiliations),0,nb_affiliations))
 ```
 
 ```{r,  fig.width=11, fig.height=7}
-membres_ccne_qgs|>
-  ggscatter(x = "nb_avis_as_participant",y = "nb_affiliations", shape = "sexe", color = "profession_recodée",
-            xlab = "Nombre d'avis en tant que participant", ylab = "Nombre d'affiliations (QGS)")+
+membres_ccne_qgs |>
+  ggscatter(x = "nb_avis_as_participant", y = "nb_affiliations", shape = "sexe", color = "profession_recodée",
+            xlab = "Nombre d'avis en tant que participant", ylab = "Nombre d'affiliations (QGS)") +
   geom_text(
-  data = subset(membres_ccne_qgs, sapply(nomination, is_president_CCNE)),
-  aes(label = nom),
-  vjust = -1, hjust = 0.5, size = 3, color = "red"
-)+
-  theme_ready()+
-  scale_fill_prism(palette = "floral")+
-  theme_ready(text_size = 16)+
-  scale_color_prism(palette = "floral")+
+    data = subset(membres_ccne_qgs, sapply(nomination, is_president_CCNE)),
+    aes(label = nom),
+    vjust = -1, hjust = 0.5, size = 3, color = "red"
+  ) +
+  theme_ready() +
+  scale_fill_prism(palette = "floral") +
+  theme_ready(text_size = 16) +
+  scale_color_prism(palette = "floral") +
   guides(color = guide_legend(title.position = "top"),
          shape = guide_legend(title.position = "top")) +
-  labs(title = "Investissement en tant que rapporteurs,\ncomparés à l'investissement dans la direction de la science\n(membres nomminé après 2002)",
+  labs(title = "Investissement en tant que rapporteurs,\ncomparés à l'investissement dans la direction de la science\n(membres nommés après 2002)",
        color = "Profession",
-       caption = "Graphique de l'auteur.\nDonnées collectées par l'auteur; et issues de la base Qui Gouverne la Science (Laillier et Topalov 2022).\nLecture : L'investissement dans des institutions de gouvernance de la science semble aller à l'opposé de l'investissement au CCNE.")
+       caption = "Graphique de l'auteur.\nDonnées collectées par l'auteur; et issues de la base Qui Gouverne la Science (Laillier et Topalov 2022).\nLecture : L'investissement dans des institutions de gouvernance de la science semble aller à l'opposé de l'investissement au CCNE.") +
+  scale_x_continuous(breaks = scales::breaks_pretty(n = 10), labels = scales::label_number(accuracy = 1, big.mark = "")) +
+  scale_y_continuous(breaks = scales::breaks_pretty(n = 10), labels = scales::label_number(accuracy = 1, big.mark = "")) +
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "red") +
+  geom_vline(xintercept = 0.5, linetype = "dashed", color = "red")+
+  ggpubr::grids(axis = "xy")
 
 if(save_figures)
   ggsave("../output/descriptive_members/participation_vs_qgs.png")
 ```
 
 ```{r, fig.width=11, fig.height=7}
-membres_ccne_qgs|>
-  ggscatter(x = "nb_avis_as_rapporteur",y = "nb_affiliations", shape = "sexe", color = "profession_recodée",
+membres_ccne_qgs |>
+  ggscatter(x = "nb_avis_as_rapporteur", y = "nb_affiliations", shape = "sexe", color = "profession_recodée",
             size = 4,
-            xlab = "Nombre d'avis en tant que rapporteur", ylab = "Nombre d'affiliations (QGS)")+
+            xlab = "Nombre d'avis en tant que rapporteur", ylab = "Nombre d'affiliations (QGS)") +
   geom_text(
-  data = subset(membres_ccne_qgs, sapply(nomination, is_president_CCNE)),
-  aes(label = nom),
-  vjust = -1, hjust = 0.5, size = 3, color = "red"
-)+
-  theme_ready(text_size = 16)+
-  scale_color_prism(palette = "floral")+
+    data = subset(membres_ccne_qgs, sapply(nomination, is_president_CCNE)),
+    aes(label = nom),
+    vjust = -1, hjust = 0.5, size = 3, color = "red"
+  ) +
+  theme_ready(text_size = 16) +
+  scale_color_prism(palette = "floral") +
   guides(color = guide_legend(title.position = "top"),
          shape = guide_legend(title.position = "top")) +
-  labs(title = "Investissement en tant que rapporteurs,\ncomparés à l'investissement dans la direction de la science\n(membres nomminé après 2002)",
+  labs(title = "Investissement en tant que rapporteurs,\ncomparés à l'investissement dans la direction de la science\n(membres nommés après 2002)",
        color = "Profession",
-       caption = "Graphique de l'auteur.\nDonnées collectées par l'auteur; et issues de la base Qui Gouverne la Science (Laillier et Topalov 2022).\nLecture : L'investissement dans des institutions de gouvernance de la science semble aller à l'opposé de l'investissement au CCNE.")
+       caption = "Graphique de l'auteur.\nDonnées collectées par l'auteur; et issues de la base Qui Gouverne la Science (Laillier et Topalov 2022).\nLecture : L'investissement dans des institutions de gouvernance de la science semble aller à l'opposé de l'investissement au CCNE.") +
+  scale_x_continuous(breaks = scales::breaks_pretty(n = 10), labels = scales::label_number(accuracy = 1, big.mark = "")) +
+  scale_y_continuous(breaks = scales::breaks_pretty(n = 10), labels = scales::label_number(accuracy = 1, big.mark = "")) +
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "red") +
+  geom_vline(xintercept = 0.5, linetype = "dashed", color = "red")+
+  ggpubr::grids(axis = "xy")
 
 if(save_figures)
   ggsave("../output/descriptive_members/rapporteur_vs_qgs.png")

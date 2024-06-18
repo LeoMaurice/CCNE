@@ -66,13 +66,14 @@ pacman::p_load(arrow,
 source("helpers/database_creation.R")
 source("helpers/figures.R")
 
-save_figures = T
+save_figures = F
 cutpoints = c(0, 1e-04, 0.001, 0.01, 0.05, 0.1, 1)
 symbols = c("****", "***", "**", "*", "•","ns")
 significance = c("p < 0.0001", "p < 0.001", "p < 0.01", "p < 0.05", "p < 0.1", "p>0.1")
 signif_caption_text <- paste("Significance levels:\n", paste(symbols, ":", significance, collapse = ", "))
 
 ```
+
 ```{r}
 predictions_BERT <- read_csv("../data/intermediate/predictions/predictions_camemBERT_1400annotations_5classes_2024-06-04.csv", 
     col_types = cols(sentence_id = col_integer(), 
@@ -110,129 +111,50 @@ predictions <- predictions_BERT %>%
   mutate(label = factor(label, levels = c("Personne relationnelle","Individu ou sujet","Genre/espèce humaine",
                                          "Corps humain","Personne droits et devoirs")),
          Date = as.Date(Date))
-```
-# Classifications across time
 
-## Presidents
-```{r}
-#| fig-width: 12
-#| fig-height: 10
-predictions %>%
-  group_by(president, label) %>%
-  summarise(count = n(), .groups = 'drop') %>%
-  group_by(president) %>%
-  mutate(total = sum(count), percentage = 100 * count / total) %>%
-  ungroup() %>%
-  select(-total)%>%
-  ggbarplot(x='president',fill = 'label', y = 'percentage',
-            position = position_stack(), 
-            #label = TRUE,lab.nb.digits = 2,lab.pos = "in",
-            ylab = "% des phrases", xlab = "Président",
-            title = "Pourcentage des phrases\nselon leur labelisationn\net selon le président au moment de la publication de l'avis")+
-  theme_ready()+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
-  scale_fill_prism(palette = "floral")+
-  labs(fill = "Label")+
-  guides(fill = guide_legend(title.position = "top"))
-```
-## Quarters
-```{r, fig.width=20, fig.height=15}
-#| fig-width: 12
-#| fig-height: 10
-
-# Convert Date to quarter
-predictions <- predictions %>%
-  mutate(quarter = paste0(year(Date), "-Q", quarter(Date)))
-
-# Get all unique labels
-all_labels <- unique(predictions$label)
-
-# Get all unique quarters
-all_quarters <- predictions %>%
-  mutate(quarter = paste0(year(Date), "-Q", quarter(Date))) %>%
-  arrange(Date) %>%
-  distinct(quarter) %>%
-  pull(quarter)
-# Create a numeric sequence for quarters
-quarter_numeric <- 1:length(all_quarters)
-
-# Map quarters to numeric sequence
-quarter_map <- data.frame(quarter = all_quarters, quarter_num = quarter_numeric)
-
-# Complete missing values with 0 and compute percentages
-temp <- predictions %>%
-  mutate(quarter = factor(quarter, levels = all_quarters)) %>%
-  group_by(quarter, label) %>%
-  summarise(count = n(), .groups = 'drop') %>%
-  group_by(quarter) %>%
-  mutate(percentage = 100 * count / sum(count)) %>%
-  ungroup() %>%
-  complete(quarter = all_quarters, label = all_labels, fill = list(percentage = 0)) %>%
-  left_join(quarter_map, by = "quarter")
-
-# Graphique en aires empilées
-ggplot(temp, aes(x = quarter_num, y = percentage, fill = label)) +
-  geom_area(position = "stack", alpha = 0.8) +
-  theme_ready() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
-  scale_fill_prism(palette = "floral") +
-  scale_color_prism(palette = "floral") +
-  scale_x_continuous(breaks = quarter_numeric, labels = all_quarters) +
-  labs(fill = "Label", color = "Label",
-       title = "Proportion des catégories au fil du temps", x = "Trimestre", y = "Pourcentage") +
-  guides(fill = guide_legend(title.position = "top"))
-
+metadata_avis <- open_metadata() %>%
+  mutate_if(is.character, ~ na_if(., "NA"))
 
 ```
+# Résumé rapide du sujet et du thème et de la date de publication de chaque avis
 
-## Year
-```{r, fig.width=20, fig.height=10}
-# Convert Date to year
-predictions <- predictions %>%
-  mutate(year = year(Date))
-
-# Get all unique labels
-all_labels <- unique(predictions$label)
-
-# Get all unique years and order them chronologically
-all_years <- sort(unique(predictions$year))
-
-# Complete missing values with 0 and compute percentages
-temp <- predictions %>%
-  group_by(year, label) %>%
-  summarise(count = n(), .groups = 'drop') %>%
-  group_by(year) %>%
-  mutate(percentage = 100 * count / sum(count)) %>%
-  ungroup() %>%
-  complete(year = all_years, label = all_labels, fill = list(percentage = 0))
-
-# Graphique en aires empilées
-ggplot(temp, aes(x = year, y = percentage, fill = label)) +
-  geom_area(position = "stack", alpha = 0.8) +
-  geom_line(position = "stack", color = "black", linetype = "dashed", size =1)+
-  theme_ready() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
-  scale_fill_prism(palette = "floral") +
-  scale_x_continuous(breaks = all_years) +
-  labs(fill = "Label", color = "Label",
-       title = "Proportion des catégories au fil du temps", x = "Année", y = "Pourcentage") +
-  guides(fill = guide_legend(title.position = "top"))
+```{r, fig.width=25, fig.height=7}
+#| eval: false
+ggplot(metadata_avis%>%
+         filter(!(is.na(num)))%>%
+         mutate(num = as.numeric(num)), aes(x= 0, y = num)) +
+  geom_text(aes(label = paste(num,titre_court, theme, sep = " | ")), angle = 0, vjust = -0.5, check_overlap = TRUE, size = 6) +
+  theme_void()
 ```
-
-# Classification compared to rapporteur by avis
-need to run descriptive figures membres avant
 
 ```{r}
-ggplot(metadata_avis, aes(x = factor(num), y = 0)) +
-  geom_text(aes(label = paste(num,titre_court, theme, sep = " | ")), angle = 90, vjust = -0.5, check_overlap = TRUE, size = 7) +
-  theme_void() +
-  theme(
-    plot.margin = margin(t = 20, r = 20, b = 20, l = 20)
-  )
+base_avis%>%
+  arrange(num)%>%
+  mutate(date= format(Date,"%d/%m/%Y"))%>%
+  select(num,titre_court,theme,date, nb_pages)
+  
+
+
 ```
 
 
-## bar plot
+# Représentation de la personnalité humaine au cours des avis
+
+## Catégories par avis
+
+```{r}
+base_sentences <- arrow::read_feather('../data/intermediate/big/base_sentences.feather')
+```
+
+```{r}
+base_sentences%>%
+  group_by(num)%>%
+  summarise(nb_sentence = mean(number_sentences))%>%
+  left_join(predictions%>%
+              group_by(num,Date)%>%
+              summarise(nb_sentence_interet = n())) -> repartion_phrase_interet_avis
+```
+
 
 ```{r, fig.width=40, fig.height=15}
 
@@ -244,123 +166,134 @@ percentage_categorie <- predictions %>%
   ungroup()
 
 # Graphique en barres empilées
-plot_categorie_par_avis <- ggplot(percentage_categorie, aes(x = factor(num), y = percentage, fill = label)) +
+ggplot(percentage_categorie, aes(x = factor(num), y = percentage, fill = label)) +
   geom_bar(stat = "identity", position = "stack", alpha = 0.8) +
   theme_ready(text_size = 30) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+  theme(axis.text.x = element_text(angle = 90)) +
   scale_fill_prism(palette = "floral") +
   labs(fill = "Label", color = "Label",
-       title = "Proportion des catégories au fil du temps par avis", x = "Numéro avis", y = "Pourcentage") +
+       title = "Proportion au sein des phrases d'intérêt des catégories au fil du temps par avis", x = "Numéro avis", y = "Pourcentage",
+       caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: ") +
   guides(fill = guide_legend(title.position = "top"))
-plot_categorie_par_avis
 
 
 ```
 
-```{r, fig.width=30, fig.height=12}
-# Exploser la colonne avis_rapporteur pour avoir une ligne par personne et par avis
-metadata_avis_membre <- metadata_auteur_2002 %>%
-  unnest(avis_rapporteur)
+## Phrase d'intéret et catégorie mise en perspective
 
-# Combiner les trois opérations en une seule
-percentage_participation <- metadata_avis_membre %>%
-  group_by(avis_rapporteur) %>%
-  mutate(total_count = n()) %>%
-  group_by(avis_rapporteur, profession_recodée, id_membre) %>%
-  summarise(
-    profession_count = n(),
-    total_count = first(total_count)
-  ) %>%
-  mutate(percentage = 100 * profession_count / total_count) %>%
-  select(avis_rapporteur, profession_recodée,id_membre, percentage) %>%
-  rename(num = avis_rapporteur)
-
-num_with_rapporteur_info <- unique(percentage_participation$num)
-
-percentage_categorie <- predictions %>%
-  filter(num %in% num_with_rapporteur_info) %>%
+```{r, fig.width=50, fig.height=20}
+repartion_phrase_interet_avis%>%
+  mutate(count = nb_sentence - nb_sentence_interet,
+         label = "N'évoque pas personnalité humaine")%>%
+  select(num, label, count)%>%
+  rbind(predictions %>%
   group_by(num, label) %>%
-  summarise(count = n(), .groups = 'drop') %>%
+  summarise(count = n(), .groups = 'drop'))%>%
   group_by(num) %>%
   mutate(percentage = 100 * count / sum(count)) %>%
-  ungroup()
+  ungroup()%>%
+  mutate(label = factor(label, levels = c("N'évoque pas personnalité humaine",
+                                          "Personne relationnelle","Individu ou sujet","Genre/espèce humaine",
+                                         "Corps humain","Personne droits et devoirs")))%>%
+  mutate(percentage = ifelse(is.na(percentage),0,percentage))%>%
+  filter(!is.na(num))-> percentage_par_rapport_tot_sentence
 
-# Ajouter les annotations pour les dates sous les graphiques
-metadata_avis_2002 <- metadata_avis %>%
-  filter(num %in% num_with_rapporteur_info) %>%
-  mutate(date_labels = format(date, "%Y/%m/%d")) %>%
-  mutate(labels = paste(date_labels, num)) %>%
-  arrange(num)
-
-plot_theme_titre_par_avis <- ggplot(metadata_avis_2002, aes(x = factor(num), y = 0)) +
-  geom_text(aes(label = paste(num,titre_court, theme, sep = " | ")), angle = 90, vjust = -0.5, check_overlap = TRUE, size = 10) +
-  theme_void() +
-  theme(
-    plot.margin = margin(t = 20, r = 20, b = 20, l = 20)
-  )
+percentage_par_rapport_tot_sentence <- percentage_par_rapport_tot_sentence%>%
+  left_join(base_avis%>%
+              select(num,Date, president),
+            by = "num")
 
 # Graphique en barres empilées
-plot_categorie_par_avis <- ggplot(percentage_categorie, aes(x = factor(num), y = percentage, fill = label)) +
-  geom_bar(stat = "identity", position = "stack", alpha = 0.8) +
-  theme_ready(text_size = 35) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
-  scale_fill_prism(palette = "floral") +
+percentage_all_sentences_plot <- ggplot(percentage_par_rapport_tot_sentence, aes(x = factor(num), y = percentage, fill = label)) +
+  geom_bar(stat = "identity", position = "stack", alpha = 0.8, color = "black") +
+  theme_ready(text_size = 33) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
+  scale_fill_manual(values = c("white","#7CA0D4","#A48AD3","#E995EB","#BADE86","#624894")) +
   labs(fill = "Label", color = "Label",
-       title = "Proportion des catégories au fil du temps par avis", x = "Numéro avis", y = "Pourcentage") +
+       title = "Proportion des représentation de la personnalité humaine au cours des années par avis", x = "Numéro avis", y = "Pourcentage",
+       caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: L'avis 21 est composé à 29% de phrase, dont une majorité référant au corps humain.") +
   guides(fill = guide_legend(title.position = "top"))
 
-# Graphique en barres empilées
-plot_participation_par_avis <- ggplot(percentage_participation, aes(x = factor(num), y = percentage, fill = profession_recodée)) +
-  geom_bar(stat = "identity", position = "stack", alpha = 1, color = "black") +
-  theme_ready(text_size = 35) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+
+# Convert the Date to a numeric year for plotting
+percentage_par_rapport_tot_sentence <- percentage_par_rapport_tot_sentence %>%
+  mutate(year = as.numeric(format(Date, "%Y"))) %>%
+  group_by(year) %>%
+  mutate(min_avis = min(num),
+         max_avis = max(num)) %>%
+  ungroup()
+
+# Create a timeline plot with black contours and varying heights based on counts
+timeline_avis<- ggplot(percentage_par_rapport_tot_sentence) +
+  geom_rect(aes(xmin = num - 0.5, xmax = num + 0.5, ymin = 0, ymax = 0.1, fill = president)) +
+  geom_rect(aes(xmin = min_avis - 0.5, xmax = max_avis + 0.5, ymin = 0, ymax = 0.1), 
+            fill = NA, color = "black", linetype = "dotted") +
+  geom_text(data = percentage_par_rapport_tot_sentence %>% distinct(year, min_avis, max_avis), 
+            aes(x = (min_avis + max_avis) / 2, y = -0.02, label = year), angle = 90, vjust = 0.5, hjust = 0, size = 15) +
+  scale_x_continuous(breaks = unique(percentage_par_rapport_tot_sentence$num), 
+                     labels = unique(percentage_par_rapport_tot_sentence$num)) +
+  theme_ready(text_size = 33)+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        legend.text = element_text(size = 35), # Increased legend text size
+        legend.title = element_text(size = 38)) +
   scale_fill_prism(palette = "floral") +
-  labs(fill = "Profession", color = "Profession",
-       title = "Proportion des professions au fil du temps par avis", x = "Numéro avis et date de publication", y = "Pourcentage") +
-  guides(fill = guide_legend(title.position = "top")) +
-  scale_x_discrete(labels = metadata_avis_2002$labels)+
-  labs(caption = "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture : Par exemple, l'avis 86 (publié le 04/11/2004) - qui parle de la commercialisation des autotests, dans le thème maladies génétique - a été à 100% écrit par un PUPH et réfère à 50% à la personne en tant qu'entité juridique.")
+  labs(fill = "President",
+       title = "Timeline des Avis par Président",
+       x = "Numéro d'avis", y = NULL,
+       caption = "Graphique de l'auteur.\nDonnées collectées par l'auteur.") +
+  guides(fill = guide_legend(title.position = "top"))
 
-# Utiliser grid.arrange pour arranger les graphiques
-participation_categories_across_avis <- grid.arrange(
-  plot_theme_titre_par_avis,
-  plot_participation_par_avis,
-  ncol = 1,
-  heights = c(1,1)  # Ajuster la hauteur relative pour donner plus d'espace aux textes
-)
-```
-## Alluvial plot
-
-```{r, fig.width=40, fig.height=30}
-metadata_avis_membre %>%
-  rename(num = avis_rapporteur) %>%
-  left_join(
-    predictions %>%
-  filter(num %in% num_with_rapporteur_info) %>%
-  group_by(num, label) %>%
-  summarise(nb_phrases = n(), .groups = 'drop'), by = "num"
-  )%>%
-  # on obtient là un df avec pour chaque personne, pour chaque avis, pour chaque catégorie textuelle
-  ggplot(aes(axis1 = président_première_nomination, axis2 = label, y = nb_phrases))+
-  geom_alluvium(aes(fill = profession_recodée),
-                curve_type = "sine")+
-  geom_stratum()+
-  geom_text(stat = "stratum",
-            aes(label = after_stat(stratum)),
-            size = 30) +
-  scale_x_discrete(limits = c("Président", "Catégorie phrase"),
-                   expand = c(0.15, 0.05)) +
-  theme_ready(text_size = 35)+
-  scale_fill_prism(palette = "floral")+
-  guides(fill = guide_legend(title.position = "top"))+
-  labs(ylab = "Nombre de phrase", fill = "Profession recodée")
-
-
+ggarrange(percentage_all_sentences_plot,
+          timeline_avis,
+          ncol =1,
+          nrow =2,
+          align = "h",
+          heights = c(2,1))
 
 ```
+```{r, fig.width=40, fig.height=14}
+repartion_phrase_interet_avis%>%
+  mutate(count = nb_sentence - nb_sentence_interet,
+         label = "N'évoque pas personnalité humaine")%>%
+  mutate(year = as.numeric(format(Date, format="%Y")))%>%
+  group_by(year, label)%>%
+  summarise(count = sum(count))%>%
+  select(year,label,count)%>%
+  rbind(predictions %>%
+  mutate(year = as.numeric(format(Date, format="%Y")))%>%
+  group_by(year, label) %>%
+  summarise(count = n(), .groups = 'drop'))%>%
+  group_by(year) %>%
+  mutate(percentage = 100 * count / sum(count)) %>%
+  ungroup()%>%
+  mutate(label = factor(label, levels = c("N'évoque pas personnalité humaine",
+                                          "Personne relationnelle","Individu ou sujet","Genre/espèce humaine",
+                                         "Corps humain","Personne droits et devoirs")))%>%
+  mutate(percentage = ifelse(is.na(percentage),0,percentage))%>%
+  filter(!is.na(year))%>%
+  ggplot(aes(x = factor(year), y = percentage, fill = label)) +
+  geom_bar(stat = "identity", position = "stack", alpha = 0.8, color = "black") +
+  theme_ready(text_size = 33) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
+  scale_fill_manual(values = c("white","#7CA0D4","#A48AD3","#E995EB","#BADE86","#624894")) +
+  labs(fill = "Label", color = "Label",
+       title = "Proportion des représentation de la personnalité humaine au cours des années", x = "Numéro avis", y = "Pourcentage",
+       caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: L'avis 21 est composé à 29% de phrase, dont une majorité référant au corps humain.") +
+  guides(fill = guide_legend(title.position = "top"))
+```
+
+## Quelle profession parle de quoi ?
 
 
 ```{r, fig.width=30, fig.height=30}
+#| eval: false
+
+# pas rendable: besoin de run descriptive_figures_membre avant
 metadata_avis_membre %>%
   rename(num = avis_rapporteur) %>%
   left_join(
