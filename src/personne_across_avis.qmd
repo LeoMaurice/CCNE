@@ -39,7 +39,7 @@ editor: source
 ---
 
 ```{r}
-require(pacman,quietly = F)
+require(pacman,quietly = T)
 
 pacman::p_load(arrow,
                tidyverse,
@@ -59,6 +59,7 @@ pacman::p_load(arrow,
                circlize,
                patchwork,
                rmarkdown,
+               quarto,
                readxl,
                readr)
 
@@ -72,7 +73,6 @@ significance = c("p < 0.0001", "p < 0.001", "p < 0.01", "p < 0.05", "p < 0.1", "
 signif_caption_text <- paste("Significance levels:\n", paste(symbols, ":", significance, collapse = ", "))
 
 ```
-
 ```{r}
 predictions_BERT <- read_csv("../data/intermediate/predictions/predictions_camemBERT_1400annotations_5classes_2024-06-04.csv", 
     col_types = cols(sentence_id = col_integer(), 
