@@ -212,7 +212,12 @@ percentage_all_sentences_plot <- ggplot(percentage_par_rapport_tot_sentence, aes
   labs(fill = "Label", color = "Label",
        title = "Proportion des représentation de la personnalité humaine au cours des années par avis", x = "Numéro avis", y = "Pourcentage",
        caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: L'avis 21 est composé à 29% de phrase, dont une majorité référant au corps humain.") +
-  guides(fill = guide_legend(title.position = "top"))
+  guides(fill = guide_legend(title.position = "top"))+
+  geom_hline(yintercept = 5, color = "red", linetype = "dotted")+
+geom_hline(yintercept = 10, color = "red", linetype = "dotted")+
+geom_hline(yintercept = 15, color = "red", linetype = "dotted")+
+geom_hline(yintercept = 20, color = "red", linetype = "dotted")+
+geom_hline(yintercept = 25, color = "red", linetype = "dotted")
 
 
 # Convert the Date to a numeric year for plotting
@@ -284,7 +289,12 @@ repartion_phrase_interet_avis%>%
   labs(fill = "Label", color = "Label",
        title = "Proportion des représentation de la personnalité humaine au cours des années", x = "Numéro avis", y = "Pourcentage",
        caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: L'avis 21 est composé à 29% de phrase, dont une majorité référant au corps humain.") +
-  guides(fill = guide_legend(title.position = "top"))
+  guides(fill = guide_legend(title.position = "top"))+
+  geom_hline(yintercept = 5, color = "red", linetype = "dotted")+
+geom_hline(yintercept = 10, color = "red", linetype = "dotted")+
+geom_hline(yintercept = 15, color = "red", linetype = "dotted")+
+geom_hline(yintercept = 20, color = "red", linetype = "dotted")+
+geom_hline(yintercept = 25, color = "red", linetype = "dotted")
 ```
 
 ## Quelle profession parle de quoi ?
@@ -317,8 +327,5 @@ metadata_avis_membre %>%
   guides(fill = guide_legend(title.position = "top"))+
   labs(ylab = "Nombre de phrase", fill = "Profession recodée",
        caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: La majorité des phrases co-signées par les biologistes sont classées dans genre/espèce humaine.")
-
-
-
 ```
 
