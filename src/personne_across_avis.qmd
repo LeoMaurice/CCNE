@@ -222,8 +222,42 @@ ggplot(temp, aes(x = year, y = percentage, fill = label)) +
 # Classification compared to rapporteur by avis
 need to run descriptive figures membres avant
 
+```{r}
+ggplot(metadata_avis, aes(x = factor(num), y = 0)) +
+  geom_text(aes(label = paste(num,titre_court, theme, sep = " | ")), angle = 90, vjust = -0.5, check_overlap = TRUE, size = 7) +
+  theme_void() +
+  theme(
+    plot.margin = margin(t = 20, r = 20, b = 20, l = 20)
+  )
+```
+
+
 ## bar plot
-```{r, fig.width=40, fig.height=30}
+
+```{r, fig.width=40, fig.height=15}
+
+percentage_categorie <- predictions %>%
+  group_by(num, label) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  group_by(num) %>%
+  mutate(percentage = 100 * count / sum(count)) %>%
+  ungroup()
+
+# Graphique en barres empilées
+plot_categorie_par_avis <- ggplot(percentage_categorie, aes(x = factor(num), y = percentage, fill = label)) +
+  geom_bar(stat = "identity", position = "stack", alpha = 0.8) +
+  theme_ready(text_size = 30) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+  scale_fill_prism(palette = "floral") +
+  labs(fill = "Label", color = "Label",
+       title = "Proportion des catégories au fil du temps par avis", x = "Numéro avis", y = "Pourcentage") +
+  guides(fill = guide_legend(title.position = "top"))
+plot_categorie_par_avis
+
+
+```
+
+```{r, fig.width=30, fig.height=12}
 # Exploser la colonne avis_rapporteur pour avoir une ligne par personne et par avis
 metadata_avis_membre <- metadata_auteur_2002 %>%
   unnest(avis_rapporteur)
@@ -290,10 +324,9 @@ plot_participation_par_avis <- ggplot(percentage_participation, aes(x = factor(n
 # Utiliser grid.arrange pour arranger les graphiques
 participation_categories_across_avis <- grid.arrange(
   plot_theme_titre_par_avis,
-  plot_categorie_par_avis,
   plot_participation_par_avis,
   ncol = 1,
-  heights = c(10, 7, 7)  # Ajuster la hauteur relative pour donner plus d'espace aux textes
+  heights = c(1,1)  # Ajuster la hauteur relative pour donner plus d'espace aux textes
 )
 ```
 ## Alluvial plot
