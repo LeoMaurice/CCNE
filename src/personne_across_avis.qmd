@@ -45,6 +45,8 @@ pacman::p_load(arrow,
                tidyverse,
                reshape2,
                stringr,
+               
+               DT,
 
                stats,
                rstatix,
@@ -75,7 +77,7 @@ signif_caption_text <- paste("Significance levels:\n", paste(symbols, ":", signi
 ```
 
 ```{r}
-predictions_BERT <- read_csv("../data/intermediate/predictions/predictions_camemBERT_1400annotations_5classes_2024-06-04.csv", 
+predictions_BERT <- read_csv("../data/intermediate/predictions/predictions_camemBERT_1400annotations_2classes_2024-06-24.csv",
     col_types = cols(sentence_id = col_integer(), 
         pred_label = col_integer())) %>%
   mutate(
@@ -83,13 +85,22 @@ predictions_BERT <- read_csv("../data/intermediate/predictions/predictions_camem
     num = as.numeric(substr(sentence_id, 1, nchar(as.character(sentence_id)) - 4))
   )
 
-recat <- c("Corps humain" = "Corps humain",
-           "Genre/espèce humaine" = "Genre/espèce humaine",
-           "Individu ou sujet" = "Individu ou sujet",
-           "Personne à protéger" = "Personne droits et devoirs",
-           "Personne responsable et autonome" = "Personne droits et devoirs",
-           "Personne relationnelle" = "Personne relationnelle",
-           "Sentiment humain" = "Genre/espèce humaine",
+# recat <- c("Corps humain" = "Corps humain",
+#            "Genre/espèce humaine" = "Genre/espèce humaine",
+#            "Individu ou sujet" = "Individu ou sujet",
+#            "Personne à protéger" = "Personne droits et devoirs",
+#            "Personne responsable et autonome" = "Personne droits et devoirs",
+#            "Personne relationnelle" = "Personne relationnelle",
+#            "Sentiment humain" = "Genre/espèce humaine",
+#            "Poubelle" = "Poubelle")
+
+recat <- c("Corps humain" = "Vivant",
+           "Genre/espèce humaine" = "Vivant",
+           "Individu ou sujet" = "Personne/Individu",
+           "Personne à protéger" = "Personne/Individu",
+           "Personne responsable et autonome" = "Personne/Individu",
+           "Personne relationnelle" = "Personne/Individu",
+           "Sentiment humain" = "Personne/Individu",
            "Poubelle" = "Poubelle")
 
 annotations <- read_csv("../data/intermediate/annotations/personne_withSentence_1400annotations_2024-06-03_ActiveTigger.csv")%>%
@@ -108,8 +119,7 @@ predictions <- predictions_BERT %>%
   mutate(label = ifelse(!is.na(training_label), training_label, pred_Personne))%>%
   filter(label != "Poubelle")%>%
   left_join(base_avis, by = "num")%>%
-  mutate(label = factor(label, levels = c("Personne relationnelle","Individu ou sujet","Genre/espèce humaine",
-                                         "Corps humain","Personne droits et devoirs")),
+  mutate(label = factor(label, levels = c("Personne/Individu","Vivant")),
          Date = as.Date(Date))
 
 metadata_avis <- open_metadata() %>%
@@ -128,11 +138,16 @@ ggplot(metadata_avis%>%
 ```
 
 ```{r}
-base_avis%>%
-  arrange(num)%>%
-  mutate(date= format(Date,"%d/%m/%Y"))%>%
-  select(num,titre_court,theme,date, nb_pages)
-  
+#| eval: false
+# Assuming base_avis is your data frame
+title_avis <- base_avis %>%
+  arrange(num) %>%
+  mutate(date = format(Date, "%d/%m/%Y")) %>%
+  select(num, titre_court, theme, date, nb_pages)
+
+
+# Render the table with scrolling
+datatable(title_avis, options = list(scrollX = TRUE, pageLength = 10), rownames = FALSE)  
 
 
 ```
@@ -170,10 +185,10 @@ ggplot(percentage_categorie, aes(x = factor(num), y = percentage, fill = label))
   geom_bar(stat = "identity", position = "stack", alpha = 0.8) +
   theme_ready(text_size = 30) +
   theme(axis.text.x = element_text(angle = 90)) +
-  scale_fill_prism(palette = "floral") +
+  scale_fill_manual(values = c("#624894","#BADE86")) +
   labs(fill = "Label", color = "Label",
        title = "Proportion au sein des phrases d'intérêt des catégories au fil du temps par avis", x = "Numéro avis", y = "Pourcentage",
-       caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: ") +
+       caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: Chaque barre représente un avis.\n ") +
   guides(fill = guide_legend(title.position = "top"))
 
 
@@ -192,9 +207,11 @@ repartion_phrase_interet_avis%>%
   group_by(num) %>%
   mutate(percentage = 100 * count / sum(count)) %>%
   ungroup()%>%
+  # mutate(label = factor(label, levels = c("N'évoque pas personnalité humaine",
+  #                                         "Personne relationnelle","Individu ou sujet","Genre/espèce humaine",
+  #                                        "Corps humain","Personne droits et devoirs")))%>%
   mutate(label = factor(label, levels = c("N'évoque pas personnalité humaine",
-                                          "Personne relationnelle","Individu ou sujet","Genre/espèce humaine",
-                                         "Corps humain","Personne droits et devoirs")))%>%
+                                          "Personne/Individu","Vivant")))%>%
   mutate(percentage = ifelse(is.na(percentage),0,percentage))%>%
   filter(!is.na(num))-> percentage_par_rapport_tot_sentence
 
@@ -202,16 +219,16 @@ percentage_par_rapport_tot_sentence <- percentage_par_rapport_tot_sentence%>%
   left_join(base_avis%>%
               select(num,Date, president),
             by = "num")
-
+# c("white","#7CA0D4","#A48AD3","#E995EB","#BADE86","#624894"
 # Graphique en barres empilées
 percentage_all_sentences_plot <- ggplot(percentage_par_rapport_tot_sentence, aes(x = factor(num), y = percentage, fill = label)) +
   geom_bar(stat = "identity", position = "stack", alpha = 0.8, color = "black") +
   theme_ready(text_size = 33) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
-  scale_fill_manual(values = c("white","#7CA0D4","#A48AD3","#E995EB","#BADE86","#624894")) +
+  scale_fill_manual(values = c("white","#624894","#BADE86")) +
   labs(fill = "Label", color = "Label",
        title = "Proportion des représentation de la personnalité humaine au cours des années par avis", x = "Numéro avis", y = "Pourcentage",
-       caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: L'avis 21 est composé à 29% de phrase, dont une majorité référant au corps humain.") +
+       caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: Chaque barre représente un avis.\nL'avis 21 est composé à 29% de phrase, dont une majorité référant au corps humain.") +
   guides(fill = guide_legend(title.position = "top"))+
   geom_hline(yintercept = 5, color = "red", linetype = "dotted")+
 geom_hline(yintercept = 10, color = "red", linetype = "dotted")+
@@ -259,8 +276,28 @@ ggarrange(percentage_all_sentences_plot,
           nrow =2,
           align = "h",
           heights = c(2,1))
-
 ```
+
+
+```{r, fig.width=9, fig.height=5}
+percentage_par_rapport_tot_sentence%>%
+  #mutate(num = factor(num))%>%
+  filter(label != "N'évoque pas personnalité humaine")%>%
+  ggscatter(x = "num", y = "percentage", color = "label",
+            add = "reg.line",
+            conf.int = TRUE, # Add confidence interval
+            add.params = list(fill = "lightgray"))+
+           #cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+           #cor.coeff.args = list(method = "pearson", label.x = 3, label.sep = "\n"))+
+  theme_ready() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
+  scale_color_manual(values = c("#624894","#BADE86")) +
+  labs(fill = "Label", color = "Label",
+       title = "Proportion des représentation de la personnalité humaine\nau cours des années par avis", x = "Numéro avis", y = "Pourcentage",
+       caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: Chaque point représente un avis.\nAu cours du temps, les avis ont tendance à utiliser plus\nun vocabulaire de la personne (éco,droit) plutôt que centré sur le vivant (bio,écolo).") +
+  guides(fill = guide_legend(title.position = "top"))
+```
+
 ```{r, fig.width=40, fig.height=14}
 repartion_phrase_interet_avis%>%
   mutate(count = nb_sentence - nb_sentence_interet,
@@ -276,16 +313,18 @@ repartion_phrase_interet_avis%>%
   group_by(year) %>%
   mutate(percentage = 100 * count / sum(count)) %>%
   ungroup()%>%
+  # mutate(label = factor(label, levels = c("N'évoque pas personnalité humaine",
+  #                                         "Personne relationnelle","Individu ou sujet","Genre/espèce humaine",
+  #                                        "Corps humain","Personne droits et devoirs")))%>%
   mutate(label = factor(label, levels = c("N'évoque pas personnalité humaine",
-                                          "Personne relationnelle","Individu ou sujet","Genre/espèce humaine",
-                                         "Corps humain","Personne droits et devoirs")))%>%
+                                          "Personne/Individu","Vivant")))%>%
   mutate(percentage = ifelse(is.na(percentage),0,percentage))%>%
   filter(!is.na(year))%>%
   ggplot(aes(x = factor(year), y = percentage, fill = label)) +
   geom_bar(stat = "identity", position = "stack", alpha = 0.8, color = "black") +
   theme_ready(text_size = 33) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
-  scale_fill_manual(values = c("white","#7CA0D4","#A48AD3","#E995EB","#BADE86","#624894")) +
+  scale_fill_manual(values = c("white","#624894","#BADE86")) +
   labs(fill = "Label", color = "Label",
        title = "Proportion des représentation de la personnalité humaine au cours des années", x = "Numéro avis", y = "Pourcentage",
        caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: L'avis 21 est composé à 29% de phrase, dont une majorité référant au corps humain.") +
@@ -295,6 +334,44 @@ geom_hline(yintercept = 10, color = "red", linetype = "dotted")+
 geom_hline(yintercept = 15, color = "red", linetype = "dotted")+
 geom_hline(yintercept = 20, color = "red", linetype = "dotted")+
 geom_hline(yintercept = 25, color = "red", linetype = "dotted")
+```
+```{r, fig.width=9, fig.height=5}
+repartion_phrase_interet_avis%>%
+  mutate(count = nb_sentence - nb_sentence_interet,
+         label = "N'évoque pas personnalité humaine")%>%
+  mutate(year = as.numeric(format(Date, format="%Y")))%>%
+  group_by(year, label)%>%
+  summarise(count = sum(count))%>%
+  select(year,label,count)%>%
+  rbind(predictions %>%
+  mutate(year = as.numeric(format(Date, format="%Y")))%>%
+  group_by(year, label) %>%
+  summarise(count = n(), .groups = 'drop'))%>%
+  group_by(year) %>%
+  mutate(percentage = 100 * count / sum(count)) %>%
+  ungroup()%>%
+  # mutate(label = factor(label, levels = c("N'évoque pas personnalité humaine",
+  #                                         "Personne relationnelle","Individu ou sujet","Genre/espèce humaine",
+  #                                        "Corps humain","Personne droits et devoirs")))%>%
+  mutate(label = factor(label, levels = c("N'évoque pas personnalité humaine",
+                                          "Personne/Individu","Vivant")))%>%
+  mutate(percentage = ifelse(is.na(percentage),0,percentage))%>%
+  filter(!is.na(year))%>%
+  #mutate(num = factor(num))%>%
+  filter(label != "N'évoque pas personnalité humaine")%>%
+  ggscatter(x = "year", y = "percentage", color = "label",
+            add = "reg.line",
+            conf.int = TRUE, # Add confidence interval
+            add.params = list(fill = "lightgray"))+
+           #cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+           #cor.coeff.args = list(method = "pearson", label.y = 22, label.sep = "\n"))+
+  theme_ready() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
+  scale_color_manual(values = c("#624894","#BADE86")) +
+  labs(fill = "Label", color = "Label",
+       title = "Proportion des représentation de la personnalité humaine\nau cours des années par année", x = "Années", y = "Pourcentage",
+       caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: Chaque point représente le pourcentage de la catégorie parmis les phrases publiées cette année.\nAu cours du temps, les avis ont tendance à utiliser plus\nun vocabulaire de la personne (éco,droit) plutôt que centré sur le vivant (bio,écolo).") +
+  guides(fill = guide_legend(title.position = "top"))
 ```
 
 ## Quelle profession parle de quoi ?
