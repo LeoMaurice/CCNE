@@ -76,22 +76,28 @@ signif_caption_text <- paste("Significance levels:\n", paste(symbols, ":", signi
 
 ```
 
-
+# Résumé de la méthodologie et des données
+Les données : chaque citation a été assigné à l'avis où elle est cité, et un auteur, une institution ou domaine.
+Pour certains auteurs que j'ai classifié comme classique je vais faire un traitement particulier : si la fréquence d'apparition est > 2, je le garde en soit, sinon je le relis à un domaine. Pour la presse spécialisée, la presse, les lois je vais adopter une démarche similaire.
 ```{r}
-designation_recoding <- Vectorize(function(type, Auteur_Institution, Institution_Domaine) {
-  if (type == "classic") {
-    return(Auteur_Institution)
-  } else if (type == "collectif") {
-    return("Collectif")
-  } else if (type == "presse spécialisée") {
-    return("Presse Spécialisée")
-  } else if (type == "presse") {
-    return("Presse")
-  } else if (type == "loi") {
-    return("Loi")
-  } else {
-    return(Institution_Domaine)
-  }
+designation_recoding <- Vectorize(function(type, Auteur_Institution, Institution_Domaine, freq_auteur, freq) {
+if (type == "classic" && freq_auteur >= 2) {
+  return(Auteur_Institution)
+} else if (type == "collectif") {
+  return("Collectif")
+} else if (type == "presse spécialisée" && freq < 2) {
+  return("Presse Spécialisée diverse")
+} else if (type == "presse" && freq < 2) {
+  return("Presse diverse")
+} else if (type == "loi" && freq < 2) {
+  return("Loi diverse")
+} else if (type == "comité d'éthique" && freq < 2) {
+  return("Comité d'éthique divers")
+} else if (type == "autre pays" && freq < 2) {
+  return("Comité d'éthique divers")
+} else {
+  return(Institution_Domaine)
+}
 })
 
 
@@ -99,16 +105,62 @@ metadata_avis <- open_metadata()%>%
   filter(rapporteurs != "NA")
 
 metadata_citation <- read_excel("../data/raw/collected_metadata/metadata_citation.xlsx", 
-    col_types = c("text", "text", "text", 
-        "text", "text", "text", "numeric", 
+    col_types = c("text", "text", "skip", 
+        "text", "text", "text", "skip", "skip", 
         "skip"))%>%
   separate_rows(cité_dans_avis_num, sep = ";")%>%
   separate_rows(Institution_Domaine, sep = ";")%>%
-  mutate(type = ifelse(type %in% c("livre","article","colloque"),"académique",type),
-         Désignation = designation_recoding(type,Auteur_Institution, Institution_Domaine)
+  group_by(Auteur_Institution)%>%
+  mutate(freq_auteur = n())%>%
+  ungroup()%>%
+  group_by(Institution_Domaine)%>%
+  mutate(freq_institution = n())%>%
+  ungroup()%>%
+  mutate(type = ifelse(is.na(type),"",type),
+         type = ifelse(type %in% c("livre","article","colloque","thèse"),"académique",type),
+         Désignation = designation_recoding(type,Auteur_Institution, Institution_Domaine, freq_auteur,freq_institution)
          )
 
+ccne_citations <- metadata_citation%>%
+  group_by(Désignation)%>%
+  summarise(count = n())
+
+reseau_citation <- metadata_citation%>%
+  rename(Avis = cité_dans_avis_num)%>%
+  group_by(Avis,Désignation)%>%
+  summarise(count = n())
+
 ```
+
+```{r}
+# regardons combien chaque "classic" est cité
+# metadata_citation%>%
+#   filter(type  == "classic")%>%
+#   group_by(Auteur_Institution)%>%
+#   summarise(count = n())%>%
+#   arrange(desc(count))
+
+# # regardons combien chaque "classic" est cité
+# metadata_citation%>%
+#   filter(type  == "presse")%>%
+#   group_by(Institution_Domaine)%>%
+#   summarise(count = n())%>%
+#   arrange(desc(count))
+
+# metadata_citation%>%
+#   filter(type  == "presse spécialisée")%>%
+#   group_by(Institution_Domaine)%>%
+#   summarise(count = n())%>%
+#   arrange(desc(count))
+
+metadata_citation%>%
+  filter(type  == "loi")%>%
+  group_by(Institution_Domaine)%>%
+  summarise(count = n())%>%
+  arrange(desc(count))
+```
+
+
 ```{r, width = 20, heigh = 20}
 # Count the number of citations for each Désignation
 citation_counts <- metadata_citation %>%
