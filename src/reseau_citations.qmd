@@ -45,10 +45,6 @@ pacman::p_load(arrow,
                tidyverse,
                reshape2,
                stringr,
-               
-               igraph,
-               #sna,
-               #network,
 
                stats,
                rstatix,
@@ -58,8 +54,17 @@ pacman::p_load(arrow,
                ggprism,
                ggpubr,
                ggcorrplot,
-               #ggraph,
+               ggraph,
                ggnetwork,
+               ggrepel,
+               
+               igraph,
+               tidygraph,
+               #sna,
+               #network,
+               
+               networkD3,
+               leaflet,
                
                rmarkdown,
                
@@ -121,16 +126,16 @@ metadata_citation <- read_excel("../data/raw/collected_metadata/metadata_citatio
          Désignation = designation_recoding(type,Auteur_Institution, Institution_Domaine, freq_auteur,freq_institution)
          )
 
-ccne_citations <- metadata_citation%>%
-  group_by(Désignation)%>%
-  summarise(count = n())
+recat <- read_excel("../data/intermediate/reseau/recategorize_designation.xlsx")%>%
+  select(-count)
 
-reseau_citation <- metadata_citation%>%
-  rename(Avis = cité_dans_avis_num)%>%
-  group_by(Avis,Désignation)%>%
-  summarise(count = n())
+metadata_citation <- metadata_citation%>%
+  left_join(recat, by = "Désignation")%>%
+  rename(Precise_Désignation = Désignation,
+         Désignation = Rename)
 
 ```
+
 
 ```{r}
 # regardons combien chaque "classic" est cité
@@ -153,44 +158,214 @@ reseau_citation <- metadata_citation%>%
 #   summarise(count = n())%>%
 #   arrange(desc(count))
 
-metadata_citation%>%
-  filter(type  == "loi")%>%
-  group_by(Institution_Domaine)%>%
-  summarise(count = n())%>%
-  arrange(desc(count))
+# metadata_citation%>%
+#   filter(type  == "loi")%>%
+#   group_by(Institution_Domaine)%>%
+#   summarise(count = n())%>%
+#   arrange(desc(count))
 ```
 
+```{r}
+#| eval: false
+# Load necessary libraries
+library(dplyr)
+library(igraph)
+library(networkD3)
+library(leaflet)
 
-```{r, width = 20, heigh = 20}
 # Count the number of citations for each Désignation
 citation_counts <- metadata_citation %>%
-  group_by(Désignation) %>%
+  group_by(Désignation, Groupe) %>%
   summarise(citation_count = n(), .groups = 'drop')
 
 # Create edge list for the network graph
-edge_list_macro <- metadata_citation %>%
+edge_list_macro <- citation_counts %>%
   mutate(source = "CCNE") %>%
-  select(source, target = Désignation) %>%
-  group_by(source, target) %>%
-  summarise(weight = n(), .groups = 'drop')
+  rename(target = Désignation,
+         weight = citation_count)%>%
+  select(source, target, weight)
 
 # Create the network graph using igraph
 macro_citations_network <- graph_from_data_frame(edge_list_macro, directed = TRUE)
 
+citation_counts <- citation_counts %>%
+  add_row(Désignation = "CCNE", Groupe = "CCNE", citation_count =sum(citation_counts$citation_count))
+
 # Add node attributes
 V(macro_citations_network)$citation_count <- citation_counts$citation_count[match(V(macro_citations_network)$name, citation_counts$Désignation)]
+V(macro_citations_network)$Groupe <- citation_counts$Groupe[match(V(macro_citations_network)$name, citation_counts$Désignation)]
 V(macro_citations_network)$type <- ifelse(V(macro_citations_network)$name == "CCNE", "Source", "Target")
 
-# Convert igraph object to ggnetwork-compatible format
-network_data <- ggnetwork(macro_citations_network)
+# Convert igraph object to a format compatible with networkD3
+network_d3 <- igraph_to_networkD3(macro_citations_network, group = V(macro_citations_network)$Groupe)
 
-# Plot the network using ggnetwork and ggplot2
-ggplot(network_data, aes(x = x, y = y, xend = xend, yend = yend)) +
-  geom_edges(aes(), color = "grey50") +
-  geom_nodes(aes(size = citation_count)) +
-  geom_nodelabel_repel(aes(label = name), box.padding = unit(0.35, "lines")) +
-  theme_blank() +
-  scale_size_continuous(range = c(3, 10)) +
-  ggtitle("Citation Network from CCNE to Institution/Auteur/Genre")
+# Adjust node size based on citation count
+network_d3$nodes$size <- V(macro_citations_network)$citation_count
+
+# top_20_nodes <- network_d3$nodes %>% 
+#   arrange(desc(size)) %>% 
+#   head(20) %>% 
+#   pull(name)
+network_d3$nodes$label <- paste(network_d3$nodes$name, "citation :", network_d3$nodes$size)
+
+# Create color scale based on group
+color_scale <- colorFactor(palette = ggprism::prism_color_pal("summer")(10), domain = network_d3$nodes$group)
+
+# Plot the network using forceNetwork
+forceNetwork(Links = network_d3$links, Nodes = network_d3$nodes,
+             Source = 'source', Target = 'target',
+             NodeID = 'label', Group = 'group', # Use 'label' for NodeID to show top 20 labels
+             linkWidth = JS("function(d) { return Math.sqrt(d.value); }"),
+             #linkDistance = JS("function(d) { return 50 + 1000 * Math.sqrt(d.value); }"),
+             Nodesize = 'size',
+             radiusCalculation = JS("Math.sqrt(d.nodesize) + 3"),
+             linkColour = "#666",
+             colourScale = JS("d3.scaleOrdinal(d3.schemeCategory10)"),
+             opacity = 0.9,
+             zoom = TRUE,
+             legend = TRUE,
+             bounded = FALSE,
+             fontSize = 20)
+
+
+```
+
+
+```{r}
+#| eval: false
+# Load necessary libraries
+library(dplyr)
+library(networkD3)
+
+# Count the number of citations for each Désignation
+citation_counts <- metadata_citation %>%
+  group_by(Désignation, Groupe) %>%
+  summarise(citation_count = n(), .groups = 'drop')
+
+# Add a row for the CCNE node
+citation_counts <- citation_counts %>%
+  add_row(Désignation = "CCNE", Groupe = "CCNE", citation_count = sum(citation_counts$citation_count))
+
+# Organize data into a hierarchical structure
+create_hierarchy <- function(group_name, citations) {
+  list(
+    name = group_name,
+    children = lapply(citations, function(citation) {
+      list(name = citation, size = citation_counts %>% filter(Désignation == citation) %>% pull(citation_count))
+    })
+  )
+}
+
+groups <- unique(citation_counts$Groupe[citation_counts$Groupe != "CCNE"])
+hierarchy <- list(
+  name = "CCNE",
+  children = lapply(groups, function(group) {
+    citations <- citation_counts %>% filter(Groupe == group) %>% pull(Désignation)
+    create_hierarchy(group, citations)
+  })
+)
+
+# Plot the hierarchical radial network
+radialNetwork(List = hierarchy,
+              fontSize = 20
+              )
+
+```
+```{r, fig.width= = 25, fig.height= 25}
+citation_counts <- metadata_citation %>%
+  group_by(Désignation, Groupe) %>%
+  summarise(citation_count = n(), .groups = 'drop') %>%
+  mutate(Categorie = Groupe, label = Désignation)%>%
+  rename(from = Groupe, to = Désignation, size = citation_count)
+
+group_counts <- metadata_citation %>%
+  group_by(Groupe) %>%
+  summarise(size = n(), .groups = 'drop') %>%
+  rename(to = Groupe) %>%
+  mutate(Categorie = to,
+         from = "CCNE",
+         label = "")
+
+macrograph_edgelist_df <- bind_rows(group_counts, citation_counts)
+
+macrograph_nodes_df <- macrograph_edgelist_df %>%
+  select(name = to, size, Categorie,label) %>%
+  distinct() %>%
+  add_row(name = "CCNE", size = sum(group_counts$size, na.rm = TRUE), 
+          Categorie = "Expertise, Forums, Autorités",
+          label = "CCNE") %>%
+  mutate(size = as.numeric(size),
+         label_size =log10(size)
+)
+
+# Create the tbl_graph object
+graph <- tbl_graph(edges = macrograph_edgelist_df %>% 
+                     select(from, to), nodes = macrograph_nodes_df, directed = TRUE)
+
+set.seed(1968)
+# Create the circular packing graph
+ggraph(graph, 'circlepack', weight = size) + 
+  geom_edge_link() + 
+  #geom_node_circle(aes(fill = size), size = 0.25, n = 50) +
+  geom_node_text(aes(label = label, colour = Categorie, size = label_size), repel = TRUE) +
+  coord_fixed() +
+  theme_void()
+```
+```{r}
+reseau_citation <- metadata_citation%>%
+  rename(Avis = cité_dans_avis_num)%>%
+  group_by(Avis,Désignation)%>%
+  summarise(count = n())%>%
+  rename(source = Avis,
+         Désignation = to)
+
+# Create edge list for the network graph
+edge_list_macro <- citation_counts %>%
+  mutate(source = "CCNE") %>%
+  rename(target = Désignation,
+         weight = citation_count)%>%
+  select(source, target, weight)
+
+# Create the network graph using igraph
+macro_citations_network <- graph_from_data_frame(edge_list_macro, directed = TRUE)
+
+citation_counts <- citation_counts %>%
+  add_row(Désignation = "CCNE", Groupe = "CCNE", citation_count =sum(citation_counts$citation_count))
+
+# Add node attributes
+V(macro_citations_network)$citation_count <- citation_counts$citation_count[match(V(macro_citations_network)$name, citation_counts$Désignation)]
+V(macro_citations_network)$Groupe <- citation_counts$Groupe[match(V(macro_citations_network)$name, citation_counts$Désignation)]
+V(macro_citations_network)$type <- ifelse(V(macro_citations_network)$name == "CCNE", "Source", "Target")
+
+# Convert igraph object to a format compatible with networkD3
+network_d3 <- igraph_to_networkD3(macro_citations_network, group = V(macro_citations_network)$Groupe)
+
+# Adjust node size based on citation count
+network_d3$nodes$size <- V(macro_citations_network)$citation_count
+
+# top_20_nodes <- network_d3$nodes %>% 
+#   arrange(desc(size)) %>% 
+#   head(20) %>% 
+#   pull(name)
+network_d3$nodes$label <- paste(network_d3$nodes$name, "citation :", network_d3$nodes$size)
+
+# Create color scale based on group
+color_scale <- colorFactor(palette = ggprism::prism_color_pal("summer")(10), domain = network_d3$nodes$group)
+
+# Plot the network using forceNetwork
+forceNetwork(Links = network_d3$links, Nodes = network_d3$nodes,
+             Source = 'source', Target = 'target',
+             NodeID = 'label', Group = 'group', # Use 'label' for NodeID to show top 20 labels
+             linkWidth = JS("function(d) { return Math.sqrt(d.value); }"),
+             #linkDistance = JS("function(d) { return 50 + 1000 * Math.sqrt(d.value); }"),
+             Nodesize = 'size',
+             radiusCalculation = JS("Math.sqrt(d.nodesize) + 3"),
+             linkColour = "#666",
+             colourScale = JS("d3.scaleOrdinal(d3.schemeCategory10)"),
+             opacity = 0.9,
+             zoom = TRUE,
+             legend = TRUE,
+             bounded = FALSE,
+             fontSize = 20)
 ```
 
