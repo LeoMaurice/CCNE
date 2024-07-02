@@ -106,8 +106,7 @@ if (type == "classic" && freq_auteur >= 2) {
 })
 
 
-metadata_avis <- open_metadata()%>%
-  filter(rapporteurs != "NA")
+metadata_avis <- open_metadata()
 
 metadata_citation <- read_excel("../data/raw/collected_metadata/metadata_citation.xlsx", 
     col_types = c("text", "text", "skip", 
@@ -169,78 +168,14 @@ metadata_citation <- metadata_citation%>%
 #| eval: false
 # Load necessary libraries
 library(dplyr)
-library(igraph)
-library(networkD3)
-library(leaflet)
-
-# Count the number of citations for each Désignation
-citation_counts <- metadata_citation %>%
-  group_by(Désignation, Groupe) %>%
-  summarise(citation_count = n(), .groups = 'drop')
-
-# Create edge list for the network graph
-edge_list_macro <- citation_counts %>%
-  mutate(source = "CCNE") %>%
-  rename(target = Désignation,
-         weight = citation_count)%>%
-  select(source, target, weight)
-
-# Create the network graph using igraph
-macro_citations_network <- graph_from_data_frame(edge_list_macro, directed = TRUE)
-
-citation_counts <- citation_counts %>%
-  add_row(Désignation = "CCNE", Groupe = "CCNE", citation_count =sum(citation_counts$citation_count))
-
-# Add node attributes
-V(macro_citations_network)$citation_count <- citation_counts$citation_count[match(V(macro_citations_network)$name, citation_counts$Désignation)]
-V(macro_citations_network)$Groupe <- citation_counts$Groupe[match(V(macro_citations_network)$name, citation_counts$Désignation)]
-V(macro_citations_network)$type <- ifelse(V(macro_citations_network)$name == "CCNE", "Source", "Target")
-
-# Convert igraph object to a format compatible with networkD3
-network_d3 <- igraph_to_networkD3(macro_citations_network, group = V(macro_citations_network)$Groupe)
-
-# Adjust node size based on citation count
-network_d3$nodes$size <- V(macro_citations_network)$citation_count
-
-# top_20_nodes <- network_d3$nodes %>% 
-#   arrange(desc(size)) %>% 
-#   head(20) %>% 
-#   pull(name)
-network_d3$nodes$label <- paste(network_d3$nodes$name, "citation :", network_d3$nodes$size)
-
-# Create color scale based on group
-color_scale <- colorFactor(palette = ggprism::prism_color_pal("summer")(10), domain = network_d3$nodes$group)
-
-# Plot the network using forceNetwork
-forceNetwork(Links = network_d3$links, Nodes = network_d3$nodes,
-             Source = 'source', Target = 'target',
-             NodeID = 'label', Group = 'group', # Use 'label' for NodeID to show top 20 labels
-             linkWidth = JS("function(d) { return Math.sqrt(d.value); }"),
-             #linkDistance = JS("function(d) { return 50 + 1000 * Math.sqrt(d.value); }"),
-             Nodesize = 'size',
-             radiusCalculation = JS("Math.sqrt(d.nodesize) + 3"),
-             linkColour = "#666",
-             colourScale = JS("d3.scaleOrdinal(d3.schemeCategory10)"),
-             opacity = 0.9,
-             zoom = TRUE,
-             legend = TRUE,
-             bounded = FALSE,
-             fontSize = 20)
-
-
-```
-
-
-```{r}
-#| eval: false
-# Load necessary libraries
-library(dplyr)
 library(networkD3)
 
 # Count the number of citations for each Désignation
 citation_counts <- metadata_citation %>%
   group_by(Désignation, Groupe) %>%
-  summarise(citation_count = n(), .groups = 'drop')
+  summarise(citation_count = n(), .groups = 'drop')%>%
+  mutate(Groupe = gsub(" ", "\n", Groupe),
+         Désignation = paste(Désignation,citation_count,sep = "|"))
 
 # Add a row for the CCNE node
 citation_counts <- citation_counts %>%
@@ -271,16 +206,18 @@ radialNetwork(List = hierarchy,
               )
 
 ```
-```{r, fig.width= = 25, fig.height= 25}
+```{r, fig.width= = 50, fig.height= 50}
 citation_counts <- metadata_citation %>%
   group_by(Désignation, Groupe) %>%
   summarise(citation_count = n(), .groups = 'drop') %>%
-  mutate(Categorie = Groupe, label = Désignation)%>%
+  mutate(Categorie = Groupe, label = ifelse(citation_count>5, Désignation, ""))%>%
   rename(from = Groupe, to = Désignation, size = citation_count)
 
 group_counts <- metadata_citation %>%
   group_by(Groupe) %>%
-  summarise(size = n(), .groups = 'drop') %>%
+  summarise(size = n(),
+            weight = 4,
+            .groups = 'drop') %>%
   rename(to = Groupe) %>%
   mutate(Categorie = to,
          from = "CCNE",
@@ -292,80 +229,106 @@ macrograph_nodes_df <- macrograph_edgelist_df %>%
   select(name = to, size, Categorie,label) %>%
   distinct() %>%
   add_row(name = "CCNE", size = sum(group_counts$size, na.rm = TRUE), 
-          Categorie = "Expertise, Forums, Autorités",
+          Categorie = "CCNE",
           label = "CCNE") %>%
   mutate(size = as.numeric(size),
-         label_size =log10(size)
+         weight = log10(size+1),
+         label_size =log10(size+1)
 )
 
 # Create the tbl_graph object
 graph <- tbl_graph(edges = macrograph_edgelist_df %>% 
-                     select(from, to), nodes = macrograph_nodes_df, directed = TRUE)
+                     select(from, to, Categorie, label), 
+                   nodes = macrograph_nodes_df, directed = TRUE)
 
 set.seed(1968)
 # Create the circular packing graph
+# ggraph(graph, 'circlepack') + 
+#   geom_edge_link() + 
+#   geom_node_point(aes(colour = Categorie)) +
+#   #geom_node_circle(aes(fill = size), size = 0.25, n = 50) +
+#   geom_node_text(aes(label = label, colour = Categorie, size = label_size), repel = TRUE) +
+#   scale_color_prism("floral") +
+#   theme_void(base_size = 20)
+
+
 ggraph(graph, 'circlepack', weight = size) + 
-  geom_edge_link() + 
-  #geom_node_circle(aes(fill = size), size = 0.25, n = 50) +
-  geom_node_text(aes(label = label, colour = Categorie, size = label_size), repel = TRUE) +
-  coord_fixed() +
-  theme_void()
+  geom_node_circle(aes(fill = Categorie)) +
+  scale_fill_prism("floral") +
+  theme_void(base_size = 20)
+
+```
+
+
+```{r}
+reseau_citation_extra <- metadata_citation%>%
+  rename(Avis = cité_dans_avis_num)%>%
+  group_by(Avis,Désignation, Groupe)%>%
+  summarise(Citations = n())%>%
+  rename(from = Avis,
+         to = Désignation,
+         Categorie = Groupe)%>%
+  mutate(shape = "Extra citation")
+
+reseau_citation_intra <- metadata_avis%>%
+  filter(!(is.na(citations_autres_avis)))%>%
+  separate_rows(citations_autres_avis , sep = ";")%>%
+  rename(from = num,
+         to = citations_autres_avis)%>%
+  group_by(from,to)%>%
+  summarise(Citations = n())%>%
+  mutate(shape = "Intra citation",
+         Categorie = "CCNE",
+         from = as.character(from))
+
+mesograph_edgelist_df <- bind_rows(reseau_citation_extra,reseau_citation_intra)%>%
+  filter(!(to=="covid")) # supprimer les avis covid pour l'instant
+
+
+mesograph_nodes_df <- bind_rows(
+  metadata_citation%>%
+    rename(name = Désignation, Categorie = Groupe)%>%
+    mutate(shape = "Extra citation")%>%
+    select(name, Categorie, shape)%>%
+    distinct(),
+  metadata_avis%>%
+    mutate(name = as.character(num),
+           shape = "Intra citation",
+           Categorie = "CCNE")%>%
+    select(name, Categorie, shape)%>%
+    distinct()
+)%>%
+  filter(!(is.na(name)))
+
+# Create the tbl_graph object
+reseau_citation <- tbl_graph(edges = mesograph_edgelist_df%>% 
+                     select(from, to,Citations, Categorie, shape),
+                   nodes = mesograph_nodes_df%>%
+                     select(name, Categorie, shape),
+                   directed = TRUE, node_key = "name")%>%
+  activate(nodes) %>%
+  filter(degree(.) > 0)
+
+# Convertir l'objet tbl_graph en igraph
+reseau_citation_igraph <- as.igraph(reseau_citation)
+
+# Convertir l'objet igraph en format compatible avec networkD3
+network_d3 <- igraph_to_networkD3(reseau_citation_igraph, group = V(reseau_citation_igraph)$Categorie)
+
+# Créer le graphique networkD3
+forceNetwork(Links = network_d3$links, Nodes = network_d3$nodes, 
+             Source = 'source', Target = 'target', 
+             NodeID = 'name', Group = 'group', 
+             opacity = 0.8, fontSize = 12)
 ```
 ```{r}
-reseau_citation <- metadata_citation%>%
-  rename(Avis = cité_dans_avis_num)%>%
-  group_by(Avis,Désignation)%>%
-  summarise(count = n())%>%
-  rename(source = Avis,
-         Désignation = to)
-
-# Create edge list for the network graph
-edge_list_macro <- citation_counts %>%
-  mutate(source = "CCNE") %>%
-  rename(target = Désignation,
-         weight = citation_count)%>%
-  select(source, target, weight)
-
-# Create the network graph using igraph
-macro_citations_network <- graph_from_data_frame(edge_list_macro, directed = TRUE)
-
-citation_counts <- citation_counts %>%
-  add_row(Désignation = "CCNE", Groupe = "CCNE", citation_count =sum(citation_counts$citation_count))
-
-# Add node attributes
-V(macro_citations_network)$citation_count <- citation_counts$citation_count[match(V(macro_citations_network)$name, citation_counts$Désignation)]
-V(macro_citations_network)$Groupe <- citation_counts$Groupe[match(V(macro_citations_network)$name, citation_counts$Désignation)]
-V(macro_citations_network)$type <- ifelse(V(macro_citations_network)$name == "CCNE", "Source", "Target")
-
-# Convert igraph object to a format compatible with networkD3
-network_d3 <- igraph_to_networkD3(macro_citations_network, group = V(macro_citations_network)$Groupe)
-
-# Adjust node size based on citation count
-network_d3$nodes$size <- V(macro_citations_network)$citation_count
-
-# top_20_nodes <- network_d3$nodes %>% 
-#   arrange(desc(size)) %>% 
-#   head(20) %>% 
-#   pull(name)
-network_d3$nodes$label <- paste(network_d3$nodes$name, "citation :", network_d3$nodes$size)
-
-# Create color scale based on group
-color_scale <- colorFactor(palette = ggprism::prism_color_pal("summer")(10), domain = network_d3$nodes$group)
-
-# Plot the network using forceNetwork
-forceNetwork(Links = network_d3$links, Nodes = network_d3$nodes,
-             Source = 'source', Target = 'target',
-             NodeID = 'label', Group = 'group', # Use 'label' for NodeID to show top 20 labels
-             linkWidth = JS("function(d) { return Math.sqrt(d.value); }"),
-             #linkDistance = JS("function(d) { return 50 + 1000 * Math.sqrt(d.value); }"),
-             Nodesize = 'size',
-             radiusCalculation = JS("Math.sqrt(d.nodesize) + 3"),
-             linkColour = "#666",
-             colourScale = JS("d3.scaleOrdinal(d3.schemeCategory10)"),
-             opacity = 0.9,
-             zoom = TRUE,
-             legend = TRUE,
-             bounded = FALSE,
-             fontSize = 20)
+ggraph(reseau_citation, layout = 'stress') + 
+  geom_edge_link(aes(edge_alpha = Citations), show.legend = FALSE) +
+  geom_node_point(aes(fill = Categorie, shape = shape, size = degree(reseau_citation)), show.legend = TRUE) +
+  geom_node_text(aes(label = name), repel = TRUE, size = 3) +
+  scale_size_continuous(range = c(3, 10)) +
+  theme_void() +
+  theme(legend.position = "right") +
+  labs(title = "Graphique de citation", subtitle = "Visualisation des citations avec ggraph")
 ```
 
