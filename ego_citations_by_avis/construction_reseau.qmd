@@ -141,7 +141,7 @@ reseau_citation_igraph <- as.igraph(reseau_citation)
 
 save(reseau_citation_igraph, mesograph_nodes_df, file = "network_data.RData")
 
-save(reseau_citation_igraph, mesograph_nodes_df, file = "../Micronetwork/network_data.RData")
+save(reseau_citation_igraph, mesograph_nodes_df, mesograph_edgelist_df, file = "../Micronetwork/network_data.RData")
 
 ```
 
