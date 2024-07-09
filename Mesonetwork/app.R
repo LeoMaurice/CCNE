@@ -157,17 +157,17 @@ server <- function(input, output, session) {
     top_n <- as.numeric(input$top_n)
     
     # Filtrer les avis dans le range sélectionné
-    filtered_nodes <- mesograph_nodes_df %>%
+    filtered_nodes <- micrograph_nodes_df %>%
       filter(as.numeric(name) >= avis_range[1] & as.numeric(name) <= avis_range[2])
     
     # Inclure les liens impliquant des avis dans le range sélectionné
-    filtered_edges <- mesograph_edgelist_df %>% 
+    filtered_edges <- micrograph_edgelist_df %>% 
       filter((as.numeric(from) >= avis_range[1] & as.numeric(from) <= avis_range[2]) |
                (as.numeric(to) >= avis_range[1] & as.numeric(to) <= avis_range[2]))
     
     # Inclure les noeuds pour tous les liens sélectionnés
     linked_nodes <- unique(c(filtered_edges$from, filtered_edges$to))
-    filtered_nodes <- mesograph_nodes_df %>% 
+    filtered_nodes <- micrograph_nodes_df %>% 
       filter(name %in% linked_nodes)
     
     # Calculer le top n des noeuds les plus cités pour la catégorie sélectionnée

@@ -29,13 +29,14 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       selectInput("node_id", "Sélectionner le numéro de l'avis:", 
-                  choices = sort(as.numeric(mesograph_nodes_df$name[mesograph_nodes_df$Categorie == "CCNE"])), 
-                  selected = min(as.numeric(mesograph_nodes_df$name[mesograph_nodes_df$Categorie == "CCNE"]), na.rm = TRUE)),
+                  choices = sort(as.numeric(micrograph_nodes_df$name[micrograph_nodes_df$Categorie == "CCNE"])), 
+                  selected = min(as.numeric(micrograph_nodes_df$name[micrograph_nodes_df$Categorie == "CCNE"]), na.rm = TRUE)),
       checkboxGroupInput("categories", "Choisir les catégories à afficher:",
-                         choices = unique(mesograph_nodes_df$Categorie),
-                         selected = unique(mesograph_nodes_df$Categorie)),
+                         choices = unique(micrograph_nodes_df$Categorie),
+                         selected = unique(micrograph_nodes_df$Categorie)),
       actionButton("toggle_select", "Décocher/Recocher toutes les catégories"),
       actionButton("toggle_non_direct", "Enlever/Mettre les liens non directs"),
+      actionButton("toggle_ccne", "Montrer uniquement les citations internes au CCNE"),
       br(),
       tags$div(
         tags$h4("Légende des flèches"),
@@ -59,7 +60,7 @@ ui <- fluidPage(
 
 # Server
 server <- function(input, output, session) {
-  all_categories <- unique(mesograph_nodes_df$Categorie)
+  all_categories <- unique(micrograph_nodes_df$Categorie)
   current_state <- reactiveVal(TRUE)  # Initial state is all categories selected
   show_non_direct <- reactiveVal(TRUE)  # Initial state is to show non-direct links
   
@@ -76,14 +77,27 @@ server <- function(input, output, session) {
     show_non_direct(!show_non_direct())  # Toggle the state for non-direct links
   })
   
+  observeEvent(input$toggle_ccne, {
+    selected_categories <- input$categories
+    if ("CCNE" %in% selected_categories) {
+      if (length(selected_categories) == 1) {
+        updateCheckboxGroupInput(session, "categories", selected = all_categories)
+      } else {
+        updateCheckboxGroupInput(session, "categories", selected = "CCNE")
+      }
+    } else {
+      updateCheckboxGroupInput(session, "categories", selected = "CCNE")
+    }
+  })
+  
   output$network <- renderVisNetwork({
     selected_node <- as.character(input$node_id)
     selected_categories <- input$categories
     show_non_direct_val <- show_non_direct()
     
     # Filtrer les noeuds et les liens pour afficher seulement ceux à une profondeur de 1 du noeud sélectionné
-    subgraph_nodes <- neighborhood(reseau_citation_igraph, order = 1, nodes = selected_node, mode = "all")[[1]]
-    subgraph <- induced_subgraph(reseau_citation_igraph, subgraph_nodes)
+    subgraph_nodes <- neighborhood(microreseau_citation_igraph, order = 1, nodes = selected_node, mode = "all")[[1]]
+    subgraph <- induced_subgraph(microreseau_citation_igraph, subgraph_nodes)
     
     # Ajouter "Avis étudié" à la liste des catégories sélectionnées
     if ("CCNE" %in% selected_categories) {
@@ -140,7 +154,7 @@ server <- function(input, output, session) {
       visGroups(groupname = "Société", color = "#3D0620", shape = "triangle") %>%
       visGroups(groupname = "Avis étudié", color = "#022013", shape = "square") %>%
       addFontAwesome() %>%
-      visLegend(useGroups = TRUE, position = "right", width = 0.2, ncol = 2,
+      visLegend(useGroups = TRUE, position = "right", width = 0.2, ncol = 1,
                 main = list(text = "Catégorie de citations",
                             style = "color:#000000;font-size:24px;text-align:center;")) %>%
       visEdges(arrows = 'to', color = list(color = "gray", highlight = "black")) %>%

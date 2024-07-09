@@ -37,7 +37,10 @@ pacman::p_load(arrow,
 
 source("../src/helpers/database_creation.R")
 source("../src/helpers/figures.R")
+```
 
+
+```{r}
 # Ouverture données
 
 designation_recoding <- Vectorize(function(type, Auteur_Institution, Institution_Domaine, freq_auteur, freq) {
@@ -45,16 +48,6 @@ designation_recoding <- Vectorize(function(type, Auteur_Institution, Institution
     return(Auteur_Institution)
   } else if (type == "collectif") {
     return("Collectif")
-  } else if (type == "presse spécialisée" && freq < 0) {
-    return("Presse Spécialisée diverse")
-  } else if (type == "presse" && freq < 0) {
-    return("Presse diverse")
-  } else if (type == "loi" && freq < 0) {
-    return("Loi diverse")
-  } else if (type == "comité d'éthique" && freq < 0) {
-    return("Comité d'éthique divers")
-  } else if (type == "autre pays" && freq < 0) {
-    return("Comité d'éthique divers")
   } else {
     return(Institution_Domaine)
   }
@@ -109,6 +102,107 @@ reseau_citation_intra <- metadata_avis %>%
          Categorie = "CCNE",
          from = as.character(from))
 
+micrograph_edgelist_df <- bind_rows(reseau_citation_extra, reseau_citation_intra) %>%
+  filter(!(to == "covid"))  # supprimer les avis covid pour l'instant
+
+micrograph_nodes_df <- bind_rows(
+  metadata_citation %>%
+    rename(name = Désignation, Categorie = Groupe) %>%
+    mutate(shape = "Extra citation") %>%
+    select(name, Categorie, shape) %>%
+    distinct(),
+  metadata_avis %>%
+    mutate(name = as.character(num),
+           shape = "Intra citation",
+           Categorie = "CCNE") %>%
+    select(name, Categorie, shape) %>%
+    distinct()
+) %>%
+  filter(!(is.na(name)))
+
+# Création de l'objet tbl_graph
+microreseau_citation <- tbl_graph(edges = micrograph_edgelist_df %>% 
+                               select(from, to, Citations, Categorie, shape),
+                             nodes = micrograph_nodes_df %>%
+                               select(name, Categorie, shape),
+                             directed = TRUE, node_key = "name") %>%
+  activate(nodes) 
+  #filter(degree(.) > 0) on supprime les avis sans aucune citation ni intra ni extra mais pas dans le réseau micro : juste dans le méso.
+
+# Convertir l'objet tbl_graph en igraph
+microreseau_citation_igraph <- as.igraph(microreseau_citation)
+```
+
+```{r}
+designation_recoding <- Vectorize(function(type, Auteur_Institution, Institution_Domaine, freq_auteur, freq) {
+if (type == "classic" && freq_auteur >= 2) {
+  return(Auteur_Institution)
+} else if (type == "collectif") {
+  return("Collectif")
+} else if (type == "presse spécialisée" && freq < 2) {
+  return("Presse Spécialisée diverse")
+} else if (type == "presse" && freq < 2) {
+  return("Presse diverse")
+} else if (type == "loi" && freq < 2) {
+  return("Loi diverse")
+} else if (type == "comité d'éthique" && freq < 2) {
+  return("Comité d'éthique divers")
+} else if (type == "autre pays" && freq < 2) {
+  return("Comité d'éthique divers")
+} else {
+  return(Institution_Domaine)
+}
+})
+
+
+metadata_avis <- open_metadata()
+
+metadata_citation <- read_excel("../data/raw/collected_metadata/metadata_citation.xlsx", 
+    col_types = c("text", "text", "skip", 
+        "text", "text", "text", "skip", "skip", 
+        "skip"))%>%
+  separate_rows(cité_dans_avis_num, sep = ";")%>%
+  separate_rows(Institution_Domaine, sep = ";")%>%
+  group_by(Auteur_Institution)%>%
+  mutate(freq_auteur = n())%>%
+  ungroup()%>%
+  group_by(Institution_Domaine)%>%
+  mutate(freq_institution = n())%>%
+  ungroup()%>%
+  mutate(type = ifelse(is.na(type),"",type),
+         type = ifelse(type %in% c("livre","article","colloque","thèse"),"académique",type),
+         Désignation = designation_recoding(type,Auteur_Institution, Institution_Domaine, freq_auteur,freq_institution)
+         )
+
+recat <- read_excel("../data/intermediate/reseau/recategorize_designation.xlsx")%>%
+  select(-count)
+
+metadata_citation <- metadata_citation%>%
+  left_join(recat, by = "Désignation")%>%
+  rename(Precise_Désignation = Désignation,
+         Désignation = Rename)
+
+# Création des dataframes nécessaires
+reseau_citation_extra <- metadata_citation %>%
+  rename(Avis = cité_dans_avis_num) %>%
+  group_by(Avis, Désignation, Groupe) %>%
+  summarise(Citations = n()) %>%
+  rename(from = Avis,
+         to = Désignation,
+         Categorie = Groupe) %>%
+  mutate(shape = "Extra citation")
+
+reseau_citation_intra <- metadata_avis %>%
+  filter(!(is.na(citations_autres_avis))) %>%
+  separate_rows(citations_autres_avis, sep = ";") %>%
+  rename(from = num,
+         to = citations_autres_avis) %>%
+  group_by(from, to) %>%
+  summarise(Citations = n()) %>%
+  mutate(shape = "Intra citation",
+         Categorie = "CCNE",
+         from = as.character(from))
+
 mesograph_edgelist_df <- bind_rows(reseau_citation_extra, reseau_citation_intra) %>%
   filter(!(to == "covid"))  # supprimer les avis covid pour l'instant
 
@@ -128,7 +222,7 @@ mesograph_nodes_df <- bind_rows(
   filter(!(is.na(name)))
 
 # Création de l'objet tbl_graph
-reseau_citation <- tbl_graph(edges = mesograph_edgelist_df %>% 
+mesoreseau_citation <- tbl_graph(edges = mesograph_edgelist_df %>% 
                                select(from, to, Citations, Categorie, shape),
                              nodes = mesograph_nodes_df %>%
                                select(name, Categorie, shape),
@@ -137,11 +231,17 @@ reseau_citation <- tbl_graph(edges = mesograph_edgelist_df %>%
   filter(degree(.) > 0)
 
 # Convertir l'objet tbl_graph en igraph
-reseau_citation_igraph <- as.igraph(reseau_citation)
+mesoreseau_citation_igraph <- as.igraph(mesoreseau_citation)
+```
 
-save(reseau_citation_igraph, mesograph_nodes_df, file = "network_data.RData")
 
-save(reseau_citation_igraph, mesograph_nodes_df, mesograph_edgelist_df, file = "../Micronetwork/network_data.RData")
+```{r}
+save(microreseau_citation_igraph, micrograph_nodes_df, micrograph_edgelist_df, 
+     mesoreseau_citation_igraph, mesograph_nodes_df, mesograph_edgelist_df,
+     file = "network_data.RData")
 
+save(microreseau_citation_igraph, micrograph_nodes_df, micrograph_edgelist_df, 
+     mesoreseau_citation_igraph, mesograph_nodes_df, mesograph_edgelist_df,
+     file = "../Micronetwork/network_data.RData")
 ```
 
