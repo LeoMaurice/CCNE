@@ -2,7 +2,8 @@
 # 31/01/2024
 require(pacman,quietly = T)
 pacman::p_load(tidyverse,
-               pdftools)
+               pdftools,
+               readxl)
 
 president_CCNE_by_date <- Vectorize(function(date){
   # Définir l'ordre des niveaux du facteur

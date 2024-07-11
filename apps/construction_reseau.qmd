@@ -6,34 +6,9 @@ pacman::p_load(arrow,
                tidyverse,
                reshape2,
                stringr,
-
-               stats,
-               rstatix,
-               
-               ggplot2,
-               gridExtra,
-               ggprism,
-               ggpubr,
-               ggcorrplot,
-               ggraph,
-               ggnetwork,
-               ggrepel,
-               viridis,
-               RColorBrewer,
-               paletteer,
-               
                igraph,
                tidygraph,
-               visnetwork,
-               #sna,
-               #network,
-               
-               networkD3,
-               leaflet,
-               
-               rmarkdown,
-               
-               readxl)
+               openxlsx)
 
 source("../src/helpers/database_creation.R")
 source("../src/helpers/figures.R")
@@ -41,25 +16,20 @@ source("../src/helpers/figures.R")
 
 
 ```{r}
-# Ouverture données
-
 designation_recoding <- Vectorize(function(type, Auteur_Institution, Institution_Domaine, freq_auteur, freq) {
-  if (type == "classic" && freq_auteur >= 0) {
-    return(Auteur_Institution)
-  } else if (type == "collectif") {
-    return("Collectif")
-  } else {
-    return(Institution_Domaine)
-  }
+if (type == "classic") {
+  return(Auteur_Institution)
+} else {
+  return(Institution_Domaine)
+}
 })
 
 
 metadata_avis <- open_metadata()
 
-metadata_citation <- read_excel("../data/raw/collected_metadata/metadata_citation.xlsx", 
-                                col_types = c("text", "text", "skip", 
-                                              "text", "text", "text", "skip", "skip", 
-                                              "skip"))%>%
+metadata_citation <- read.xlsx("../data/raw/collected_metadata/metadata_citation.xlsx", 
+                               colNames = TRUE,
+                               cols = c(1, 2, 4, 5, 6))%>%
   separate_rows(cité_dans_avis_num, sep = ";")%>%
   separate_rows(Institution_Domaine, sep = ";")%>%
   group_by(Auteur_Institution)%>%
@@ -71,15 +41,14 @@ metadata_citation <- read_excel("../data/raw/collected_metadata/metadata_citatio
   mutate(type = ifelse(is.na(type),"",type),
          type = ifelse(type %in% c("livre","article","colloque","thèse"),"académique",type),
          Désignation = designation_recoding(type,Auteur_Institution, Institution_Domaine, freq_auteur,freq_institution)
-  )
+         )
 
-recat <- read_excel("../data/intermediate/reseau/recategorize_designation_detaille.xlsx")%>%
-  select(-count)
+recat <- read_excel("../data/intermediate/reseau/recategorize_designation.xlsx")
 
 metadata_citation <- metadata_citation%>%
   left_join(recat, by = "Désignation")%>%
-  rename(Precise_Désignation = Désignation,
-         Désignation = Rename)
+  rename(Désignation_collectée = Désignation,
+         Désignation = Désignation_ego)
 
 # Création des dataframes nécessaires
 reseau_citation_extra <- metadata_citation %>%
@@ -135,20 +104,8 @@ microreseau_citation_igraph <- as.igraph(microreseau_citation)
 
 ```{r}
 designation_recoding <- Vectorize(function(type, Auteur_Institution, Institution_Domaine, freq_auteur, freq) {
-if (type == "classic" && freq_auteur >= 2) {
+if (type == "classic") {
   return(Auteur_Institution)
-} else if (type == "collectif") {
-  return("Collectif")
-} else if (type == "presse spécialisée" && freq < 2) {
-  return("Presse Spécialisée diverse")
-} else if (type == "presse" && freq < 2) {
-  return("Presse diverse")
-} else if (type == "loi" && freq < 2) {
-  return("Loi diverse")
-} else if (type == "comité d'éthique" && freq < 2) {
-  return("Comité d'éthique divers")
-} else if (type == "autre pays" && freq < 2) {
-  return("Comité d'éthique divers")
 } else {
   return(Institution_Domaine)
 }
@@ -157,10 +114,9 @@ if (type == "classic" && freq_auteur >= 2) {
 
 metadata_avis <- open_metadata()
 
-metadata_citation <- read_excel("../data/raw/collected_metadata/metadata_citation.xlsx", 
-    col_types = c("text", "text", "skip", 
-        "text", "text", "text", "skip", "skip", 
-        "skip"))%>%
+metadata_citation <- read.xlsx("../data/raw/collected_metadata/metadata_citation.xlsx", 
+                               colNames = TRUE,
+                               cols = c(1, 2, 4, 5, 6))%>%
   separate_rows(cité_dans_avis_num, sep = ";")%>%
   separate_rows(Institution_Domaine, sep = ";")%>%
   group_by(Auteur_Institution)%>%
@@ -174,13 +130,12 @@ metadata_citation <- read_excel("../data/raw/collected_metadata/metadata_citatio
          Désignation = designation_recoding(type,Auteur_Institution, Institution_Domaine, freq_auteur,freq_institution)
          )
 
-recat <- read_excel("../data/intermediate/reseau/recategorize_designation.xlsx")%>%
-  select(-count)
+recat <- read_excel("../data/intermediate/reseau/recategorize_designation.xlsx")
 
 metadata_citation <- metadata_citation%>%
   left_join(recat, by = "Désignation")%>%
-  rename(Precise_Désignation = Désignation,
-         Désignation = Rename)
+  rename(Désignation_collectée = Désignation,
+         Désignation = Désignation_méso)
 
 # Création des dataframes nécessaires
 reseau_citation_extra <- metadata_citation %>%
@@ -227,21 +182,38 @@ mesoreseau_citation <- tbl_graph(edges = mesograph_edgelist_df %>%
                              nodes = mesograph_nodes_df %>%
                                select(name, Categorie, shape),
                              directed = TRUE, node_key = "name") %>%
-  activate(nodes) %>%
-  filter(degree(.) > 0)
+  activate(nodes)
+  # filter(degree(.) > 0)
 
 # Convertir l'objet tbl_graph en igraph
 mesoreseau_citation_igraph <- as.igraph(mesoreseau_citation)
+
+# mesoreseau_citation_igraph = delete.vertices(mesoreseau_citation_igraph, which(degree(mesoreseau_citation_igraph)==0))
 ```
+
+```{r}
+base_avis <- arrow::read_feather('../data/intermediate/big/base_avis.feather')
+base_avis%>%
+group_by(president)%>%
+summarise(avis_max = max(num), avis_min = min(num)) -> max_min_par_president
+```
+
 
 
 ```{r}
 save(microreseau_citation_igraph, micrograph_nodes_df, micrograph_edgelist_df, 
      mesoreseau_citation_igraph, mesograph_nodes_df, mesograph_edgelist_df,
-     file = "network_data.RData")
+     max_min_par_president,
+     file = "./ego_citations_by_avis/network_data.RData")
 
 save(microreseau_citation_igraph, micrograph_nodes_df, micrograph_edgelist_df, 
      mesoreseau_citation_igraph, mesograph_nodes_df, mesograph_edgelist_df,
-     file = "../Micronetwork/network_data.RData")
+     max_min_par_president,
+     file = "./Mesonetwork/network_data.RData")
+
+save(microreseau_citation_igraph, micrograph_nodes_df, micrograph_edgelist_df, 
+     mesoreseau_citation_igraph, mesograph_nodes_df, mesograph_edgelist_df,
+     max_min_par_president,
+     file = "./top_citations/network_data.RData")
 ```
 

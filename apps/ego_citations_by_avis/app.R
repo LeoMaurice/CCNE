@@ -9,22 +9,37 @@ load("network_data.RData")
 
 # Couleurs fixes pour chaque catégorie
 category_colors <- c(
-  "CCNE" = "#285291",
-  "Comité d'éthique" = "#4F2B8E",
-  "Comparaison pays" = "#91188E",
-  "Etat" = "#539027",
-  "Forums, Autorités" = "#0D405B",
-  "Loi" = "#34274D",
-  "Org Internationales" = "#91181D",
-  "Organismes recherches" = "#2C3324",
-  "Presse" = "#022240",
-  "Science, littérature" = "#21063F",
-  "Société" = "#3D0620",
-  "Avis étudié" = "#022013"
+  "Autorités" = "#285291",
+  "CCNE" = "#9D3A5E",
+  "Comité d'éthique" = "#579125",
+  "Comparaison pays" = "#0F0F5C",
+  "Etat" = "#91188F",
+  "Forums" = "#0E405C",
+  "Loi" = "#915B11",
+  "Org Internationales" = "#4F2B91",
+  "Presse" = "#91181E",
+  "Science, littérature" = "#0B5C2D",
+  "Société" = "#BD6345",
+  "Avis étudié" = "#4269A0"
 )
 
 # UI
 ui <- fluidPage(
+  tags$head(
+    tags$style(HTML("
+      #backButton {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+      }
+    "))
+  ),
+  tags$div(
+    id = "backButton",
+    actionButton("back", "Retour aux différents choix", 
+                 onclick = "window.location.href='https://leopoldmaurice.shinyapps.io/CCNE/'")
+  ),
   titlePanel("Visualisation de l'égo réseau des citations autour d'un avis"),
   sidebarLayout(
     sidebarPanel(
@@ -35,8 +50,12 @@ ui <- fluidPage(
                          choices = unique(micrograph_nodes_df$Categorie),
                          selected = unique(micrograph_nodes_df$Categorie)),
       actionButton("toggle_select", "Décocher/Recocher toutes les catégories"),
-      actionButton("toggle_non_direct", "Enlever/Mettre les liens non directs"),
-      actionButton("toggle_ccne", "Montrer uniquement les citations internes au CCNE"),
+      radioButtons("non_direct_links", "Liens non directs:",
+                   choices = list("Afficher" = TRUE, "Masquer" = FALSE), 
+                   selected = TRUE),
+      radioButtons("graph_mode", "Mode du graphe:",
+                   choices = list("Noms complets" = "meso", "Simplifié" = "micro"), 
+                   selected = "micro"),
       br(),
       tags$div(
         tags$h4("Légende des flèches"),
@@ -62,7 +81,6 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   all_categories <- unique(micrograph_nodes_df$Categorie)
   current_state <- reactiveVal(TRUE)  # Initial state is all categories selected
-  show_non_direct <- reactiveVal(TRUE)  # Initial state is to show non-direct links
   
   observeEvent(input$toggle_select, {
     if (current_state()) {
@@ -73,31 +91,26 @@ server <- function(input, output, session) {
     current_state(!current_state())  # Toggle the state
   })
   
-  observeEvent(input$toggle_non_direct, {
-    show_non_direct(!show_non_direct())  # Toggle the state for non-direct links
-  })
-  
-  observeEvent(input$toggle_ccne, {
-    selected_categories <- input$categories
-    if ("CCNE" %in% selected_categories) {
-      if (length(selected_categories) == 1) {
-        updateCheckboxGroupInput(session, "categories", selected = all_categories)
-      } else {
-        updateCheckboxGroupInput(session, "categories", selected = "CCNE")
-      }
-    } else {
-      updateCheckboxGroupInput(session, "categories", selected = "CCNE")
-    }
-  })
-  
   output$network <- renderVisNetwork({
     selected_node <- as.character(input$node_id)
     selected_categories <- input$categories
-    show_non_direct_val <- show_non_direct()
+    show_non_direct_val <- as.logical(input$non_direct_links)
+    mode <- input$graph_mode
+    
+    # Sélectionner les objets en fonction du mode (micro ou meso)
+    if (mode == "micro") {
+      reseau_citation_igraph <- microreseau_citation_igraph
+      graph_nodes_df <- micrograph_nodes_df
+      graph_edgelist_df <- micrograph_edgelist_df
+    } else {
+      reseau_citation_igraph <- mesoreseau_citation_igraph
+      graph_nodes_df <- mesograph_nodes_df
+      graph_edgelist_df <- mesograph_edgelist_df
+    }
     
     # Filtrer les noeuds et les liens pour afficher seulement ceux à une profondeur de 1 du noeud sélectionné
-    subgraph_nodes <- neighborhood(microreseau_citation_igraph, order = 1, nodes = selected_node, mode = "all")[[1]]
-    subgraph <- induced_subgraph(microreseau_citation_igraph, subgraph_nodes)
+    subgraph_nodes <- neighborhood(reseau_citation_igraph, order = 1, nodes = selected_node, mode = "all")[[1]]
+    subgraph <- induced_subgraph(reseau_citation_igraph, subgraph_nodes)
     
     # Ajouter "Avis étudié" à la liste des catégories sélectionnées
     if ("CCNE" %in% selected_categories) {
@@ -141,18 +154,18 @@ server <- function(input, output, session) {
     # Créer le graphique visNetwork
     visNetwork(nodes, edges) %>%
       visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
-      visGroups(groupname = "CCNE", color = "#285291", shape = "square") %>%
-      visGroups(groupname = "Comité d'éthique", color = "#4F2B8E", shape = "triangle") %>%
-      visGroups(groupname = "Comparaison pays", color = "#91188E", shape = "triangle") %>%
-      visGroups(groupname = "Etat", color = "#539027", shape = "triangle") %>%
-      visGroups(groupname = "Forums, Autorités", color = "#0D405B", shape = "triangle") %>%
-      visGroups(groupname = "Loi", color = "#34274D", shape = "triangle") %>%
-      visGroups(groupname = "Org Internationales", color = "#91181D", shape = "triangle") %>%
-      visGroups(groupname = "Organismes recherches", color = "#2C3324", shape = "triangle") %>%
-      visGroups(groupname = "Presse", color = "#022240", shape = "triangle") %>%
-      visGroups(groupname = "Science, littérature", color = "#21063F", shape = "triangle") %>%
-      visGroups(groupname = "Société", color = "#3D0620", shape = "triangle") %>%
-      visGroups(groupname = "Avis étudié", color = "#022013", shape = "square") %>%
+      visGroups(groupname = "Autorités", color = "#285291", shape = "square") %>%
+      visGroups(groupname = "CCNE", color = "#9D3A5E", shape = "square") %>%
+      visGroups(groupname = "Comité d'éthique", color = "#579125", shape = "triangle") %>%
+      visGroups(groupname = "Comparaison pays", color = "#0F0F5C", shape = "triangle") %>%
+      visGroups(groupname = "Etat", color = "#91188F", shape = "triangle") %>%
+      visGroups(groupname = "Forums", color = "#0E405C", shape = "triangle") %>%
+      visGroups(groupname = "Loi", color = "#915B11", shape = "triangle") %>%
+      visGroups(groupname = "Org Internationales", color = "#4F2B91", shape = "triangle") %>%
+      visGroups(groupname = "Presse", color = "#91181E", shape = "triangle") %>%
+      visGroups(groupname = "Science, littérature", color = "#0B5C2D", shape = "triangle") %>%
+      visGroups(groupname = "Société", color = "#BD6345", shape = "triangle") %>%
+      visGroups(groupname = "Avis étudié", color = "#4269A0", shape = "square") %>%
       addFontAwesome() %>%
       visLegend(useGroups = TRUE, position = "right", width = 0.2, ncol = 1,
                 main = list(text = "Catégorie de citations",
