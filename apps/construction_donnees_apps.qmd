@@ -14,6 +14,8 @@ source("../src/helpers/database_creation.R")
 source("../src/helpers/figures.R")
 ```
 
+# Réseau
+
 
 ```{r}
 designation_recoding <- Vectorize(function(type, Auteur_Institution, Institution_Domaine, freq_auteur, freq) {
@@ -217,8 +219,10 @@ save(microreseau_citation_igraph, micrograph_nodes_df, micrograph_edgelist_df,
      file = "./top_citations/network_data.RData")
 ```
 
+# Liste avis
 ```{r}
 base_avis <- arrow::read_feather('../data/intermediate/big/base_avis.feather')
+base_avis <- as.data.frame(base_avis)
 base_avis%>%
   select(num,Titre,president,Date,theme,nb_pages,rapporteurs,membres_gt)%>%
   rename("Numéro avis"=num,
@@ -229,7 +233,38 @@ base_avis%>%
          "Rapporteurs" = rapporteurs,
          "Membres du Groupe de Travail" = membres_gt
          )->base_avis
-save(base_avis,
-     file = "./Liste_avis/metadata_avis.RData")
+
+base_avis%>%
+  mutate(Date = format(as.Date(Date, format = "%Y-%m-%d"), "%d/%m/%Y"),
+         Thème = as.character(Thème),
+         Titre = as.character(Titre),
+         Président = as.character(Président),
+         Rapporteurs = as.character(Rapporteurs),
+         `Membres du Groupe de Travail` = as.character(`Membres du Groupe de Travail`))->base_avis
+saveRDS(base_avis, "./Liste_avis/base_avis.rds")
+```
+
+
+
+# PCA
+
+```{r}
+library(FactoMineR)
+# Calculer le nombre de citations pour chaque source
+citations_summary <- mesograph_edgelist_df %>%
+  filter(Categorie!="CCNE")%>%
+  group_by(from, to) %>%
+  summarise(total_citations = sum(Citations)) %>%
+  ungroup()
+
+# Réorganiser le tableau pour avoir les colonnes "num" et le nombre de citations pour chaque document
+citations_table <- citations_summary %>%
+  pivot_wider(names_from = to, values_from = total_citations, values_fill = list(total_citations = 0)) %>%
+  rename(num = from)%>%
+  column_to_rownames(., var = 'num')
+
+saveRDS(citations_table,"./PCA/citations_table.rds")
+
+#Factoshiny::PCAshiny(citations_table)
 ```
 

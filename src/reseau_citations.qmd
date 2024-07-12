@@ -265,7 +265,7 @@ ggraph(layout) +
   coord_fixed(clip = 'off') +
   guides(size = FALSE, colour = FALSE)+
   theme(
-  plot.margin = unit(c(3, 3, 3, 6), "cm"),
+  plot.margin = unit(c(6, 6, 6, 6), "cm"),
   legend.title = element_text(size = 10),
   legend.position = "top",
   legend.margin = margin(0, 0, -30, 0),
@@ -352,55 +352,162 @@ metadata_citation %>%
 
 ## nb citation absolu
 
-```{r}
-metadata_citation%>%
-  rename(num = cité_dans_avis_num, Catégorie = Groupe)%>%
-  group_by(num, Catégorie)%>%
-  mutate(num = as.numeric(num))%>%
-  summarise(nb_citation = n())%>%
-  bind_rows(metadata_avis%>%
-              filter(!is.na(citations_autres_avis))%>%
-              separate_rows(citations_autres_avis , sep = ";")%>%
-              mutate(Catégorie = "CCNE")%>%
-              group_by(num,Catégorie)%>%
-              summarise(nb_citation = n()))%>%
-  left_join(metadata_avis,by = "num")%>%
-  filter(Catégorie != "Science, littérature")%>%
-  ggscatter(x = "date", y = "nb_citation", facet.by = "Catégorie")+
-  theme_ready()
+```{r, fig.width=21, fig.height=9.9}
+# Ajouter une colonne président à metadata_avis
+metadata_avis <- metadata_avis %>%
+  mutate(president = case_when(
+    num >= 1 & num <= 28 ~ "Bernard (83-91)",
+    num >= 29 & num <= 60 ~ "Changeux (92-99)",
+    num >= 61 & num <= 103 ~ "Sicard (00-08)",
+    num >= 104 & num <= 115 ~ "Grimfeld (09-11)",
+    num >= 116 & num <= 124 ~ "Ameisen (12-15)",
+    num >= 125 & num <= 144 ~ "Delfraissy (16-)"
+  ))
+
+# Assurez-vous que les présidents sont dans le bon ordre
+metadata_avis$president <- factor(metadata_avis$president, levels = c(
+  "Bernard (83-91)", "Changeux (92-99)", "Sicard (00-08)", "Grimfeld (09-11)", "Ameisen (12-15)", "Delfraissy (16-)"
+))
+
+all_combinations <- expand.grid(
+  num = unique(metadata_citation$cité_dans_avis_num),
+  Catégorie = unique(metadata_citation$Groupe)
+)%>%
+  mutate(num = as.numeric(num))
+
+# Graphique
+all_combinations %>%
+  left_join(metadata_citation %>%
+              rename(num = cité_dans_avis_num, Catégorie = Groupe) %>%
+              group_by(num, Catégorie) %>%
+              mutate(num = as.numeric(num)) %>%
+              summarise(nb_citation = n(), .groups = 'drop'),
+            by = c("num", "Catégorie")) %>%
+  replace_na(list(nb_citation = 0))%>%
+  bind_rows(metadata_avis %>%
+              # filter(!is.na(citations_autres_avis)) %>%
+              separate_rows(citations_autres_avis , sep = ";") %>%
+              mutate(Catégorie = "CCNE") %>%
+              group_by(num, Catégorie) %>%
+              summarise(nb_citation = n())) %>%
+  left_join(metadata_avis, by = "num") -> plot_data_nb_citations
+plot_data_nb_citations%>%
+  group_by(Catégorie) %>%
+  mutate(rank = dense_rank(desc(nb_citation))) %>%
+  ungroup() %>%
+  mutate(label = ifelse(rank <= 3, as.character(num), ""))%>%
+  filter(Catégorie != "Science, littérature") %>%
+  ggscatter(x = "date", y = "nb_citation", facet.by = "Catégorie", color = "president", xlab = "Temps",ylab = "Nombre de citations (multiple par avis)", caption= "Graphique de l'auteur.\nChamps : Tous les avis numérotés publiés par le CCNE jusqu'au 144.\nDonnées collectées par l'auteur.\nLecture: Le nombre de citations dans les avis du CCNE\nsemblent augmenter dans le cas où ces citations renvoient\naux institutions gouvernementales, aux autorités indépendantes et dans une moindre mesure à la société civile.\nLe fait le plus notable est la citation devient quasiment systématique dans toutes les catégories, en particulier sous Delfraissy.\nLa loi est le domaine d'exception qui a quasiment toujours été cité dès le tout premier avis.") +
+  scale_color_prism("colorblind_safe")+
+  theme_ready(text_size = 25)+
+  geom_text_repel(aes(label = label, color = president), max.overlaps = Inf)
 ```
 
-```{r}
-metadata_citation%>%
-  rename(num = cité_dans_avis_num, Catégorie = Groupe)%>%
-  group_by(num, Catégorie)%>%
-  mutate(num = as.numeric(num))%>%
-  summarise(nb_citation = n())%>%
-  bind_rows(metadata_avis%>%
-              filter(!is.na(citations_autres_avis))%>%
-              separate_rows(citations_autres_avis , sep = ";")%>%
-              mutate(Catégorie = "CCNE")%>%
-              group_by(num,Catégorie)%>%
-              summarise(nb_citation = n()))%>%
-  left_join(metadata_avis,by = "num")%>%
+```{r, fig.width=21, fig.height=9.9}
+plot_data_nb_citations%>%
+  mutate(label = ifelse(nb_citation>50,num,""))%>%
   filter(Catégorie== "Science, littérature")%>%
-  ggscatter(x = "date", y = "nb_citation", facet.by = "Catégorie")+
-  theme_ready()
+  ggscatter(x = "date", y = "nb_citation", facet.by = "Catégorie", color = "president", xlab = "Temps",ylab = "Nombre de citations (multiple par avis)", caption= "Graphique de l'auteur.\nChamps : Tous les avis numérotés publiés par le CCNE jusqu'au 144.\nDonnées collectées par l'auteur.\nLecture: En moyenne deux pics d'inflations du nombre de citations scientifiques peuvent être identifier :\nà la fin de la présidence Changeux et au cours de la présidence Delfraissy.") +
+  scale_color_prism("colorblind_safe")+
+  theme_ready(text_size = 25)+
+  geom_text_repel(aes(label = label, color = president), max.overlaps = Inf)
 ```
 
-```{r}
-metadata_citation%>%
-  rename(num = cité_dans_avis_num, Catégorie = Groupe)%>%
-  filter(Catégorie == "Science, littérature")%>%
-  group_by(num, Désignation)%>%
-  mutate(num = as.numeric(num))%>%
-  summarise(nb_citation = n())%>%
-  left_join(metadata_avis,by = "num")%>%
-  filter(Désignation%in% c("Biologie","Economie","Ethique & philo","Médical","SHS","psycho&neuro"))%>%
-  ggscatter(x = "date", y = "nb_citation", facet.by = "Désignation")+
-  theme_ready()
+```{r, fig.width=10.5, fig.height=7}
+library(dplyr)
+library(ggplot2)
+library(ggpubr)
+library(tidyr)
+library(ggrepel)
+
+# Créer un dataframe avec toutes les combinaisons possibles de num et Désignation
+all_combinations <- expand.grid(
+  num = unique(metadata_citation$cité_dans_avis_num),
+  Désignation = c("Biologie", "Economie", "Ethique & philo", "SHS", "psycho&neuro", "Médical")
+)%>%
+  mutate(num = as.numeric(num))
+
+# Ajouter les pairs manquants et assigner 0 aux nb_citation manquants
+plot_data_nb_citations <- all_combinations %>%
+  left_join(metadata_citation %>%
+              rename(num = cité_dans_avis_num, Catégorie = Groupe) %>%
+              filter(Catégorie == "Science, littérature") %>%
+              group_by(num, Désignation) %>%
+              mutate(num = as.numeric(num)) %>%
+              summarise(nb_citation = n(), .groups = 'drop'),
+            by = c("num", "Désignation")) %>%
+  replace_na(list(nb_citation = 0)) %>%
+  left_join(metadata_avis, by = "num")
+
+# Identifier le top 5 des nb_citation pour chaque Désignation
+plot_data_nb_citations <- plot_data_nb_citations %>%
+  group_by(Désignation) %>%
+  mutate(rank = dense_rank(desc(nb_citation))) %>%
+  ungroup() %>%
+  mutate(label = ifelse(rank <= 3, as.character(num), ""))
+
+# Filtrer les Désignations désirées
+plot_data_nb_citations <- plot_data_nb_citations %>%
+  filter(Désignation %in% c("Biologie", "Economie", "Ethique & philo", "SHS"))
+
+# Graphique
+ggscatter(plot_data_nb_citations, x = "date", y = "nb_citation", facet.by = "Désignation", color = "president",
+          xlab = "Temps", ylab = "Nombre de citations (multiple par avis)",
+          caption = "Graphique de l'auteur.\nChamps : Tous les avis numérotés publiés par le CCNE jusqu'au 144.\nDonnées collectées par l'auteur.\nLecture: l'usage de référence issu des SHS, de philo ou l'éthique devient réellement systématique au milieu de la présidence Ameisen, au milieu des années 2010.") +
+  scale_color_prism("colorblind_safe") +
+  theme_ready(text_size = 13) +
+  geom_text_repel(aes(label = label, color = president), max.overlaps = Inf) +
+  geom_point(data = plot_data_nb_citations, aes(x = date, y = nb_citation, color = president))
+
 ```
 
+```{r, fig.width=10.5, fig.height=7}
+library(dplyr)
+library(ggplot2)
+library(ggpubr)
+library(tidyr)
+library(ggrepel)
+
+# Créer un dataframe avec toutes les combinaisons possibles de num et Désignation
+all_combinations <- expand.grid(
+  num = unique(metadata_citation$cité_dans_avis_num),
+  Désignation = c("Biologie", "Economie", "Ethique & philo", "SHS", "psycho&neuro", "Médical")
+)%>%
+  mutate(num = as.numeric(num))
+
+# Ajouter les pairs manquants et assigner 0 aux nb_citation manquants
+plot_data_nb_citations <- all_combinations %>%
+  left_join(metadata_citation %>%
+              rename(num = cité_dans_avis_num, Catégorie = Groupe) %>%
+              filter(Catégorie == "Science, littérature") %>%
+              group_by(num, Désignation) %>%
+              mutate(num = as.numeric(num)) %>%
+              summarise(nb_citation = n(), .groups = 'drop'),
+            by = c("num", "Désignation")) %>%
+  replace_na(list(nb_citation = 0)) %>%
+  left_join(metadata_avis, by = "num")
+
+# Identifier le top 5 des nb_citation pour chaque Désignation
+plot_data_nb_citations <- plot_data_nb_citations %>%
+  group_by(Désignation) %>%
+  mutate(rank = dense_rank(desc(nb_citation))) %>%
+  ungroup() %>%
+  mutate(label = ifelse(rank <= 3, as.character(num), ""))
+
+# Filtrer les Désignations désirées
+plot_data_nb_citations <- plot_data_nb_citations %>%
+  filter(Désignation %in% c("Médical"))
+
+# Graphique
+ggscatter(plot_data_nb_citations, x = "date", y = "nb_citation", color = "president",
+          xlab = "Temps", ylab = "Nombre de citations (multiple par avis)",
+          caption = "Graphique de l'auteur.\nChamps : Tous les avis numérotés publiés par le CCNE jusqu'au 144.\nDonnées collectées par l'auteur.\nLecture: Pour les citations médicales, on voit une inflation jusqu'à la fin de la présidence Changeux et une systématisation au cours du mandat Delfraissy.\nAvant Grimfeld, les médecins pouvaient affirmer sans cité dans la majorité des avis.") +
+  scale_color_prism("colorblind_safe") +
+  theme_ready(text_size = 13) +
+  geom_text_repel(aes(label = label, color = president), max.overlaps = Inf) +
+  geom_point(data = plot_data_nb_citations, aes(x = date, y = nb_citation, color = president))
+
+```
 ## nb citation relatif
 
 ```{r}

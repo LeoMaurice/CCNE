@@ -61,10 +61,11 @@ ui <- fluidPage(
     sidebarPanel(
       div(
         style = "display: flex; flex-wrap: wrap; gap: 10px;",
+        h4("Sélectionnez un président pour ajuster le slider avec les avis publiés sous son mandat :"),
         uiOutput("president_buttons")
       ),
       br(),
-      sliderInput("avis_range", "Sélectionner la plage des avis à afficher:",
+      sliderInput("avis_range", "Sélectionner la plage des avis à afficher (par numéro de publication, dans l'odre chronologique):",
                   min = min(as.numeric(mesograph_nodes_df$name), na.rm = TRUE),
                   max = max(as.numeric(mesograph_nodes_df$name), na.rm = TRUE),
                   value = c(125, 144),  # Valeurs par défaut du slider

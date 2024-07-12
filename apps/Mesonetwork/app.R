@@ -76,13 +76,13 @@ ui <- fluidPage(
                        selected = TRUE),
           htmlOutput("legend")
       ),
-      sliderInput("avis_range", "Sélectionner la plage des avis à afficher:",
+      sliderInput("avis_range", "Sélectionner la plage des avis à afficher (par numéro de publication, dans l'odre chronologique):",
                   min = min(as.numeric(mesograph_nodes_df$name), na.rm = TRUE),
                   max = max(as.numeric(mesograph_nodes_df$name), na.rm = TRUE),
                   value = c(125, 144),  # Valeurs par défaut du slider
                   step = 1),
       br(),
-      h4("Sélectionnez un président pour ajuster le slider:"),
+      h4("Sélectionnez un président pour ajuster le slider avec les avis publiés sous son mandat :"),
       uiOutput("president_buttons"),
       checkboxGroupInput("categories", "Choisir les catégories à afficher:",
                          choices = unique(mesograph_nodes_df$Categorie),
@@ -157,18 +157,18 @@ server <- function(input, output, session) {
       visEdges(arrows = 'to') %>%
       visNodes(scaling = list(min = 10, max = 30)) %>%
       visOptions(highlightNearest = list(enabled = TRUE, degree = 1), nodesIdSelection = TRUE) %>%
-      visGroups(groupname = "Auteurs", color = "#6CC7B3", shape = "triangle") %>%
-      visGroups(groupname = "Autorités", color = "#285291", shape = "triangle") %>%
-      visGroups(groupname = "CCNE", color = "#9D3A5E", shape = "square") %>%
-      visGroups(groupname = "Comité d'éthique", color = "#579125", shape = "triangle") %>%
-      visGroups(groupname = "Comparaison pays", color = "#0F0F5C", shape = "triangle") %>%
-      visGroups(groupname = "Etat", color = "#91188F", shape = "triangle") %>%
-      visGroups(groupname = "Forums", color = "#0E405C", shape = "triangle") %>%
-      visGroups(groupname = "Loi", color = "#915B11", shape = "triangle") %>%
-      visGroups(groupname = "Org Internationales", color = "#4F2B91", shape = "triangle") %>%
-      visGroups(groupname = "Presse", color = "#91181E", shape = "triangle") %>%
-      visGroups(groupname = "Science, littérature", color = "#0B5C2D", shape = "triangle") %>%
-      visGroups(groupname = "Société", color = "#BD6345", shape = "triangle") 
+      visGroups(groupname = "Auteurs", color = "#6CC7B3", shape = "square") %>%
+      visGroups(groupname = "Autorités", color = "#285291", shape = "square") %>%
+      visGroups(groupname = "CCNE", color = "#9D3A5E", shape = "triangle") %>%
+      visGroups(groupname = "Comité d'éthique", color = "#579125", shape = "square") %>%
+      visGroups(groupname = "Comparaison pays", color = "#0F0F5C", shape = "square") %>%
+      visGroups(groupname = "Etat", color = "#91188F", shape = "square") %>%
+      visGroups(groupname = "Forums", color = "#0E405C", shape = "square") %>%
+      visGroups(groupname = "Loi", color = "#915B11", shape = "square") %>%
+      visGroups(groupname = "Org Internationales", color = "#4F2B91", shape = "square") %>%
+      visGroups(groupname = "Presse", color = "#91181E", shape = "square") %>%
+      visGroups(groupname = "Science, littérature", color = "#0B5C2D", shape = "square") %>%
+      visGroups(groupname = "Société", color = "#BD6345", shape = "square")
   })
   
   output$legend <- renderUI({

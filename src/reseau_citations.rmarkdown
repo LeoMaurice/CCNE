@@ -1,0 +1,659 @@
+---
+title: "CCNE Personne across avis"
+author: "Léopold MAURICE"
+date: "2024-06-05"
+project: CCNE
+supervision: Pr. Emmanuel Didier, CMH/ENS/EHESS
+format:
+  html:
+    toc: true
+    number-sections: true
+    colorlinks: true
+    geometry:
+      - top=10mm
+      - left=20mm
+      - right=20mm
+      - bottom=10mm  
+      - heightrounded
+    highlight-style: github
+    fontfamily: libertinus
+    documentclass: report
+    fig-width: 12
+    fig-height: 9
+  pdf:
+    documentclass: article
+    geometry: [left=1in, right=1in, top=1in, bottom=1in]
+    fontsize: 11pt
+    keep-tex: true
+    toc: true
+    toc-depth: 2
+    number-sections: true
+execute:
+  eval: true
+  message: false
+  warning: false
+  echo: false
+  output: true
+  error: true
+editor: source
+---
+
+```{r}
+require(pacman,quietly = T)
+
+pacman::p_load(arrow,
+               tidyverse,
+               reshape2,
+               stringr,
+
+               stats,
+               rstatix,
+               
+               ggplot2,
+               gridExtra,
+               ggprism,
+               ggpubr,
+               ggcorrplot,
+               ggraph,
+               ggnetwork,
+               ggrepel,
+               viridis,
+               RColorBrewer,
+               paletteer,
+               
+               igraph,
+               tidygraph,
+               #sna,
+               #network,
+               
+               networkD3,
+               leaflet,
+               
+               rmarkdown,
+               
+               openxlsx)
+
+source("helpers/database_creation.R")
+source("helpers/figures.R")
+
+save_figures = T
+cutpoints = c(0, 1e-04, 0.001, 0.01, 0.05, 0.1, 1)
+symbols = c("****", "***", "**", "*", "•","ns")
+significance = c("p < 0.0001", "p < 0.001", "p < 0.01", "p < 0.05", "p < 0.1", "p>0.1")
+signif_caption_text <- paste("Significance levels:\n", paste(symbols, ":", significance, collapse = ", "))
+
+```
+
+
+# Résumé de la méthodologie et des données
+Les données : chaque citation a été assigné à l'avis où elle est cité, et un auteur, une institution ou domaine.
+Pour certains auteurs que j'ai classifié comme classique je vais faire un traitement particulier : si la fréquence d'apparition est > 2, je le garde en soit, sinon je le relis à un domaine. Pour la presse spécialisée, la presse, les lois je vais adopter une démarche similaire.
+
+```{r}
+designation_recoding <- Vectorize(function(type, Auteur_Institution, Institution_Domaine, freq_auteur, freq) {
+if (type == "classic") {
+  return(Auteur_Institution)
+} else {
+  return(Institution_Domaine)
+}
+})
+
+
+metadata_avis <- open_metadata()
+
+metadata_citation <- read.xlsx("../data/raw/collected_metadata/metadata_citation.xlsx", 
+                               colNames = TRUE,
+                               cols = c(1, 2, 4, 5, 6))%>%
+  separate_rows(cité_dans_avis_num, sep = ";")%>%
+  separate_rows(Institution_Domaine, sep = ";")%>%
+  group_by(Auteur_Institution)%>%
+  mutate(freq_auteur = n())%>%
+  ungroup()%>%
+  group_by(Institution_Domaine)%>%
+  mutate(freq_institution = n())%>%
+  ungroup()%>%
+  mutate(type = ifelse(is.na(type),"",type),
+         type = ifelse(type %in% c("livre","article","colloque","thèse"),"académique",type),
+         Désignation = designation_recoding(type,Auteur_Institution, Institution_Domaine, freq_auteur,freq_institution)
+         )
+
+recat <- read_excel("../data/intermediate/reseau/recategorize_designation.xlsx")
+
+metadata_citation <- metadata_citation%>%
+  left_join(recat, by = "Désignation")%>%
+  rename(Désignation_collectée = Désignation,
+         Désignation = Désignation_méso)
+
+color_pal_groupe = c( "#6CC7B3","#285291","#9D3A5E","#579125","#0F0F5C","#91188F","#0E405C", "#915B11" , "#4F2B91", "#91181E","#0B5C2D","#BD6345")
+
+```
+
+```{r}
+
+# code de vérification
+
+metadata_citation%>%
+  select(Citation, cité_dans_avis_num,Désignation_collectée,Désignation_ego,Désignation,Groupe)%>%
+  filter(is.na(Désignation_ego)|is.na(Désignation)|is.na(Groupe)) -> trous
+
+metadata_citation%>%
+  group_by(Groupe,Désignation,Désignation_ego)%>%
+  summarise(count_précis = n())%>%
+  group_by(Groupe,Désignation)%>%
+  mutate(count_meso = sum(count_précis))%>%
+  ungroup()-> fréquence_désignations
+```
+
+# réseau macro
+
+
+
+```{r}
+#| eval: false
+# Load necessary libraries
+library(dplyr)
+library(networkD3)
+
+# Count the number of citations for each Désignation
+citation_counts <- metadata_citation %>%
+  group_by(Désignation, Groupe) %>%
+  summarise(citation_count = n(), .groups = 'drop')%>%
+  mutate(Groupe = gsub(" ", "\n", Groupe),
+         Nombre_formate = if_else(Groupe == "Sciences, littérature",
+                             str_pad(citation_count, 4, pad = "0"),
+                             str_pad(citation_count, 2, pad = "0")),
+         Désignation = paste(Nombre_formate,Désignation,sep = "|"))
+
+# Add a row for the CCNE node
+citation_counts <- citation_counts %>%
+  add_row(Désignation = "CCNE", Groupe = "CCNE", citation_count = sum(citation_counts$citation_count))
+
+# Organize data into a hierarchical structure
+create_hierarchy <- function(group_name, citations) {
+  list(
+    name = group_name,
+    children = lapply(citations, function(citation) {
+      list(name = citation, size = citation_counts %>% filter(Désignation == citation) %>% pull(citation_count))
+    })
+  )
+}
+
+groups <- unique(citation_counts$Groupe[citation_counts$Groupe != "CCNE"])
+hierarchy <- list(
+  name = "CCNE",
+  children = lapply(groups, function(group) {
+    citations <- citation_counts %>% filter(Groupe == group) %>% pull(Désignation)
+    create_hierarchy(group, citations)
+  })
+)
+
+# Plot the hierarchical radial network
+radialNetwork(List = hierarchy,
+              fontSize = 20
+              )
+
+```
+
+```{r, fig.width= 12, fig.height= 12}
+# Count the number of citations for each Désignation
+citation_counts <- metadata_citation %>%
+  group_by(Désignation, Groupe) %>%
+  summarise(citation_count = n(), .groups = 'drop') %>%
+  mutate(Groupe = gsub(" ", "\n", Groupe),
+         Nombre_formate = if_else(Groupe == "Sciences, littérature",
+                             str_pad(citation_count, 4, pad = "0"),
+                             str_pad(citation_count, 2, pad = "0")),
+         Désignation = paste(Nombre_formate, Désignation, sep = "|"))
+
+# Prepare edges and nodes for igraph
+edges <- bind_rows(
+  citation_counts %>%
+    mutate(from = Groupe, to = Désignation)%>%
+    select(from,to),
+  citation_counts %>%
+    group_by(Groupe)%>%
+    summarise(from = "CCNE")%>%
+    rename(to = Groupe)
+)
+
+nodes <- bind_rows(
+  citation_counts %>%
+    distinct(Désignation,citation_count, Groupe) %>%
+    rename(name = Désignation)%>%
+    select(name,citation_count,Groupe)%>%
+    mutate(cercle = 3),
+  citation_counts %>%
+    group_by(Groupe) %>%
+    summarise(citation_count = sum(citation_count))%>%
+    mutate(name = Groupe)%>%
+    select(name,citation_count, Groupe)%>%
+    mutate(cercle = 2)
+)%>%
+  add_row(name = "CCNE", citation_count = sum(citation_counts$citation_count), cercle = 1, Groupe = "CCNE")%>%
+  mutate( leaf = (cercle == 3))
+
+# Create igraph object
+graph <- graph_from_data_frame(edges, vertices = nodes, directed = TRUE)
+
+# Convert to a tree structure with CCNE as the root
+layout <- create_layout(graph, layout = 'focus', focus = name == "CCNE")
+
+# Plot using ggraph
+# Create layout
+layout <- create_layout(graph, layout = 'dendrogram', circular = TRUE)
+
+# Function to calculate text angle
+node_angle <- function(x, y) {
+  angle <- atan2(y, x) * 180 / pi
+  angle <- ifelse(angle < 0, angle + 360, angle)
+  ifelse(angle > 90 & angle < 270, angle + 180, angle)
+}
+
+node_true_angle <- function(x,y) {
+  angle <- atan2(y, x) * 180 / pi
+  angle <- ifelse(angle < 0, angle + 360, angle)
+  angle
+}
+
+# Plot using ggraph
+ggraph(layout) +
+  #ggforce::geom_circle(aes(x0 = 0, y0 = 0, r = r), data.frame(r = 1:2), colour = 'grey') + 
+  geom_edge_diagonal() +
+  geom_node_point(aes(size = log10(citation_count + 1), colour = Groupe)) +
+  geom_node_label(aes(label = name, angle = ifelse(leaf,node_angle(x, y),0), 
+                      hjust = ifelse(leaf,ifelse(node_true_angle(x, y) > 90 & node_true_angle(x, y) < 270, 1, 0),0)
+                   ),
+                  size = 3) +
+  theme_void() +
+  scale_colour_manual(values = color_pal_groupe) +
+  coord_fixed(clip = 'off') +
+  guides(size = FALSE, colour = FALSE)+
+  theme(
+  plot.margin = unit(c(6, 6, 6, 6), "cm"),
+  legend.title = element_text(size = 10),
+  legend.position = "top",
+  legend.margin = margin(0, 0, -30, 0),
+  legend.box.margin = margin(0, 0, 20, 0))
+```
+
+```{r}
+# Convertir en structure d'arbre avec CCNE comme racine
+layout <- create_layout(graph, layout = 'cactustree')
+
+# Plot avec ggraph
+ggraph(layout) +
+  geom_node_circle(aes(size = log10(citation_count+1), fill = Groupe)) +
+  theme_void() +
+  scale_fill_manual(values = color_pal_groupe) +
+  coord_fixed(clip = 'off') +
+  guides(size = FALSE, colour = FALSE) +
+  theme(
+    plot.margin = unit(c(3, 3, 3, 6), "cm"),
+    legend.title = element_text(size = 10),
+    legend.position = "top",
+    legend.margin = margin(0, 0, -30, 0),
+    legend.box.margin = margin(0, 0, 20, 0)
+  )
+
+```
+
+```{r}
+# Define custom breaks for the bins
+custom_breaks <- c(10,50, 100, 500, 1500)
+
+layout <- create_layout(graph, 'circlepack', weight = log10(citation_count+1), sort.by = citation_count)
+
+# Create the circular packing graph with a radius legend and custom color bins
+set.seed(1968)
+ggraph(layout) +
+  geom_node_circle(aes(fill = Groupe, x0 = x, y0 = y, colour = citation_count), size = 1.3, show.legend = TRUE) +
+  scale_color_stepsn(name = "Nombre de citations", colours = paletteer::paletteer_d("beyonce::X34",6), breaks = custom_breaks) +
+  scale_fill_manual(values = color_pal_groupe) +
+  theme_void(base_size = 20) +
+  coord_fixed()+
+  theme(
+    legend.title = element_text(size = 10),    # Adjust legend title size
+    legend.text = element_text(size = 8),      # Adjust legend text size
+    legend.key.size = unit(0.5, "lines")       # Adjust legend key size
+  )
+```
+
+```{r}
+library(ggraph)
+library(tidygraph)
+
+# Visualisation de base du graphe
+ggraph(graph, layout = 'fr') + # layout 'fr' pour Fruchterman-Reingold, une mise en page de base
+  geom_edge_link(aes(edge_alpha = ..index..), show.legend = FALSE) + # Affiche les arêtes avec alpha proportionnel à l'index
+  geom_node_point(aes(color = Groupe, size = citation_count), show.legend = TRUE) + # Affiche les nœuds avec des tailles proportionnelles et colorés par groupe
+  theme_void() + # Thème vide pour une visualisation claire
+  theme(
+    legend.position = "right", # Position de la légende à droite
+    legend.title = element_text(size = 10), # Taille du titre de la légende
+    legend.text = element_text(size = 8) # Taille du texte de la légende
+  )
+
+```
+
+
+# bar plot
+
+
+```{r}
+
+color_pal_groupe_sans_ccne = c("#285291","#579125","#0F0F5C","#91188F","#0E405C", "#915B11" , "#4F2B91", "#91181E","#0B5C2D","#BD6345")
+
+metadata_citation %>%
+  group_by(Désignation, Groupe) %>%
+  summarise(citation_count = n(), .groups = 'drop')%>%
+  filter(Groupe != "Science, littérature")%>%
+  ggbarplot(x = "Désignation", y = "citation_count",facet.by = "Groupe", color = "Groupe", fill = "Groupe")+
+  theme_ready()+
+  scale_color_manual(values = color_pal_groupe_sans_ccne)+
+  scale_fill_manual(values = color_pal_groupe_sans_ccne)
+```
+
+
+
+
+# Across time
+
+
+## nb citation absolu
+
+
+```{r, fig.width=21, fig.height=9.9}
+# Ajouter une colonne président à metadata_avis
+metadata_avis <- metadata_avis %>%
+  mutate(president = case_when(
+    num >= 1 & num <= 28 ~ "Bernard (83-91)",
+    num >= 29 & num <= 60 ~ "Changeux (92-99)",
+    num >= 61 & num <= 103 ~ "Sicard (00-08)",
+    num >= 104 & num <= 115 ~ "Grimfeld (09-11)",
+    num >= 116 & num <= 124 ~ "Ameisen (12-15)",
+    num >= 125 & num <= 144 ~ "Delfraissy (16-)"
+  ))
+
+# Assurez-vous que les présidents sont dans le bon ordre
+metadata_avis$president <- factor(metadata_avis$president, levels = c(
+  "Bernard (83-91)", "Changeux (92-99)", "Sicard (00-08)", "Grimfeld (09-11)", "Ameisen (12-15)", "Delfraissy (16-)"
+))
+
+all_combinations <- expand.grid(
+  num = unique(metadata_citation$cité_dans_avis_num),
+  Catégorie = unique(metadata_citation$Groupe)
+)%>%
+  mutate(num = as.numeric(num))
+
+# Graphique
+all_combinations %>%
+  left_join(metadata_citation %>%
+              rename(num = cité_dans_avis_num, Catégorie = Groupe) %>%
+              group_by(num, Catégorie) %>%
+              mutate(num = as.numeric(num)) %>%
+              summarise(nb_citation = n(), .groups = 'drop'),
+            by = c("num", "Catégorie")) %>%
+  replace_na(list(nb_citation = 0))%>%
+  bind_rows(metadata_avis %>%
+              # filter(!is.na(citations_autres_avis)) %>%
+              separate_rows(citations_autres_avis , sep = ";") %>%
+              mutate(Catégorie = "CCNE") %>%
+              group_by(num, Catégorie) %>%
+              summarise(nb_citation = n())) %>%
+  left_join(metadata_avis, by = "num") -> plot_data_nb_citations
+plot_data_nb_citations%>%
+  group_by(Catégorie) %>%
+  mutate(rank = dense_rank(desc(nb_citation))) %>%
+  ungroup() %>%
+  mutate(label = ifelse(rank <= 3, as.character(num), ""))%>%
+  filter(Catégorie != "Science, littérature") %>%
+  ggscatter(x = "date", y = "nb_citation", facet.by = "Catégorie", color = "president", xlab = "Temps",ylab = "Nombre de citations (multiple par avis)", caption= "Graphique de l'auteur.\nChamps : Tous les avis numérotés publiés par le CCNE jusqu'au 144.\nDonnées collectées par l'auteur.\nLecture: Le nombre de citations dans les avis du CCNE\nsemblent augmenter dans le cas où ces citations renvoient\naux institutions gouvernementales, aux autorités indépendantes et dans une moindre mesure à la société civile.\nLe fait le plus notable est la citation devient quasiment systématique dans toutes les catégories, en particulier sous Delfraissy.\nLa loi est le domaine d'exception qui a quasiment toujours été cité dès le tout premier avis.") +
+  scale_color_prism("colorblind_safe")+
+  theme_ready(text_size = 25)+
+  geom_text_repel(aes(label = label, color = president), max.overlaps = Inf)
+```
+
+```{r, fig.width=21, fig.height=9.9}
+plot_data_nb_citations%>%
+  mutate(label = ifelse(nb_citation>50,num,""))%>%
+  filter(Catégorie== "Science, littérature")%>%
+  ggscatter(x = "date", y = "nb_citation", facet.by = "Catégorie", color = "president", xlab = "Temps",ylab = "Nombre de citations (multiple par avis)", caption= "Graphique de l'auteur.\nChamps : Tous les avis numérotés publiés par le CCNE jusqu'au 144.\nDonnées collectées par l'auteur.\nLecture: En moyenne deux pics d'inflations du nombre de citations scientifiques peuvent être identifier :\nà la fin de la présidence Changeux et au cours de la présidence Delfraissy.") +
+  scale_color_prism("colorblind_safe")+
+  theme_ready(text_size = 25)+
+  geom_text_repel(aes(label = label, color = president), max.overlaps = Inf)
+```
+
+```{r, fig.width=10.5, fig.height=7}
+library(dplyr)
+library(ggplot2)
+library(ggpubr)
+library(tidyr)
+library(ggrepel)
+
+# Créer un dataframe avec toutes les combinaisons possibles de num et Désignation
+all_combinations <- expand.grid(
+  num = unique(metadata_citation$cité_dans_avis_num),
+  Désignation = c("Biologie", "Economie", "Ethique & philo", "SHS", "psycho&neuro", "Médical")
+)%>%
+  mutate(num = as.numeric(num))
+
+# Ajouter les pairs manquants et assigner 0 aux nb_citation manquants
+plot_data_nb_citations <- all_combinations %>%
+  left_join(metadata_citation %>%
+              rename(num = cité_dans_avis_num, Catégorie = Groupe) %>%
+              filter(Catégorie == "Science, littérature") %>%
+              group_by(num, Désignation) %>%
+              mutate(num = as.numeric(num)) %>%
+              summarise(nb_citation = n(), .groups = 'drop'),
+            by = c("num", "Désignation")) %>%
+  replace_na(list(nb_citation = 0)) %>%
+  left_join(metadata_avis, by = "num")
+
+# Identifier le top 5 des nb_citation pour chaque Désignation
+plot_data_nb_citations <- plot_data_nb_citations %>%
+  group_by(Désignation) %>%
+  mutate(rank = dense_rank(desc(nb_citation))) %>%
+  ungroup() %>%
+  mutate(label = ifelse(rank <= 3, as.character(num), ""))
+
+# Filtrer les Désignations désirées
+plot_data_nb_citations <- plot_data_nb_citations %>%
+  filter(Désignation %in% c("Biologie", "Economie", "Ethique & philo", "SHS"))
+
+# Graphique
+ggscatter(plot_data_nb_citations, x = "date", y = "nb_citation", facet.by = "Désignation", color = "president",
+          xlab = "Temps", ylab = "Nombre de citations (multiple par avis)",
+          caption = "Graphique de l'auteur.\nChamps : Tous les avis numérotés publiés par le CCNE jusqu'au 144.\nDonnées collectées par l'auteur.\nLecture: l'usage de référence issu des SHS, de philo ou l'éthique devient réellement systématique au milieu de la présidence Ameisen, au milieu des années 2010.") +
+  scale_color_prism("colorblind_safe") +
+  theme_ready(text_size = 13) +
+  geom_text_repel(aes(label = label, color = president), max.overlaps = Inf) +
+  geom_point(data = plot_data_nb_citations, aes(x = date, y = nb_citation, color = president))
+
+```
+
+```{r, fig.width=10.5, fig.height=7}
+library(dplyr)
+library(ggplot2)
+library(ggpubr)
+library(tidyr)
+library(ggrepel)
+
+# Créer un dataframe avec toutes les combinaisons possibles de num et Désignation
+all_combinations <- expand.grid(
+  num = unique(metadata_citation$cité_dans_avis_num),
+  Désignation = c("Biologie", "Economie", "Ethique & philo", "SHS", "psycho&neuro", "Médical")
+)%>%
+  mutate(num = as.numeric(num))
+
+# Ajouter les pairs manquants et assigner 0 aux nb_citation manquants
+plot_data_nb_citations <- all_combinations %>%
+  left_join(metadata_citation %>%
+              rename(num = cité_dans_avis_num, Catégorie = Groupe) %>%
+              filter(Catégorie == "Science, littérature") %>%
+              group_by(num, Désignation) %>%
+              mutate(num = as.numeric(num)) %>%
+              summarise(nb_citation = n(), .groups = 'drop'),
+            by = c("num", "Désignation")) %>%
+  replace_na(list(nb_citation = 0)) %>%
+  left_join(metadata_avis, by = "num")
+
+# Identifier le top 5 des nb_citation pour chaque Désignation
+plot_data_nb_citations <- plot_data_nb_citations %>%
+  group_by(Désignation) %>%
+  mutate(rank = dense_rank(desc(nb_citation))) %>%
+  ungroup() %>%
+  mutate(label = ifelse(rank <= 3, as.character(num), ""))
+
+# Filtrer les Désignations désirées
+plot_data_nb_citations <- plot_data_nb_citations %>%
+  filter(Désignation %in% c("Médical"))
+
+# Graphique
+ggscatter(plot_data_nb_citations, x = "date", y = "nb_citation", color = "president",
+          xlab = "Temps", ylab = "Nombre de citations (multiple par avis)",
+          caption = "Graphique de l'auteur.\nChamps : Tous les avis numérotés publiés par le CCNE jusqu'au 144.\nDonnées collectées par l'auteur.\nLecture: Pour les citations médicales, on voit une inflation jusqu'à la fin de la présidence Changeux et une systématisation au cours du mandat Delfraissy.\nAvant Grimfeld, les médecins pouvaient affirmer sans cité dans la majorité des avis.") +
+  scale_color_prism("colorblind_safe") +
+  theme_ready(text_size = 13) +
+  geom_text_repel(aes(label = label, color = president), max.overlaps = Inf) +
+  geom_point(data = plot_data_nb_citations, aes(x = date, y = nb_citation, color = president))
+
+```
+
+## nb citation relatif
+
+
+```{r}
+taille_avis <- read.csv("../data/raw/collected_metadata/taille_avis.csv")
+```
+
+```{r}
+metadata_citation%>%
+  rename(num = cité_dans_avis_num, Catégorie = Groupe)%>%
+  group_by(num, Catégorie)%>%
+  mutate(num = as.numeric(num))%>%
+  summarise(nb_citation = n())%>%
+  bind_rows(metadata_avis%>%
+              filter(!is.na(citations_autres_avis))%>%
+              separate_rows(citations_autres_avis , sep = ";")%>%
+              mutate(Catégorie = "CCNE")%>%
+              group_by(num,Catégorie)%>%
+              summarise(nb_citation = n()))%>%
+  left_join(metadata_avis,by = "num")%>%
+  left_join(taille_avis,by = "num")%>%
+  mutate(nb_citation = nb_citation/nb_pages)%>%
+  filter(Catégorie != "Science, littérature")%>%
+  ggscatter(x = "date", y = "nb_citation", facet.by = "Catégorie")+
+  theme_ready()
+```
+
+```{r}
+metadata_citation%>%
+  rename(num = cité_dans_avis_num, Catégorie = Groupe)%>%
+  group_by(num, Catégorie)%>%
+  mutate(num = as.numeric(num))%>%
+  summarise(nb_citation = n())%>%
+  bind_rows(metadata_avis%>%
+              filter(!is.na(citations_autres_avis))%>%
+              separate_rows(citations_autres_avis , sep = ";")%>%
+              mutate(Catégorie = "CCNE")%>%
+              group_by(num,Catégorie)%>%
+              summarise(nb_citation = n()))%>%
+  left_join(metadata_avis,by = "num")%>%
+  left_join(taille_avis,by = "num")%>%
+  mutate(nb_citation = nb_citation/nb_pages)%>%
+  filter(Catégorie== "Science, littérature")%>%
+  ggscatter(x = "date", y = "nb_citation", facet.by = "Catégorie")+
+  theme_ready()
+```
+
+```{r}
+metadata_citation%>%
+  rename(num = cité_dans_avis_num, Catégorie = Groupe)%>%
+  filter(Catégorie == "Science, littérature")%>%
+  group_by(num, Désignation)%>%
+  mutate(num = as.numeric(num))%>%
+  summarise(nb_citation = n())%>%
+  left_join(metadata_avis,by = "num")%>%
+  left_join(taille_avis,by = "num")%>%
+  mutate(nb_citation = nb_citation/nb_pages)%>%
+  filter(Désignation%in% c("Biologie","Economie","Ethique & philo","Médical","SHS","psycho&neuro"))%>%
+  ggscatter(x = "date", y = "nb_citation", facet.by = "Désignation")+
+  theme_ready()
+```
+
+
+# Réseau méso
+
+
+```{r}
+# reseau_citation_extra <- metadata_citation%>%
+#   rename(Avis = cité_dans_avis_num)%>%
+#   group_by(Avis,Désignation, Groupe)%>%
+#   summarise(Citations = n())%>%
+#   rename(from = Avis,
+#          to = Désignation,
+#          Categorie = Groupe)%>%
+#   mutate(shape = "Extra citation")
+# 
+# reseau_citation_intra <- metadata_avis%>%
+#   filter(!(is.na(citations_autres_avis)))%>%
+#   separate_rows(citations_autres_avis , sep = ";")%>%
+#   rename(from = num,
+#          to = citations_autres_avis)%>%
+#   group_by(from,to)%>%
+#   summarise(Citations = n())%>%
+#   mutate(shape = "Intra citation",
+#          Categorie = "CCNE",
+#          from = as.character(from))
+# 
+# mesograph_edgelist_df <- bind_rows(reseau_citation_extra,reseau_citation_intra)%>%
+#   filter(!(to=="covid")) # supprimer les avis covid pour l'instant
+# 
+# 
+# mesograph_nodes_df <- bind_rows(
+#   metadata_citation%>%
+#     rename(name = Désignation, Categorie = Groupe)%>%
+#     mutate(shape = "Extra citation")%>%
+#     select(name, Categorie, shape)%>%
+#     distinct(),
+#   metadata_avis%>%
+#     mutate(name = as.character(num),
+#            shape = "Intra citation",
+#            Categorie = "CCNE")%>%
+#     select(name, Categorie, shape)%>%
+#     distinct()
+# )%>%
+#   filter(!(is.na(name)))
+# 
+# # Create the tbl_graph object
+# reseau_citation <- tbl_graph(edges = mesograph_edgelist_df%>% 
+#                      select(from, to,Citations, Categorie, shape),
+#                    nodes = mesograph_nodes_df%>%
+#                      select(name, Categorie, shape),
+#                    directed = TRUE, node_key = "name")%>%
+#   activate(nodes) %>%
+#   filter(degree(.) > 0)
+# 
+# # Convertir l'objet tbl_graph en igraph
+# reseau_citation_igraph <- as.igraph(reseau_citation)
+# 
+# # Convertir l'objet igraph en format compatible avec networkD3
+# network_d3 <- igraph_to_networkD3(reseau_citation_igraph, group = V(reseau_citation_igraph)$Categorie)
+# 
+# # Créer le graphique networkD3
+# forceNetwork(Links = network_d3$links, Nodes = network_d3$nodes, 
+#              Source = 'source', Target = 'target', 
+#              NodeID = 'name', Group = 'group', 
+#              opacity = 0.8, fontSize = 12)
+# ```
+# ```{r}
+# ggraph(reseau_citation, layout = 'stress') + 
+#   geom_edge_link(aes(edge_alpha = Citations), show.legend = FALSE) +
+#   geom_node_point(aes(fill = Categorie, shape = shape, size = degree(reseau_citation)), show.legend = TRUE) +
+#   geom_node_text(aes(label = name), repel = TRUE, size = 3) +
+#   scale_size_continuous(range = c(3, 10)) +
+#   theme_void() +
+#   theme(legend.position = "right") +
+#   labs(title = "Graphique de citation", subtitle = "Visualisation des citations avec ggraph")
+```
+
