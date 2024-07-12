@@ -122,7 +122,7 @@ metadata_citation <- metadata_citation%>%
   rename(Désignation_collectée = Désignation,
          Désignation = Désignation_méso)
 
-color_pal_groupe = c("#285291","#9D3A5E","#579125","#0F0F5C","#91188F","#0E405C", "#915B11" , "#4F2B91", "#91181E","#0B5C2D","#BD6345")
+color_pal_groupe = c( "#6CC7B3","#285291","#9D3A5E","#579125","#0F0F5C","#91188F","#0E405C", "#915B11" , "#4F2B91", "#91181E","#0B5C2D","#BD6345")
 
 ```
 
@@ -317,7 +317,7 @@ library(ggraph)
 library(tidygraph)
 
 # Visualisation de base du graphe
-ggraph(hierar, layout = 'fr') + # layout 'fr' pour Fruchterman-Reingold, une mise en page de base
+ggraph(graph, layout = 'fr') + # layout 'fr' pour Fruchterman-Reingold, une mise en page de base
   geom_edge_link(aes(edge_alpha = ..index..), show.legend = FALSE) + # Affiche les arêtes avec alpha proportionnel à l'index
   geom_node_point(aes(color = Groupe, size = citation_count), show.legend = TRUE) + # Affiche les nœuds avec des tailles proportionnelles et colorés par groupe
   theme_void() + # Thème vide pour une visualisation claire
@@ -465,74 +465,74 @@ metadata_citation%>%
 # Réseau méso
 
 ```{r}
-reseau_citation_extra <- metadata_citation%>%
-  rename(Avis = cité_dans_avis_num)%>%
-  group_by(Avis,Désignation, Groupe)%>%
-  summarise(Citations = n())%>%
-  rename(from = Avis,
-         to = Désignation,
-         Categorie = Groupe)%>%
-  mutate(shape = "Extra citation")
-
-reseau_citation_intra <- metadata_avis%>%
-  filter(!(is.na(citations_autres_avis)))%>%
-  separate_rows(citations_autres_avis , sep = ";")%>%
-  rename(from = num,
-         to = citations_autres_avis)%>%
-  group_by(from,to)%>%
-  summarise(Citations = n())%>%
-  mutate(shape = "Intra citation",
-         Categorie = "CCNE",
-         from = as.character(from))
-
-mesograph_edgelist_df <- bind_rows(reseau_citation_extra,reseau_citation_intra)%>%
-  filter(!(to=="covid")) # supprimer les avis covid pour l'instant
-
-
-mesograph_nodes_df <- bind_rows(
-  metadata_citation%>%
-    rename(name = Désignation, Categorie = Groupe)%>%
-    mutate(shape = "Extra citation")%>%
-    select(name, Categorie, shape)%>%
-    distinct(),
-  metadata_avis%>%
-    mutate(name = as.character(num),
-           shape = "Intra citation",
-           Categorie = "CCNE")%>%
-    select(name, Categorie, shape)%>%
-    distinct()
-)%>%
-  filter(!(is.na(name)))
-
-# Create the tbl_graph object
-reseau_citation <- tbl_graph(edges = mesograph_edgelist_df%>% 
-                     select(from, to,Citations, Categorie, shape),
-                   nodes = mesograph_nodes_df%>%
-                     select(name, Categorie, shape),
-                   directed = TRUE, node_key = "name")%>%
-  activate(nodes) %>%
-  filter(degree(.) > 0)
-
-# Convertir l'objet tbl_graph en igraph
-reseau_citation_igraph <- as.igraph(reseau_citation)
-
-# Convertir l'objet igraph en format compatible avec networkD3
-network_d3 <- igraph_to_networkD3(reseau_citation_igraph, group = V(reseau_citation_igraph)$Categorie)
-
-# Créer le graphique networkD3
-forceNetwork(Links = network_d3$links, Nodes = network_d3$nodes, 
-             Source = 'source', Target = 'target', 
-             NodeID = 'name', Group = 'group', 
-             opacity = 0.8, fontSize = 12)
-```
-```{r}
-ggraph(reseau_citation, layout = 'stress') + 
-  geom_edge_link(aes(edge_alpha = Citations), show.legend = FALSE) +
-  geom_node_point(aes(fill = Categorie, shape = shape, size = degree(reseau_citation)), show.legend = TRUE) +
-  geom_node_text(aes(label = name), repel = TRUE, size = 3) +
-  scale_size_continuous(range = c(3, 10)) +
-  theme_void() +
-  theme(legend.position = "right") +
-  labs(title = "Graphique de citation", subtitle = "Visualisation des citations avec ggraph")
+# reseau_citation_extra <- metadata_citation%>%
+#   rename(Avis = cité_dans_avis_num)%>%
+#   group_by(Avis,Désignation, Groupe)%>%
+#   summarise(Citations = n())%>%
+#   rename(from = Avis,
+#          to = Désignation,
+#          Categorie = Groupe)%>%
+#   mutate(shape = "Extra citation")
+# 
+# reseau_citation_intra <- metadata_avis%>%
+#   filter(!(is.na(citations_autres_avis)))%>%
+#   separate_rows(citations_autres_avis , sep = ";")%>%
+#   rename(from = num,
+#          to = citations_autres_avis)%>%
+#   group_by(from,to)%>%
+#   summarise(Citations = n())%>%
+#   mutate(shape = "Intra citation",
+#          Categorie = "CCNE",
+#          from = as.character(from))
+# 
+# mesograph_edgelist_df <- bind_rows(reseau_citation_extra,reseau_citation_intra)%>%
+#   filter(!(to=="covid")) # supprimer les avis covid pour l'instant
+# 
+# 
+# mesograph_nodes_df <- bind_rows(
+#   metadata_citation%>%
+#     rename(name = Désignation, Categorie = Groupe)%>%
+#     mutate(shape = "Extra citation")%>%
+#     select(name, Categorie, shape)%>%
+#     distinct(),
+#   metadata_avis%>%
+#     mutate(name = as.character(num),
+#            shape = "Intra citation",
+#            Categorie = "CCNE")%>%
+#     select(name, Categorie, shape)%>%
+#     distinct()
+# )%>%
+#   filter(!(is.na(name)))
+# 
+# # Create the tbl_graph object
+# reseau_citation <- tbl_graph(edges = mesograph_edgelist_df%>% 
+#                      select(from, to,Citations, Categorie, shape),
+#                    nodes = mesograph_nodes_df%>%
+#                      select(name, Categorie, shape),
+#                    directed = TRUE, node_key = "name")%>%
+#   activate(nodes) %>%
+#   filter(degree(.) > 0)
+# 
+# # Convertir l'objet tbl_graph en igraph
+# reseau_citation_igraph <- as.igraph(reseau_citation)
+# 
+# # Convertir l'objet igraph en format compatible avec networkD3
+# network_d3 <- igraph_to_networkD3(reseau_citation_igraph, group = V(reseau_citation_igraph)$Categorie)
+# 
+# # Créer le graphique networkD3
+# forceNetwork(Links = network_d3$links, Nodes = network_d3$nodes, 
+#              Source = 'source', Target = 'target', 
+#              NodeID = 'name', Group = 'group', 
+#              opacity = 0.8, fontSize = 12)
+# ```
+# ```{r}
+# ggraph(reseau_citation, layout = 'stress') + 
+#   geom_edge_link(aes(edge_alpha = Citations), show.legend = FALSE) +
+#   geom_node_point(aes(fill = Categorie, shape = shape, size = degree(reseau_citation)), show.legend = TRUE) +
+#   geom_node_text(aes(label = name), repel = TRUE, size = 3) +
+#   scale_size_continuous(range = c(3, 10)) +
+#   theme_void() +
+#   theme(legend.position = "right") +
+#   labs(title = "Graphique de citation", subtitle = "Visualisation des citations avec ggraph")
 ```
 

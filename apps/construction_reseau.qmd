@@ -217,3 +217,19 @@ save(microreseau_citation_igraph, micrograph_nodes_df, micrograph_edgelist_df,
      file = "./top_citations/network_data.RData")
 ```
 
+```{r}
+base_avis <- arrow::read_feather('../data/intermediate/big/base_avis.feather')
+base_avis%>%
+  select(num,Titre,president,Date,theme,nb_pages,rapporteurs,membres_gt)%>%
+  rename("Numéro avis"=num,
+         "Titre"=Titre,
+         "Président" = president,
+         "Thème"=theme,
+         "Nombre de pages" = nb_pages,
+         "Rapporteurs" = rapporteurs,
+         "Membres du Groupe de Travail" = membres_gt
+         )->base_avis
+save(base_avis,
+     file = "./Liste_avis/metadata_avis.RData")
+```
+

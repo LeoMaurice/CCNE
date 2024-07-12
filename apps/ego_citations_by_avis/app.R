@@ -9,6 +9,7 @@ load("network_data.RData")
 
 # Couleurs fixes pour chaque catégorie
 category_colors <- c(
+  "Auteurs" = "#6CC7B3",
   "Autorités" = "#285291",
   "CCNE" = "#9D3A5E",
   "Comité d'éthique" = "#579125",
@@ -33,12 +34,22 @@ ui <- fluidPage(
         right: 10px;
         z-index: 1000;
       }
+      #explanationButton {
+        position: fixed;
+        top: 50px;
+        right: 10px;
+        z-index: 1000;
+      }    
     "))
   ),
   tags$div(
     id = "backButton",
     actionButton("back", "Retour aux différents choix", 
                  onclick = "window.location.href='https://leopoldmaurice.shinyapps.io/CCNE/'")
+  ),
+  tags$div(
+    id = "explanationButton",
+    actionButton("explanation", "Explication de l'application")
   ),
   titlePanel("Visualisation de l'égo réseau des citations autour d'un avis"),
   sidebarLayout(
@@ -54,8 +65,8 @@ ui <- fluidPage(
                    choices = list("Afficher" = TRUE, "Masquer" = FALSE), 
                    selected = TRUE),
       radioButtons("graph_mode", "Mode du graphe:",
-                   choices = list("Noms complets" = "meso", "Simplifié" = "micro"), 
-                   selected = "micro"),
+                   choices = list("Noms complets" = "micro", "Simplifié" = "meso"), 
+                   selected = "micro"),  # Inverser les valeurs ici
       br(),
       tags$div(
         tags$h4("Légende des flèches"),
@@ -76,6 +87,7 @@ ui <- fluidPage(
     )
   )
 )
+
 
 # Server
 server <- function(input, output, session) {
@@ -154,7 +166,8 @@ server <- function(input, output, session) {
     # Créer le graphique visNetwork
     visNetwork(nodes, edges) %>%
       visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
-      visGroups(groupname = "Autorités", color = "#285291", shape = "square") %>%
+      visGroups(groupname = "Auteurs", color = "#6CC7B3", shape = "triangle") %>%
+      visGroups(groupname = "Autorités", color = "#285291", shape = "triangle") %>%
       visGroups(groupname = "CCNE", color = "#9D3A5E", shape = "square") %>%
       visGroups(groupname = "Comité d'éthique", color = "#579125", shape = "triangle") %>%
       visGroups(groupname = "Comparaison pays", color = "#0F0F5C", shape = "triangle") %>%
@@ -172,6 +185,39 @@ server <- function(input, output, session) {
                             style = "color:#000000;font-size:24px;text-align:center;")) %>%
       visEdges(arrows = 'to', color = list(color = "gray", highlight = "black")) %>%
       visNodes(font = list(size = 20))
+  })
+  
+  observeEvent(input$explanation, {
+    showModal(modalDialog(
+      title = "Explication de l'application",
+      HTML("<div><h4>Explication de l'application :</h4>
+        <p>Cette application permet de visualiser le graphe des citations autour de chaque avis émis par le Comité Consultatif National d'Éthique (CCNE).</p>
+        <p>Sélectionner un numéro d'avis permet de choisir l'avis à regarder.</p>
+        <p>On peut choisir les types de citations à afficher parmi :</p>
+        <ul>
+          <li>Science, littérature : livres et articles scientifiques. Oeuvres de fictions ou autobiographiques, regroupés par domaine.</li>
+          <li>Presse : Journeaux de la presse quotidienne et Bulletins spécialisés (médicaux ou en santé publique).</li>
+          <li>Etat : Ministères, Parlement, Président, Premier Ministre, Administration (à l'exclusion des autorités indépendantes et/ou consultatives)</li>
+          <li>Auteurs : Auteurs considérés comme suffisamment importants pour apparaitre en propre, inclus des membres du CCNE et des 'classiques'.</li>
+          <li>Loi : Lois votées au Parlement, regroupées par thématique et Codes de lois.</li>
+          <li>Forums : Organisations consultatives associées à une posture de conseils au gouvernement et d'expertise (Forums Hybride, Callon et al. 2001) comme le CCNE, les académies ou l'Ordre des médecins.</li>
+          <li>Comité d'éthique : Tout autre comité d'éthique, français ou d'un autre pays.</li>
+          <li>Org Internationales : Toutes les organisations internationales incluant : institutions européennes, onusiennes, économiques/financières, olympiques.</li>
+          <li>Comparaison pays : Pays qui font l'objet d'une comparaison dans l'un des avis.</li>
+          <li>Société : Société civile, regroupée dans des catégories simples : collectifs, syndicats, religion, fondations caritatives</li>
+          <li>Autorités : Autorités administratives publics ou indépendantes, au sens de la loi de 2016, qui un pouvoir de contrôle effectif.</li>
+          <li>CCNE : Ensemble des avis numérotés publiés par le CCNE, à l'exclusion de celui choisi pour être le centre du graphe.</li>
+        </ul>
+        <p>Deux options sont disponibles :</p>
+        <ul>
+        <li>Liens non directs sont les liens des citations autre que le noeud centrale. On peut les masquer </li>
+        <li>Mode du graphe permet de choisir entre les noms complets des citations, ou des regroupements plus simples.</li>
+        </ul>
+        </div>")
+      ,
+      easyClose = TRUE,
+      footer = NULL
+    ))
   })
 }
 
