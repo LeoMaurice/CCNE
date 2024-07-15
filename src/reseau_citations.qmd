@@ -85,8 +85,22 @@ signif_caption_text <- paste("Significance levels:\n", paste(symbols, ":", signi
 ```
 
 # Résumé de la méthodologie et des données
-Les données : chaque citation a été assigné à l'avis où elle est cité, et un auteur, une institution ou domaine.
-Pour certains auteurs que j'ai classifié comme classique je vais faire un traitement particulier : si la fréquence d'apparition est > 2, je le garde en soit, sinon je le relis à un domaine. Pour la presse spécialisée, la presse, les lois je vais adopter une démarche similaire.
+
+On a collecté l'ensemble des citations dans les 144 avis du CCNE. Chaque citation a été mise en forme de la façon suivante : dans quel avis elle a été utilisée, quel est son auteur moral (ministère, sénat etc.) ou son domaine (article médical par exemple). De plus, pour rendre la lecture plus aisée, j'ai découpé chaque citation en différentes catégories :  
+- Auteurs : personne suffisamment importante dont le nom a été relevé en propre au moment de la collecte. Cela concerne aussi bien des classiques (philosophes antiques, ou modernes d'avant le 20ème s.), que les auteurs les plus cités au cours des avis (Ricoeur, Canguilhem) que les membres du CCNE cités au sein des avis.
+- Autorités : Autorités administratives publics ou indépendantes, au sens de la loi de 2016, qui un pouvoir de contrôle effectif.
+- Comité d'éthique : Tout autre comité d'éthique, français ou d'un autre pays.
+- Comparaison pays : Pays qui font l'objet d'une comparaison dans l'un des avis.
+- Etat : Ministères, Parlement, Président, Premier Ministre, Administration (à l'exclusion des autorités indépendantes et/ou consultatives)
+- Forums : Organisations consultatives associées à une posture de conseils au gouvernement et d'expertise (Forums Hybride, Callon et al. 2001) comme le CCNE, les académies ou l'Ordre des médecins.
+- Loi : Codes de lois et lois votées au Parlement, regroupées par thématique.
+- Organisations Internationales : Toutes les organisations internationales incluant : institutions européennes (de l'UE ou Conseil de l'Europe), onusiennes (on a différencié l'OMS des autres, regroupées sous le terme ONU), économiques/financières (OCDE, FMI, Banque Mondiale), olympiques (CIO).
+- Presse : Journeaux de la presse quotidienne et bulletins spécialisés (médicaux ou en santé publique).
+- Science, littérature : livres et articles scientifiques, Oeuvres de fictions ou autobiographiques, regroupés par domaine.
+- Société : Société civile, regroupée dans des catégories simples : collectifs, syndicats, religion, fondations caritatives
+
+En plus des visualisations présentes [dans l'annexe numérique du mémoire](https://leopoldmaurice.shinyapps.io/CCNE/), je présente ici les résultats les plus agrégés des citations. Pour une facilité de lecture, plutôt que parler citation par citation, ou même catégorie par catégorie, j'ai regroupé les citations entre elles, selon une logique qui dépend de la catégorie. Ainsi les lois ont été regroupé par leur thématique (lois de bioéthique, lois sur l'égalité des droits, sur la santé publique etc.), pour la presse un critère de fréquence a été attribué pour montrer les titres les plus importants et regroupés les autres. A l'avenir, je parlerais de noms détaillés pour la forme collectée et de noms simplifiés pour la forme regroupée.
+
 ```{r}
 designation_recoding <- Vectorize(function(type, Auteur_Institution, Institution_Domaine, freq_auteur, freq) {
 if (type == "classic") {
@@ -141,11 +155,31 @@ metadata_citation%>%
   mutate(count_meso = sum(count_précis))%>%
   ungroup()-> fréquence_désignations
 ```
-# réseau macro
+# Citations les plus importantes sur l'ensemble de l'histoire du CCNE
+
+Les deux graphiques suivants permettent de se donner une idée des citations les plus importantes du CCNE sur la totalité des quarantes dernières années. Ces deux graphiques construis sur le même principe : chaque citation (avec son nom simplifié) est relié à sa catégorie, elle même relié au CCNE, dans une relation hiérarchique.
+
+On y trouve les résultats suivants : 
+- Auteurs : les membres du CCNE sont la catégories d'individus la plus cité avec 17 citations. Ensuite, ce sont les philosophes pré modernes mais dont aucun n'est cité plus d'une fois au cours des 144 avis (Spninoza, Nietzsche). Deux auteurs de la seconde moitié du XXème s. sortent vraiment du lot : Canguilhem et Ricoeur. Il faut quand même noté que le nombre de citations total de ces auteurs est très faible par rapport à la masse de citations scientifiques et littéraires, comme on peut le comparer avec les citations 'Science, littérature'.
+- Science, littérature : en effet les sciences médicales sont largement les plus cités, avec un total de 1019 articles ou livres cités. La majorité des avis citent au moins un article médical, biologique, ou psychiatries/psychologies.En seconde place, les sciences humaines sont autant citées que la philosophie et l'éthique. Le droit, l'économie et l'écologie sont assez minoritaires : seulement 21 avis citent des ouvrages de droit, et seuls 16 des articles d'économie et seulement 2 avis citent des articles d'écologie (avis 133 par exemple). On a aussi quelques références à des oeuvres de fiction ou autobiographiques. En particulier, sur les questions "sensibles" comme l'autonisme, sur une période récente à partir de l'avis 102, des oeuvres autobiographiques écrites par des personnes sur le spectre autiste sont cités : c'est une première de tout les avis.
+On peut conclure qu'il n'y a pas consciemment de la part des membres du CCNE une référence explicite à certains philosophes. Canguilhem et Ricoeur sont les plus cités, mais combiné ils ne dépassent pas la douzaine d'avis faisant directement référence à eux. Le CCNE semble plutôt composé ses avis, de façon pragmatique,  selon l'idée énoncé dès les premiers avis. Les citations scientifiques sont à l'image des membres mobilisés du CCNE : biomédical et sciences humaines. Par contre, il est intéressant de noter que le droit et l'économie sont très peu mobilisés : sciences de gouvernement c'est par leurs étatiques (tribunaux, rapports) qu'on peut y déceler leur influence, plutôt que par le pôle académique. 
+- Autorités : Les autorités les plus cités sont très largement les autorités de sécurité sanitaire (AFSS) en particulier ce qui est actuellement dénommé comme l'Agence de la biomédecine (ABM) et la Haute Autorité de Santé (HAS). Au total 38 avis citent une expertise d'une des AFSS, pour un total de 67 citations. Le conseil d'Etat est largement l'institution la plus citée : 19 avis y font référence pour 27 citations. Cela vient probablement des forts historiques liens entre les deux institutions. 
+- Forums : Sans trop de surprise les forums les plus citées sont l'académie nationale de médecine, l'ordre des médecins, le conseil national du Sida. Le reste est composé du CESE, du défenseur des droits, et de divers observatoires (OFDT, ONFV, CNCDH).
+- Etat : Le CCNE cite principalement les directions des ministères sociaux, et rapports commandités en leurs noms, puis le parlement (Assemblée nationale, Sénat, OPCEST) et pour finir les tribunaux (Cour de cassation et autres tribunaux). Le premier ministre ou le président sont plutôt rares. Le Premier ministre dans le cas de rapports qu'il a commandité, le président à l'occasion des lois de bioéthique (Etats généraux de la bioéthique).
+
+- Comité d'éthique : Principalement le Groupe d'Ethique Européen (GEE) mis en place par la Commission Européenne, les espaces éthiques régionaux, le comité d'éthique du CNRS (COMETS/COPE) et le comité d'éthique de la Nuffield Foundation.
+- Comparaison pays : Les institutions américaines et britanniques sont largement les plus citées (respectivement 36 et 20 avis qui les citent), viennent ensuite les pays européens (regroupés ils apparaissent dans une quinzaine d'avis, avec la Suisse et la Belgique en premier lieu). USA : domination médicale, Suisse : francophone et leader pharmaceutique, Belgique : Fr, UK : ?. 
+
+- Loi : Codes de lois et lois votées au Parlement, regroupées par thématique. Code de la santé publique, code civil, les lois de bioéthique (particulièrement 1994 et 2004) et surtout la loi Huriet la plus citées en elle même. Puis viennent ensuite les lois thématiques : Egalités des droits, santé publique, fin de vie, RGPD/informatique et libertés.
+
+- Organisations Internationales : UE > ONU > OMS. Quelques traités mais pas tant que ça : 5 avis avec la convention d'Oviedo et 9 avec la déclaration d'Helsinki, 6 pour le code de Nuremberg.
+
+- Presse : Pas mal de presse spécialisée, mais surtout beaucoup le monde 17 avis qui le citent.
+- Société : Principalement des collectifs.
 
 
 ```{r}
-#| eval: false
+#| eval: true
 # Load necessary libraries
 library(dplyr)
 library(networkD3)
@@ -273,6 +307,8 @@ ggraph(layout) +
 ```
 
 ```{r}
+#| eval: false
+
 # Convertir en structure d'arbre avec CCNE comme racine
 layout <- create_layout(graph, layout = 'cactustree')
 
@@ -293,6 +329,8 @@ ggraph(layout) +
 
 ```
 ```{r}
+#| eval: false
+
 # Define custom breaks for the bins
 custom_breaks <- c(10,50, 100, 500, 1500)
 
@@ -329,9 +367,8 @@ ggraph(graph, layout = 'fr') + # layout 'fr' pour Fruchterman-Reingold, une mise
 
 ```
 
-# bar plot
-
 ```{r}
+#| eval: false
 
 color_pal_groupe_sans_ccne = c("#285291","#579125","#0F0F5C","#91188F","#0E405C", "#915B11" , "#4F2B91", "#91181E","#0B5C2D","#BD6345")
 
@@ -347,10 +384,7 @@ metadata_citation %>%
 
 
 
-# Across time
-
-
-## nb citation absolu
+# Nombre de citations au cours du temps
 
 ```{r, fig.width=21, fig.height=9.9}
 # Ajouter une colonne président à metadata_avis
@@ -370,7 +404,7 @@ metadata_avis$president <- factor(metadata_avis$president, levels = c(
 ))
 
 all_combinations <- expand.grid(
-  num = unique(metadata_citation$cité_dans_avis_num),
+  num = 1:144,
   Catégorie = unique(metadata_citation$Groupe)
 )%>%
   mutate(num = as.numeric(num))
@@ -422,7 +456,7 @@ library(ggrepel)
 
 # Créer un dataframe avec toutes les combinaisons possibles de num et Désignation
 all_combinations <- expand.grid(
-  num = unique(metadata_citation$cité_dans_avis_num),
+  num = 1:144,
   Désignation = c("Biologie", "Economie", "Ethique & philo", "SHS", "psycho&neuro", "Médical")
 )%>%
   mutate(num = as.numeric(num))
@@ -453,7 +487,7 @@ plot_data_nb_citations <- plot_data_nb_citations %>%
 # Graphique
 ggscatter(plot_data_nb_citations, x = "date", y = "nb_citation", facet.by = "Désignation", color = "president",
           xlab = "Temps", ylab = "Nombre de citations (multiple par avis)",
-          caption = "Graphique de l'auteur.\nChamps : Tous les avis numérotés publiés par le CCNE jusqu'au 144.\nDonnées collectées par l'auteur.\nLecture: l'usage de référence issu des SHS, de philo ou l'éthique devient réellement systématique au milieu de la présidence Ameisen, au milieu des années 2010.") +
+          caption = "Graphique de l'auteur.\nChamps : Tous les avis numérotés publiés par le CCNE jusqu'au 144.\nDonnées collectées par l'auteur.\nLecture: l'usage de référence issu des SHS, de philo ou l'éthique\ndevient réellement systématique au milieu de la présidence Ameisen, au milieu des années 2010.") +
   scale_color_prism("colorblind_safe") +
   theme_ready(text_size = 13) +
   geom_text_repel(aes(label = label, color = president), max.overlaps = Inf) +
@@ -470,7 +504,7 @@ library(ggrepel)
 
 # Créer un dataframe avec toutes les combinaisons possibles de num et Désignation
 all_combinations <- expand.grid(
-  num = unique(metadata_citation$cité_dans_avis_num),
+  num = 1:144,
   Désignation = c("Biologie", "Economie", "Ethique & philo", "SHS", "psycho&neuro", "Médical")
 )%>%
   mutate(num = as.numeric(num))
@@ -500,6 +534,7 @@ plot_data_nb_citations <- plot_data_nb_citations %>%
 
 # Graphique
 ggscatter(plot_data_nb_citations, x = "date", y = "nb_citation", color = "president",
+          title = "Publications médicales",
           xlab = "Temps", ylab = "Nombre de citations (multiple par avis)",
           caption = "Graphique de l'auteur.\nChamps : Tous les avis numérotés publiés par le CCNE jusqu'au 144.\nDonnées collectées par l'auteur.\nLecture: Pour les citations médicales, on voit une inflation jusqu'à la fin de la présidence Changeux et une systématisation au cours du mandat Delfraissy.\nAvant Grimfeld, les médecins pouvaient affirmer sans cité dans la majorité des avis.") +
   scale_color_prism("colorblind_safe") +
@@ -508,13 +543,159 @@ ggscatter(plot_data_nb_citations, x = "date", y = "nb_citation", color = "presid
   geom_point(data = plot_data_nb_citations, aes(x = date, y = nb_citation, color = president))
 
 ```
-## nb citation relatif
+
+# Tableau récapitulatif
+
+```{r}
+
+# Créer un dataframe avec toutes les combinaisons possibles de num et Désignation
+all_combinations <- expand.grid(
+  num = 1:144,
+  Catégorie = unique(metadata_citation$Groupe)
+)%>%
+  mutate(num = as.numeric(num))
+
+all_combinations %>%
+  left_join(metadata_citation %>%
+              rename(num = cité_dans_avis_num, Catégorie = Groupe) %>%
+              group_by(num, Catégorie) %>%
+              mutate(num = as.numeric(num)) %>%
+              summarise(nb_citation = n(), .groups = 'drop'),
+            by = c("num", "Catégorie")) %>%
+  replace_na(list(nb_citation = 0))%>%
+  left_join(metadata_avis, by = "num") -> citations_by_cat
+
+percentage_by_cat<- citations_by_cat%>%
+  mutate(is_cited = (nb_citation > 0),
+         total_avis = 144)%>%
+  group_by(Catégorie)%>%
+  summarise(Pourcentage = 100*sum(is_cited)/144)%>%
+  rename(`Ensemble des avis` = Pourcentage)
+
+percentage_by_cat_pres <- citations_by_cat%>%
+  mutate(is_cited = (nb_citation > 0),
+         total_avis = 144)%>%
+  group_by(Catégorie, president)%>%
+  summarise(Pourcentage = sum(is_cited))%>%
+  mutate(total = case_when(
+    president == "Bernard (83-91)"  ~ 28,
+    president == "Changeux (92-99)"  ~ 32,
+    president == "Sicard (00-08)" ~ 43,
+    president == "Grimfeld (09-11)" ~ 12,
+    president == "Ameisen (12-15)" ~ 9,
+    president == "Delfraissy (16-)" ~ 20
+  ),
+  Pourcentage = 100*Pourcentage/total)%>%
+  select(Catégorie,president,Pourcentage)%>%
+  pivot_wider(names_from = president, values_from = Pourcentage)
+
+percentage_cat <- left_join(percentage_by_cat,percentage_by_cat_pres, by= "Catégorie")
+
+percentage_cite_toutes_cat <- citations_by_cat%>%
+  mutate(is_cited = (nb_citation > 0))%>%
+  group_by(num)%>%
+  summarise(is_cited = all(is_cited))%>%
+  mutate(president = case_when(
+    num >= 1 & num <= 28 ~ "Bernard (83-91)",
+    num >= 29 & num <= 60 ~ "Changeux (92-99)",
+    num >= 61 & num <= 103 ~ "Sicard (00-08)",
+    num >= 104 & num <= 115 ~ "Grimfeld (09-11)",
+    num >= 116 & num <= 124 ~ "Ameisen (12-15)",
+    num >= 125 & num <= 144 ~ "Delfraissy (16-)"
+  ))
+
+percentage_cite_toutes_cat_tout_ccne <- 100*sum(percentage_cite_toutes_cat$is_cited)/144
+
+percentage_cite_toutes_cat_by_pres <- percentage_cite_toutes_cat%>%
+  group_by(president)%>%
+  summarise(Pourcentage = sum(is_cited))%>%
+  mutate(total = case_when(
+    president == "Bernard (83-91)"  ~ 28,
+    president == "Changeux (92-99)"  ~ 32,
+    president == "Sicard (00-08)" ~ 43,
+    president == "Grimfeld (09-11)" ~ 12,
+    president == "Ameisen (12-15)" ~ 9,
+    president == "Delfraissy (16-)" ~ 20
+  ),
+  Pourcentage = 100*Pourcentage/total)%>%
+  select(president,Pourcentage)%>%
+  pivot_wider(names_from = president, values_from = Pourcentage)%>%
+  mutate(`Ensemble des avis` = percentage_cite_toutes_cat_tout_ccne,
+         Catégorie = "Cite toutes les catégories")
+
+percentage_cite_toutes_sauf_n_cat <- function(n) {
+  cat_to_cite = length(unique(citations_by_cat$Catégorie))-n
+  percentage_cite_sauf_n_cat <- citations_by_cat%>%
+    mutate(is_cited = (nb_citation > 0))%>%
+    group_by(num)%>%
+    summarise(is_cited = sum(is_cited))%>%
+    mutate(president = case_when(
+      num >= 1 & num <= 28 ~ "Bernard (83-91)",
+      num >= 29 & num <= 60 ~ "Changeux (92-99)",
+      num >= 61 & num <= 103 ~ "Sicard (00-08)",
+      num >= 104 & num <= 115 ~ "Grimfeld (09-11)",
+      num >= 116 & num <= 124 ~ "Ameisen (12-15)",
+      num >= 125 & num <= 144 ~ "Delfraissy (16-)"
+    ),
+    is_cited = (is_cited>=cat_to_cite))
+  
+  percentage_cite_sauf_n_cat_ensemble <- 100*sum(percentage_cite_sauf_n_cat$is_cited)/144
+  
+  percentage_cite_sauf_n_cat_by_pres <- percentage_cite_sauf_n_cat%>%
+    group_by(president)%>%
+    summarise(Pourcentage = sum(is_cited))%>%
+    mutate(total = case_when(
+      president == "Bernard (83-91)"  ~ 28,
+      president == "Changeux (92-99)"  ~ 32,
+      president == "Sicard (00-08)" ~ 43,
+      president == "Grimfeld (09-11)" ~ 12,
+      president == "Ameisen (12-15)" ~ 9,
+      president == "Delfraissy (16-)" ~ 20
+    ),
+    Pourcentage = 100*Pourcentage/total)%>%
+    select(president,Pourcentage)%>%
+    pivot_wider(names_from = president, values_from = Pourcentage)%>%
+    mutate(`Ensemble des avis` = percentage_cite_sauf_n_cat_ensemble,
+           Catégorie = paste("Cite",cat_to_cite,"des",length(unique(citations_by_cat$Catégorie)),"catégories"))
+  
+  return(percentage_cite_sauf_n_cat_by_pres)
+}
+
+# Calculer les pourcentages pour toutes les catégories sauf une, deux et trois
+percentage_sauf_1_cat <- percentage_cite_toutes_sauf_n_cat(1)
+percentage_sauf_2_cat <- percentage_cite_toutes_sauf_n_cat(2)
+percentage_sauf_3_cat <- percentage_cite_toutes_sauf_n_cat(3)
+percentage_sauf_4_cat <- percentage_cite_toutes_sauf_n_cat(4)
+
+final_table <- bind_rows(percentage_cat,
+                         percentage_cite_toutes_cat_by_pres,
+                           percentage_sauf_1_cat,
+                           percentage_sauf_2_cat,
+                           percentage_sauf_3_cat,
+                         percentage_sauf_4_cat)%>%
+  select(Catégorie,`Bernard (83-91)`,`Changeux (92-99)`,`Sicard (00-08)`,`Grimfeld (09-11)`,`Ameisen (12-15)`,`Delfraissy (16-)`)%>%
+   mutate(across(c(`Bernard (83-91)`,`Changeux (92-99)`,`Sicard (00-08)`,`Grimfeld (09-11)`,`Ameisen (12-15)`,`Delfraissy (16-)`), ~ round(., 1)))
+
+# Afficher le tableau avec DT
+datatable(final_table, extensions = 'Buttons', options = list(
+  dom = 'Bfrtip',
+  buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
+))
+
+```
+
+
+
+
+
 
 ```{r}
 taille_avis <- read.csv("../data/raw/collected_metadata/taille_avis.csv")
 ```
 
 ```{r}
+#| eval: false
+
 metadata_citation%>%
   rename(num = cité_dans_avis_num, Catégorie = Groupe)%>%
   group_by(num, Catégorie)%>%
@@ -535,6 +716,8 @@ metadata_citation%>%
 ```
 
 ```{r}
+#| eval: false
+
 metadata_citation%>%
   rename(num = cité_dans_avis_num, Catégorie = Groupe)%>%
   group_by(num, Catégorie)%>%
@@ -555,6 +738,8 @@ metadata_citation%>%
 ```
 
 ```{r}
+#| eval: false
+
 metadata_citation%>%
   rename(num = cité_dans_avis_num, Catégorie = Groupe)%>%
   filter(Catégorie == "Science, littérature")%>%
@@ -569,7 +754,6 @@ metadata_citation%>%
   theme_ready()
 ```
 
-# Réseau méso
 
 ```{r}
 # reseau_citation_extra <- metadata_citation%>%
