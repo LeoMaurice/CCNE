@@ -1,7 +1,7 @@
 ---
-title: "Réprésentation personnalité humaine au cours des avis du CCNE"
+title: "Représentation personnalité humaine au cours des avis du CCNE"
 author: "Léopold MAURICE"
-date: "2024-06-05"
+date: "2024-07-16"
 project: CCNE
 supervision: Pr. Emmanuel Didier, CMH/ENS/EHESS
 format:
@@ -57,6 +57,7 @@ pacman::p_load(arrow,
                ggpubr,
                ggcorrplot,
                ggalluvial,
+               ggrepel,
                ComplexHeatmap,
                circlize,
                patchwork,
@@ -324,6 +325,125 @@ repartion_phrase_interet_avis%>%
        caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: Chaque point représente le pourcentage de la catégorie parmis les phrases publiées cette année.\nAu cours du temps, les avis ont tendance à utiliser plus\nun vocabulaire de la personne (éco,droit) plutôt que centré sur le vivant (bio,écolo).") +
   guides(fill = guide_legend(title.position = "top"))
 ```
+
+## Tendance au sein du biologique et du moral
+
+```{r}
+bert_sentences_id <- unique(predictions_BERT$sentence_id)
+predictions_gpt <- read_csv("../data/intermediate/predictions/predictions_gpt35ft_1400annotations_7classes_2024-07-15.csv",
+    col_types = cols(sentence_id = col_integer()))%>%
+  filter(Label != "Miscellaneous")%>%
+  filter(Label != "Poubelle")%>%
+  filter(sentence_id %in% bert_sentences_id)
+
+gpt_sentences_id <- unique(predictions_gpt$sentence_id)
+
+predictions_BERT <- predictions_BERT%>%
+  filter(sentence_id %in% gpt_sentences_id)
+
+predictions_both <- predictions_gpt%>%
+  left_join(predictions_BERT%>%
+              select(sentence_id,num,label))%>%
+  rename(Label_gpt = Label,
+         Label_bert = label)
+
+levels_order <- c( "Bernard (83-91)", "Changeux (92-99)","Sicard (00-08)", "Grimfeld (09-11)", "Ameisen (12-15)", "Delfraissy (16-)")
+
+predictions_both$president <- factor(predictions_both$president, levels = levels_order)
+```
+
+
+```{r, fig.width=19, fig.height=10}
+
+palette <- c("#E995EB","#7CA0D4","#A48AD3","#BADE86","#2B8AAE" ,"#624894","#8BA56F")
+
+
+percent_au_sein_labels <- predictions_both%>%
+  group_by(Label_bert)%>%
+  mutate(nb_label_bert = n())%>%
+  ungroup()%>%
+  group_by(Label_bert,Label_gpt)%>%
+  summarise(percent = 100 * n()/mean(nb_label_bert))%>%
+  mutate(Label_gpt = factor(Label_gpt, levels = c(
+                                          "Personne relationnelle",
+                                          "Individu ou sujet",
+                                          "Genre/espèce humaine",
+                                         "Corps humain",
+                                         "Personne responsable et autonome",
+                                         "Personne à protéger",
+                                         "Sentiment humain")),
+         Label_bert = factor(Label_bert, levels = c(
+           "Personne/Individu","Vivant")),
+         text = ifelse(percent >= 3, paste(Label_gpt, round(percent, digits = 1),"%"), ""),
+         label = text)
+
+percent_au_sein_labels %>%
+  filter(Label_bert == "Vivant") %>%
+  ggpie("percent", label.pos = "out", fill = "Label_gpt", color = "white",
+        lab.font = c(8,"plain","black")) +
+  scale_fill_manual(values = palette)+
+  labs(title = "Labels précis désignés par le modèle GPT\naux phrases labelisées 'vivant'",
+       caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: 56% des phrases dans la catégorie 'Vivant' réfère à la biologie.",
+       fill = "Label GPT")+
+  guides(fill = guide_legend(title.position = "top",nrow = 4, ncol = 2))+
+  theme(text = element_text(size = 25))
+
+  
+```
+
+```{r, fig.width=19, fig.height=10}
+percent_au_sein_labels%>%
+  filter(Label_bert == "Personne/Individu")%>%
+  ggpie("percent", label = "label",label.pos = "out",fill = "Label_gpt", color = "white",
+        lab.font = c(8,"plain","black"))+
+  scale_fill_manual(values = palette)+
+  labs(title = "Labels précis désignés par le modèle GPT\naux phrases labelisées 'vivant'",
+       caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: 27% des phrases dans la catégorie 'Personne/Individu' réfère à l'individu.",
+       fill = "Label GPT")+
+  guides(fill = guide_legend(title.position = "top",nrow = 4, ncol = 2))+
+  theme(text = element_text(size = 25))
+```
+
+```{r}
+#| eval: false
+percent_au_sein_labels_pres <- predictions_both%>%
+  group_by(num,Label_bert,president)%>%
+  mutate(nb_label_bert = n())%>%
+  ungroup()%>%
+  group_by(num,Label_bert,Label_gpt,president)%>%
+  summarise(percent = 100 * n()/mean(nb_label_bert))%>%
+  mutate(Label_gpt = factor(Label_gpt, levels = c(
+                                          "Personne relationnelle",
+                                          "Individu ou sujet",
+                                          "Genre/espèce humaine",
+                                         "Corps humain",
+                                         "Personne responsable et autonome",
+                                         "Personne à protéger",
+                                         "Sentiment humain")),
+         Label_bert = factor(Label_bert, levels = c(
+           "Personne/Individu","Vivant")))%>%
+  filter((Label_bert == "Vivant" & Label_gpt %in% c("Genre/espèce humaine",
+                                                    "Corps humain")) | (Label_bert == "Personne/Individu" & Label_gpt %in% c("Personne relationnelle","Individu ou sujet",
+                                                                                                                             "Personne responsable et autonome",
+                                         "Personne à protéger",
+                                         "Sentiment humain")))
+
+ggscatter(percent_au_sein_labels_pres,x = "num", y = "percent", color = "Label_gpt",facet.by = "Label_bert",
+            add = "reg.line",
+            conf.int = TRUE, # Add confidence interval
+            add.params = list(fill = "lightgray"))+
+           #cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+           #cor.coeff.args = list(method = "pearson", label.x = 3, label.sep = "\n"))+
+  theme_ready() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
+  scale_color_manual(values = palette) +
+  labs(fill = "Label GPT", color = "Label GPT",
+       title = "Proportion des représentation de la personnalité humaine\nau cours des années par avis", x = "Numéro avis", y = "Pourcentage",
+       caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: Chaque point représente un avis.\nAu cours du temps, les avis ont tendance à utiliser plus\nun vocabulaire de la personne (éco,droit) plutôt que centré sur le pur biologique.") +
+  guides(fill = guide_legend(title.position = "top"))
+
+```
+
 
 ## Biologique vs Vivant vs Social vs Moral
 
