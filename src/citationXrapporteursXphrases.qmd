@@ -1,0 +1,495 @@
+---
+title: "Citations et catégories personnalités en fonction professions rapporteurs"
+author: "Léopold MAURICE"
+date: "2024-07-16"
+project: CCNE
+supervision: Pr. Emmanuel Didier, CMH/ENS/EHESS
+format:
+  html:
+    toc: true
+    number-sections: true
+    colorlinks: true
+    geometry:
+      - top=10mm
+      - left=20mm
+      - right=20mm
+      - bottom=10mm  
+      - heightrounded
+    highlight-style: github
+    fontfamily: libertinus
+    documentclass: report
+    fig-width: 12
+    fig-height: 9
+  pdf:
+    documentclass: article
+    geometry: [left=1in, right=1in, top=1in, bottom=1in]
+    fontsize: 11pt
+    keep-tex: true
+    toc: true
+    toc-depth: 2
+    number-sections: true
+execute:
+  eval: true
+  message: false
+  warning: false
+  echo: false
+  output: true
+  error: true
+editor: source
+---
+
+```{r}
+require(pacman,quietly = T)
+
+pacman::p_load(arrow,
+               tidyverse,
+               reshape2,
+               stringr,
+
+               stats,
+               rstatix,
+               
+               igraph,
+               
+               ggplot2,
+               gridExtra,
+               ggprism,
+               ggpubr,
+               ggcorrplot,
+               ComplexHeatmap,
+               circlize,
+               patchwork,
+               rmarkdown,
+               readxl,
+               openxlsx,
+               
+               arrow,
+               tidyverse,
+               reshape2,
+               stringr,
+               DT,
+
+               stats,
+               rstatix,
+               
+               ggplot2,
+               gridExtra,
+               ggprism,
+               ggpubr,
+               ggcorrplot,
+               ggraph,
+               ggnetwork,
+               ggrepel,
+               viridis,
+               RColorBrewer,
+               paletteer,
+               
+               igraph,
+               tidygraph,
+               #sna,
+               #network,
+               
+               networkD3,
+               leaflet,
+               
+               rmarkdown,
+               knitr,
+               
+               openxlsx)
+
+source("helpers/database_creation.R")
+source("helpers/figures.R")
+
+save_figures = F
+cutpoints = c(0, 1e-04, 0.001, 0.01, 0.05, 0.1, 1)
+symbols = c("****", "***", "**", "*", "•","ns")
+significance = c("p < 0.0001", "p < 0.001", "p < 0.01", "p < 0.05", "p < 0.1", "p>0.1")
+signif_caption_text <- paste("Significance levels:\n", paste(symbols, ":", significance, collapse = ", "))
+
+```
+
+```{r}
+metadata_auteur <- read_excel("../data/raw/collected_metadata/metadata_auteur.xlsx", 
+    col_types = c("numeric", "text", "text", 
+        "text", "text", "text", "text", 
+        "text", "text", "numeric", "text", 
+        "text", "text", "skip"))
+
+metadata_auteur <- metadata_auteur|>
+  mutate(président = président == "TRUE")
+
+calcul_mandat_durée <- Vectorize(function(début,fin,début2,fin2){
+  if(is.na(début2))
+    return(fin - début + 1)
+  else 
+    return(fin - début + 1 + fin2 - début2 + 1)
+})
+
+NOW_year = 2024
+# Replace "NOW" with the current year in the specified columns using dplyr
+metadata_auteur <- metadata_auteur %>%
+  mutate(across(c(début, fin, début2, fin2), ~ ifelse(. == "NOW", NOW_year, .))) %>%
+  mutate(across(c(début, fin, début2, fin2), as.numeric))%>%
+  mutate(président_première_nomination = president_CCNE_by_year(début),
+         age_première_nomination = début - naissance + 1,
+         durée_mandat = calcul_mandat_durée(début,fin,début2,fin2))
+
+# recodage des professions avec une catégorie unique par membre du ccne
+recodage_profession <- Vectorize(function(profession, spécialité){
+  profession = strsplit(profession, ";")[[1]]
+  spécialité = strsplit(spécialité, ";")[[1]]
+  if('politicien' %in% profession | 'militant' %in% profession){
+    return('politicien ou militant') # un politicien qui fut médecin est classé comme politicien
+  }
+  else if('journaliste' %in% profession | 'presse' %in% profession){
+    return('journaliste/presse')
+  }
+  else if('théologien' %in% profession){
+    return('théologien')
+  }
+  else if('médecin' %in% profession & !('généraliste' %in% spécialité)){
+    return('médecin PUPH')
+  }
+  else if('biologiste' %in% profession | 'physiologie' %in% spécialité | 'pharmacologie' %in% spécialité){
+    return('chercheur bio')
+  }
+  else if('pharmacien' %in% profession | 'infirmier' %in% profession | 'infirmière' %in% profession | 'psychologue' %in% profession | 'généraliste' %in% spécialité | 'cadre supérieur santé' %in% profession)
+    return('autres professions santé')
+  else if('avocat' %in% profession | 'magistrat' %in% profession | 'juge' %in% profession | 'juriste' %in% profession)
+    return('profession du droit')
+  else if('haut fonctionnaire' %in% profession | 'ENArque' %in% profession | 'cadre' %in% profession | 'ingénieur' %in% profession)
+    return('cadre public/privé')
+  else if('chercheur' %in% profession | 'professeur agrégé' %in% profession | "professeur d'université" %in% profession){
+    if('droit' %in% spécialité)
+      return("chercheur droit")
+    if('sociologie' %in% spécialité | 'anthropologie' %in% spécialité | 'histoire' %in% spécialité | 'économie' %in% spécialité | 'psychologie' %in% spécialité | 'démographie' %in% spécialité | 'philosophie' %in% spécialité | 'géographie' %in% spécialité | 'judaïsme' %in% spécialité | 'sciences politiques'  %in% spécialité | 'littérature' %in% spécialité | 'musée' %in% spécialité | 'protestantisme' %in% spécialité
+)
+      return('chercheur SHS')
+    if('mathématiques' %in% spécialité | 'chimie' %in% spécialité | 'physique' %in% spécialité | 'informatique' %in% spécialité)
+      return('chercheur sciences exactes')
+  }
+  else{
+    return("inconnue")
+  }
+})
+
+metadata_auteur <- metadata_auteur%>%
+  mutate(profession_recodée = recodage_profession(profession,spécialité))%>%
+  mutate(profession_recodée = as.character(profession_recodée))%>%
+  mutate(profession_recodée = factor(profession_recodée, 
+                                     levels = c(
+                                       "médecin PUPH","chercheur bio",
+                                       "autres professions santé",
+                                       "politicien ou militant",
+                                       "cadre public/privé","journaliste/presse",
+                                       "théologien","profession du droit",
+                                       "chercheur droit","chercheur SHS",
+                                       "chercheur sciences exactes","inconnue")))
+metadata_avis <- open_metadata()
+
+metadata_avis <- metadata_avis %>%
+  mutate_if(is.character, ~ na_if(., "NA"))
+
+# Fonction pour compléter les bases de données
+appariement_avis_membre <- function(metadata_auteur_intermediate, metadata_avis_intermediate) {
+  # Séparer les rapporteurs et les membres_gt et créer une relation entre chaque auteur et le document
+  metadata_rapporteurs_long <- metadata_avis_intermediate %>%
+    select(num, rapporteurs) %>%
+    separate_rows(rapporteurs, sep = ",\\s*") %>%
+    rename(nom = rapporteurs) %>%
+    mutate(role_avis = 'rapporteur')
+
+  metadata_membres_gt_long <- metadata_avis_intermediate %>%
+    select(num, membres_gt) %>%
+    separate_rows(membres_gt, sep = ",\\s*") %>%
+    rename(nom = membres_gt) %>%
+    mutate(role_avis = 'membre_gt')
+
+  # Combiner les deux ensembles de données
+  metadata_avis_long <- bind_rows(
+    metadata_rapporteurs_long,
+    metadata_membres_gt_long
+  )
+
+  # Joindre les tables par le nom de l'auteur
+  metadata_avis_joined <- metadata_avis_long %>%
+    left_join(metadata_auteur, by = "nom")
+
+  # Attribuer à chaque personne la liste des numéros des documents dont il est rapporteur
+  auteurs_docs_rapporteurs <- metadata_avis_joined %>%
+    filter(role_avis == "rapporteur") %>%
+    group_by(id_membre, nom) %>%
+    summarise(avis_rapporteur = list(num), .groups = 'drop')
+
+  # Attribuer à chaque personne la liste des numéros des documents dont il est membre_gt
+  auteurs_docs_membres_gt <- metadata_avis_joined %>%
+    filter(role_avis == "membre_gt") %>%
+    group_by(id_membre, nom) %>%
+    summarise(avis_membre_gt = list(num), .groups = 'drop')
+
+  # Fusionner les informations des auteurs
+  metadata_auteur_intermediate <- metadata_auteur_intermediate %>%
+    left_join(auteurs_docs_rapporteurs, by = c("id_membre", "nom")) %>%
+    left_join(auteurs_docs_membres_gt, by = c("id_membre", "nom"))
+
+  # Attribuer à chaque document la liste des identifiants des rapporteurs
+  docs_ids_rapporteurs <- metadata_avis_joined %>%
+    filter(role_avis == "rapporteur") %>%
+    group_by(num) %>%
+    summarise(ids_rapporteurs = list(id_membre), .groups = 'drop')
+
+  # Attribuer à chaque document la liste des identifiants des membres_gt
+  docs_ids_membres_gt <- metadata_avis_joined %>%
+    filter(role_avis == "membre_gt") %>%
+    group_by(num) %>%
+    summarise(ids_membres_gt = list(id_membre), .groups = 'drop')
+
+  # Joindre les résultats pour avoir une vue complète par document
+  metadata_avis_intermediate <- metadata_avis_intermediate %>%
+    left_join(docs_ids_rapporteurs, by = "num") %>%
+    left_join(docs_ids_membres_gt, by = "num")
+
+  return(list(metadata_auteur = metadata_auteur_intermediate, metadata_avis = metadata_avis_intermediate))
+}
+
+# Appeler la fonction et obtenir les data.frames complétés
+result <- appariement_avis_membre(metadata_auteur, metadata_avis)
+
+# Récupérer les data.frames complétés
+metadata_auteur <- result$metadata_auteur
+metadata_avis <- result$metadata_avis
+
+rm(result)
+
+metadata_auteur <- metadata_auteur|>
+  mutate(nb_avis_as_rapporteur = sapply(avis_rapporteur, length),
+         nb_avis_as_membre_gt = sapply(avis_membre_gt, length),
+         nb_avis_as_participant = nb_avis_as_rapporteur + nb_avis_as_membre_gt)
+
+metadata_auteur_2002 <- metadata_auteur|>
+  filter(début>= 2002 | début2 >= 2002)
+```
+
+
+```{r}
+predictions_BERT <- read_csv("../data/intermediate/predictions/predictions_camemBERT_1400annotations_2classes_2024-06-24.csv",
+    col_types = cols(sentence_id = col_integer(), 
+        pred_label = col_integer())) %>%
+  mutate(
+    sentence_index = as.numeric(substr(sentence_id, nchar(as.character(sentence_id)) - 3, nchar(as.character(sentence_id)))),
+    num = as.numeric(substr(sentence_id, 1, nchar(as.character(sentence_id)) - 4))
+  )
+
+recat <- c("Corps humain" = "Vivant",
+           "Genre/espèce humaine" = "Vivant",
+           "Individu ou sujet" = "Personne/Individu",
+           "Personne à protéger" = "Personne/Individu",
+           "Personne responsable et autonome" = "Personne/Individu",
+           "Personne relationnelle" = "Personne/Individu",
+           "Sentiment humain" = "Personne/Individu",
+           "Poubelle" = "Poubelle")
+
+annotations <- read_csv("../data/intermediate/annotations/personne_withSentence_1400annotations_2024-06-03_ActiveTigger.csv")%>%
+  rename(annotation_label = Personne)%>%
+  mutate(training_label = recode(annotation_label, !!!recat))%>%
+  select(sentence_id,training_label,annotation_label)
+
+# base avec métadonnées au niveau des avis, sans découper au niveau des phrases
+base_avis <- arrow::read_feather('../data/intermediate/big/base_avis.feather')
+levels_order <- c( "Bernard (83-91)", "Changeux (92-99)","Sicard (00-08)", "Grimfeld (09-11)", "Ameisen (12-15)", "Delfraissy (16-)")
+
+base_avis$president <- factor(base_avis$president, levels = levels_order)
+
+predictions_BERT <- predictions_BERT %>%
+  left_join(annotations, by = "sentence_id")%>%
+  mutate(label = ifelse(!is.na(training_label), training_label, pred_Personne))%>%
+  filter(label != "Poubelle")%>%
+  left_join(base_avis, by = "num")%>%
+  mutate(label = factor(label, levels = c("Personne/Individu","Vivant")),
+         Date = as.Date(Date))
+
+bert_sentences_id <- unique(predictions_BERT$sentence_id)
+predictions_gpt <- read_csv("../data/intermediate/predictions/predictions_gpt35ft_1400annotations_7classes_2024-07-15.csv",
+    col_types = cols(sentence_id = col_integer()))%>%
+  filter(Label != "Miscellaneous")%>%
+  filter(Label != "Poubelle")%>%
+  filter(sentence_id %in% bert_sentences_id)
+
+gpt_sentences_id <- unique(predictions_gpt$sentence_id)
+
+predictions_BERT <- predictions_BERT%>%
+  filter(sentence_id %in% gpt_sentences_id)
+
+predictions_both <- predictions_gpt%>%
+  left_join(predictions_BERT%>%
+              select(sentence_id,num,label))%>%
+  rename(Label_gpt = Label,
+         Label_bert = label)
+
+levels_order <- c( "Bernard (83-91)", "Changeux (92-99)","Sicard (00-08)", "Grimfeld (09-11)", "Ameisen (12-15)", "Delfraissy (16-)")
+
+predictions_both$president <- factor(predictions_both$president, levels = levels_order)
+```
+
+```{r}
+designation_recoding <- Vectorize(function(type, Auteur_Institution, Institution_Domaine, freq_auteur, freq) {
+if (type == "classic") {
+  return(Auteur_Institution)
+} else {
+  return(Institution_Domaine)
+}
+})
+
+
+metadata_avis <- open_metadata()
+
+metadata_citation <- read.xlsx("../data/raw/collected_metadata/metadata_citation.xlsx", 
+                               colNames = TRUE,
+                               cols = c(1, 2, 4, 5, 6))%>%
+  separate_rows(cité_dans_avis_num, sep = ";")%>%
+  separate_rows(Institution_Domaine, sep = ";")%>%
+  group_by(Auteur_Institution)%>%
+  mutate(freq_auteur = n())%>%
+  ungroup()%>%
+  group_by(Institution_Domaine)%>%
+  mutate(freq_institution = n())%>%
+  ungroup()%>%
+  mutate(type = ifelse(is.na(type),"",type),
+         type = ifelse(type %in% c("livre","article","colloque","thèse"),"académique",type),
+         Désignation = designation_recoding(type,Auteur_Institution, Institution_Domaine, freq_auteur,freq_institution)
+         )
+
+recat <- read_excel("../data/intermediate/reseau/recategorize_designation.xlsx")
+
+metadata_citation <- metadata_citation%>%
+  left_join(recat, by = "Désignation")%>%
+  rename(Désignation_collectée = Désignation,
+         Désignation = Désignation_méso)
+
+color_pal_groupe = c( "#6CC7B3","#285291","#9D3A5E","#579125","#0F0F5C","#91188F","#0E405C", "#915B11" , "#4F2B91", "#91181E","#0B5C2D","#BD6345")
+```
+
+```{r}
+metadata_auteur_2002_avis <- metadata_auteur_2002%>%
+  unnest(avis_rapporteur)%>%
+  rename(num = avis_rapporteur)%>%
+  mutate(num = as.numeric(num))
+
+metadata_auteur_2002_réduit <- metadata_auteur_2002_avis%>%
+              group_by(profession_recodée)%>%
+              mutate(total = n())%>%
+              select(num, profession_recodée,total)%>%
+              rename(profession = profession_recodée)
+
+avis_post_2002 <- unique(metadata_auteur_2002_avis$num)
+
+predictions_both <- predictions_both%>%
+  filter(num %in% avis_post_2002)%>%
+  mutate(num = as.numeric(num))
+
+metadata_citation_2002_avis <- metadata_citation%>%
+  unnest(cité_dans_avis_num)%>%
+  rename(num = cité_dans_avis_num)%>%
+  filter(num %in% avis_post_2002)%>%
+  mutate(num = as.numeric(num))%>%
+  rename(groupe = Groupe)
+
+combination_profession_citations <- expand.grid(
+  num = avis_post_2002,
+  groupe = unique(metadata_citation_2002_avis$groupe)
+) %>%
+  mutate(num = as.numeric(num))
+
+citations_by_professions <- combination_profession_citations %>%
+  left_join(metadata_citation_2002_avis %>%
+              group_by(num, groupe) %>%
+              summarise(nb = n(), .groups = 'drop'),
+            by = c("num", "groupe")) %>%
+  replace_na(list(nb = 0))%>%
+  left_join(metadata_auteur_2002_réduit, by = "num")%>%
+  distinct()%>%
+  mutate(is = (nb > 0))
+
+combination_profession_bert <- expand.grid(
+  num = avis_post_2002,
+  groupe = unique(predictions_both$Label_bert)
+) %>%
+  mutate(num = as.numeric(num))
+
+bert_by_professions <- combination_profession_bert%>%
+  left_join(predictions_both %>%
+              rename(groupe = Label_bert)%>%
+              group_by(num,groupe)%>%
+              summarise(nb = n(), .groups = 'drop'),
+            by = c("num","groupe")) %>%
+  replace_na(list(nb = 0))%>%
+  left_join(metadata_auteur_2002_réduit, by = "num")%>%
+  distinct()%>%
+  mutate(is = (nb > 0))
+  
+
+combination_profession_gpt <- expand.grid(
+  num = avis_post_2002,
+  groupe = unique(predictions_both$Label_gpt)
+) %>%
+  mutate(num = as.numeric(num))
+
+gpt_by_professions <- combination_profession_gpt%>%
+  left_join(predictions_both %>%
+              rename(groupe = Label_gpt)%>%
+              group_by(num,groupe)%>%
+              summarise(nb = n(), .groups = 'drop'),
+            by = c("num","groupe")) %>%
+  replace_na(list(nb = 0))%>%
+  left_join(metadata_auteur_2002_réduit, by = "num")%>%
+  distinct()%>%
+  mutate(is = (nb > 0))
+```
+
+```{r}
+citations_by_professions<- citations_by_professions%>%
+  group_by(profession, groupe)%>%
+  summarise(Pourcentage = 100*sum(is)/mean(total))%>%
+  select(profession,groupe,Pourcentage)%>%
+  mutate(profession = paste("Avis avec au moins un(e)",profession,"dans ses rapporteurs"),
+         Pourcentage = round(Pourcentage,digits = 1))%>%
+  rename(`Type de citation`= groupe)%>%
+  pivot_wider(names_from = profession, values_from = Pourcentage)
+
+citations_by_professions%>%
+  knitr::kable(title = "Pourcentage des avis qui ont au moins une citation du type")
+```
+
+
+
+```{r}
+bert_by_professions <- bert_by_professions%>%
+  group_by(profession, groupe)%>%
+  summarise(Pourcentage = 100*sum(is)/mean(total))%>%
+  select(profession,groupe,Pourcentage)%>%
+  mutate(profession = paste("Avis avec au moins un(e)",profession,"dans ses rapporteurs"),
+         Pourcentage = round(Pourcentage,digits = 1))%>%
+  rename(`Type de phrase`= groupe)%>%
+  pivot_wider(names_from = profession, values_from = Pourcentage)
+
+bert_by_professions%>%
+  knitr::kable(title = "Pourcentage des avis qui ont au moins une phrase associée à une certaine personnalité humaine")
+```
+
+```{r}
+gpt_by_professions <- gpt_by_professions%>%
+  group_by(profession, groupe)%>%
+  summarise(Pourcentage = 100*sum(is)/mean(total))%>%
+  select(profession,groupe,Pourcentage)%>%
+  mutate(profession = paste("Avis avec au moins un(e)",profession,"dans ses rapporteurs"),
+         Pourcentage = round(Pourcentage,digits = 1))%>%
+  rename(`Type de phrases`= groupe)%>%
+  pivot_wider(names_from = profession, values_from = Pourcentage)
+
+gpt_by_professions%>%
+  knitr::kable(title = "Pourcentage des avis qui ont au moins une phrase associée à une certaine personnalité humaine")
+```
+```{r}
+save(citations_by_professions,bert_by_professions,gpt_by_professions, file = "../apps/tableaux_croisés/tableaux_croisés.RData")
+```
+

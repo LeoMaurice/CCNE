@@ -1,5 +1,5 @@
 ---
-title: "Résumé citations CCNE"
+title: "Résumé des citations des avis du CCNE"
 author: "Léopold MAURICE"
 date: "2024-07-16"
 project: CCNE
@@ -46,8 +46,7 @@ pacman::p_load(arrow,
                reshape2,
                stringr,
                DT,
-               kable,
-
+               
                stats,
                rstatix,
                
@@ -62,6 +61,7 @@ pacman::p_load(arrow,
                viridis,
                RColorBrewer,
                paletteer,
+               patchwork,
                
                igraph,
                tidygraph,
@@ -73,6 +73,7 @@ pacman::p_load(arrow,
                
                rmarkdown,
                knitr,
+               kableExtra,
                
                openxlsx)
 
@@ -86,6 +87,7 @@ significance = c("p < 0.0001", "p < 0.001", "p < 0.01", "p < 0.05", "p < 0.1", "
 signif_caption_text <- paste("Significance levels:\n", paste(symbols, ":", significance, collapse = ", "))
 
 ```
+# [Retour aux choix](https://leopoldmaurice.shinyapps.io/CCNE/)
 
 # Résumé de la méthodologie et des données
 
@@ -289,7 +291,7 @@ node_true_angle <- function(x,y) {
 }
 
 # Plot using ggraph
-ggraph(layout) +
+main_plot <- ggraph(layout) +
   #ggforce::geom_circle(aes(x0 = 0, y0 = 0, r = r), data.frame(r = 1:2), colour = 'grey') + 
   geom_edge_diagonal() +
   geom_node_point(aes(size = log10(citation_count + 1), colour = Groupe)) +
@@ -306,8 +308,23 @@ ggraph(layout) +
   legend.title = element_text(size = 10),
   legend.position = "top",
   legend.margin = margin(0, 0, -30, 0),
-  legend.box.margin = margin(0, 0, 20, 0))+
-  labs(caption = "Graphique de l'auteur.\nChamps : Tous les avis numérotés publiés par le CCNE jusqu'au 144 et leurs citations.\nDonnées : citations collectées par l'auteur.\nLecture: Les lois de bioéthique, dans la catégorie Loi, sont citées 26 fois dans les avis.")
+  legend.box.margin = margin(0, 0, 20, 0))
+  # labs(caption = "Graphique de l'auteur.\nChamps : Tous les avis numérotés publiés par le CCNE jusqu'au 144 et leurs citations.\nDonnées : citations collectées par l'auteur.\nLecture: Les lois de bioéthique, dans la catégorie Loi, sont citées 26 fois dans les avis.")+
+  # theme(
+  # plot.caption =  element_text(hjust = 1, vjust = -2, margin = margin(t = 20, r = 20, b = 20, l = 0))
+  # )
+
+# Plot vide avec la légende seule
+caption_plot <- ggplot() +
+  labs(caption = "Graphique de l'auteur.\nChamps : Tous les avis numérotés publiés par le CCNE jusqu'au 144 et leurs citations.\nDonnées : citations collectées par l'auteur.\nLecture: Les lois de bioéthique, dans la catégorie Loi, sont citées 26 fois dans les avis.") +
+  theme_void() +
+  theme(
+    plot.caption = element_text(size = 12)
+  )
+
+# Combiner les deux plots
+final_plot <- main_plot / caption_plot + plot_layout(heights = c(1, 0.1))
+final_plot
 ```
 
 ```{r}
@@ -437,23 +454,23 @@ plot_data_nb_citations%>%
   ungroup() %>%
   mutate(label = ifelse(rank <= 3, as.character(num), ""))%>%
   filter(Catégorie != "Science, littérature") %>%
-  ggscatter(x = "date", y = "nb_citation", facet.by = "Catégorie", color = "president", xlab = "Temps",ylab = "Nombre de citations (multiple par avis)", caption= "Graphique de l'auteur.\nChamps : Tous les avis numérotés publiés par le CCNE jusqu'au 144.\nDonnées collectées par l'auteur.\nLecture: Le nombre de citations dans les avis du CCNE\nsemblent augmenter dans le cas où ces citations renvoient\naux institutions gouvernementales, aux autorités indépendantes et dans une moindre mesure à la société civile.\nLe fait le plus notable est la citation devient quasiment systématique dans toutes les catégories, en particulier sous Delfraissy.\nLa loi est le domaine d'exception qui a quasiment toujours été cité dès le tout premier avis.") +
+  ggscatter(x = "date", y = "nb_citation", facet.by = "Catégorie", color = "president",size = 2.5, xlab = "Temps",ylab = "Nombre de citations (multiple par avis)", caption= "Graphique de l'auteur.\nChamps : Tous les avis numérotés publiés par le CCNE jusqu'au 144.\nDonnées collectées par l'auteur.\nLecture: Le nombre de citations dans les avis du CCNE\nsemblent augmenter dans le cas où ces citations renvoient\naux institutions gouvernementales, aux autorités indépendantes et dans une moindre mesure à la société civile.\nLe fait le plus notable est la citation devient quasiment systématique dans toutes les catégories, en particulier sous Delfraissy.\nLa loi est le domaine d'exception qui a quasiment toujours été cité dès le tout premier avis.") +
   scale_color_prism("colorblind_safe")+
-  theme_ready(text_size = 25)+
-  geom_text_repel(aes(label = label, color = president), max.overlaps = Inf)
+  theme_ready(text_size = 27)+
+  geom_text_repel(aes(label = label, color = president), max.overlaps = Inf, size = 8)
 ```
 
 ```{r, fig.width=21, fig.height=9.9}
 plot_data_nb_citations%>%
   mutate(label = ifelse(nb_citation>50,num,""))%>%
   filter(Catégorie== "Science, littérature")%>%
-  ggscatter(x = "date", y = "nb_citation", facet.by = "Catégorie", color = "president", xlab = "Temps",ylab = "Nombre de citations (multiple par avis)", caption= "Graphique de l'auteur.\nChamps : Tous les avis numérotés publiés par le CCNE jusqu'au 144.\nDonnées collectées par l'auteur.\nLecture: En moyenne deux pics d'inflations du nombre de citations scientifiques peuvent être identifier :\nà la fin de la présidence Changeux et au cours de la présidence Delfraissy.") +
+  ggscatter(x = "date", y = "nb_citation", facet.by = "Catégorie", color = "president",size = 4, xlab = "Temps",ylab = "Nombre de citations (multiple par avis)", caption= "Graphique de l'auteur.\nChamps : Tous les avis numérotés publiés par le CCNE jusqu'au 144.\nDonnées collectées par l'auteur.\nLecture: En moyenne deux pics d'inflations du nombre de citations scientifiques peuvent être identifier :\nà la fin de la présidence Changeux et au cours de la présidence Delfraissy.") +
   scale_color_prism("colorblind_safe")+
-  theme_ready(text_size = 25)+
-  geom_text_repel(aes(label = label, color = president), max.overlaps = Inf)
+  theme_ready(text_size = 27)+
+  geom_text_repel(aes(label = label, color = president), max.overlaps = Inf, size = 8)
 ```
 
-```{r, fig.width=10.5, fig.height=7}
+```{r, fig.width=21, fig.height=9.9}
 library(dplyr)
 library(ggplot2)
 library(ggpubr)
@@ -491,17 +508,17 @@ plot_data_nb_citations <- plot_data_nb_citations %>%
   filter(Désignation %in% c("Biologie", "Economie", "Ethique & philo", "SHS"))
 
 # Graphique
-ggscatter(plot_data_nb_citations, x = "date", y = "nb_citation", facet.by = "Désignation", color = "president",
+ggscatter(plot_data_nb_citations, x = "date", y = "nb_citation", facet.by = "Désignation",size = 3, color = "president",
           xlab = "Temps", ylab = "Nombre de citations (multiple par avis)",
           caption = "Graphique de l'auteur.\nChamps : Tous les avis numérotés publiés par le CCNE jusqu'au 144.\nDonnées collectées par l'auteur.\nLecture: l'usage de référence issu des SHS, de philo ou l'éthique\ndevient réellement systématique au milieu de la présidence Ameisen, au milieu des années 2010.") +
   scale_color_prism("colorblind_safe") +
-  theme_ready(text_size = 13) +
-  geom_text_repel(aes(label = label, color = president), max.overlaps = Inf) +
+  theme_ready(text_size = 27) +
+  geom_text_repel(aes(label = label, color = president), max.overlaps = Inf, size = 8) +
   geom_point(data = plot_data_nb_citations, aes(x = date, y = nb_citation, color = president))
 
 ```
 
-```{r, fig.width=10.5, fig.height=7}
+```{r, fig.width=21, fig.height=9.9}
 library(dplyr)
 library(ggplot2)
 library(ggpubr)
@@ -539,13 +556,13 @@ plot_data_nb_citations <- plot_data_nb_citations %>%
   filter(Désignation %in% c("Médical"))
 
 # Graphique
-ggscatter(plot_data_nb_citations, x = "date", y = "nb_citation", color = "president",
+ggscatter(plot_data_nb_citations, x = "date", y = "nb_citation", color = "president",size = 4,
           title = "Publications médicales",
           xlab = "Temps", ylab = "Nombre de citations (multiple par avis)",
           caption = "Graphique de l'auteur.\nChamps : Tous les avis numérotés publiés par le CCNE jusqu'au 144.\nDonnées collectées par l'auteur.\nLecture: Pour les citations médicales, on voit une inflation jusqu'à la fin de la présidence Changeux et une systématisation au cours du mandat Delfraissy.\nAvant Grimfeld, les médecins pouvaient affirmer sans cité dans la majorité des avis.") +
   scale_color_prism("colorblind_safe") +
-  theme_ready(text_size = 13) +
-  geom_text_repel(aes(label = label, color = president), max.overlaps = Inf) +
+  theme_ready(text_size = 27) +
+  geom_text_repel(aes(label = label, color = president), max.overlaps = Inf, size = 8) +
   geom_point(data = plot_data_nb_citations, aes(x = date, y = nb_citation, color = president))
 
 ```
@@ -688,7 +705,10 @@ final_table <- bind_rows(percentage_cat,
 #   buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
 # ))
 
-kable(final_table, caption = "Tableau de l'auteur.\nChamps : Tous les avis numérotés publiés par le CCNE jusqu'au 144 et leurs citations.\nDonnées : citations collectées par l'auteur.\nLecture: Sous Bernard (83-91), 3.6% des avis publiés sous son mandat comprenait une citation d'un auteur remarquable.\nInterprétation : Au cours du temps, le nombre de catégorie mobilisées augmentent :\non passe d'une réflexion basée sur la loi, la science biomédicale et les organisations internationales à\nun moment où de nouvelles formes de légitimités sont mobilisés : expertises non directement académiques, rapports administratifs, publications de collectifs, autorités indépendantes, comités consultatifs.")
+kable(final_table, format = "html") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>%
+  add_header_above(c("Pourcentage d'avis citant" = 1, "Tableau du pourcentage de présence de certaines citations parmi les avis publiés sous le mandat d'un président" = ncol(final_table) - 1), bold = TRUE)%>%
+  add_footnote("Tableau de l'auteur.\nChamps : Tous les avis numérotés publiés par le CCNE jusqu'au 144 et leurs citations.\nDonnées : citations collectées par l'auteur.\nLecture: Sous Bernard (83-91), 3.6% des avis publiés sous son mandat comprenait une citation d'un auteur remarquable.\nInterprétation : Au cours du temps, le nombre de catégorie mobilisées augmentent : on passe d'une réflexion basée sur la loi, la science biomédicale et les organisations internationales à un moment où de nouvelles formes de légitimités sont mobilisés : expertises non directement académiques, rapports administratifs, publications de collectifs, autorités indépendantes, comités consultatifs.")
 ```
 
 

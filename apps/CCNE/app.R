@@ -14,20 +14,39 @@ ui <- fluidPage(
   p("Graphiques interactifs créés dans le cadre d'un mémoire de sociologie sous la direction d'Emmanuel Didier, par Léopold MAURICE, sur le Comité Consultatif National d'Ethique (CCNE)"),
   
   br(),
-  # Boutons de redirection en colonne
+  # Boutons de redirection en colonnes
   fluidRow(
-    column(12, actionButton("ego_network", "Ego Réseau de chaque avis", 
-                            onclick = "window.location.href='https://leopoldmaurice.shinyapps.io/Ego_Citation_avis/'",
-                            width = '100%')),
-    column(12, actionButton("meso_network", "Réseaux entre les avis et entre les citations",
-                            onclick = "window.location.href='https://leopoldmaurice.shinyapps.io/Mesonetwork/'",
-                            width = '100%')),
-    column(12, actionButton("top_citations", "Top citations dans les avis",
-                            onclick = "window.location.href='https://leopoldmaurice.shinyapps.io/Top_citations/'",
-                            width = '100%')),
-    column(12, actionButton("list_avis", "Liste des avis du CCNE, avec informations",
-                            onclick = "window.location.href='https://leopoldmaurice.shinyapps.io/Liste_avis/'",
-                            width = '100%'))
+    column(6, 
+           actionButton("ego_network", "Ego Réseau de chaque avis", 
+                        onclick = "window.location.href='https://leopoldmaurice.shinyapps.io/Ego_Citation_avis/'",
+                        width = '100%'),
+           actionButton("meso_network", "Réseaux entre les avis et entre les citations",
+                        onclick = "window.location.href='https://leopoldmaurice.shinyapps.io/Mesonetwork/'",
+                        width = '100%'),
+           actionButton("top_citations", "Top citations dans les avis",
+                        onclick = "window.location.href='https://leopoldmaurice.shinyapps.io/Top_citations/'",
+                        width = '100%'),
+           actionButton("list_avis", "Liste des avis du CCNE, avec informations",
+                        onclick = "window.location.href='https://leopoldmaurice.shinyapps.io/Liste_avis/'",
+                        width = '100%'),
+           actionButton("cross_tables", "Tableaux croisés professions, citations, personnalité humaine",
+                        onclick = "window.location.href='https://leopold-maurice.shinyapps.io/tableaux_croises/'",
+                        width = '100%')
+    ),
+    column(6, 
+           actionButton("info_avis", "Informations diverses sur les avis du CCNE", 
+                        onclick = "window.location.href='https://rpubs.com/leopoldmaurice/description_avis_ccne'",
+                        width = '100%'),
+           actionButton("professions", "Description professions des membres du CCNE",
+                        onclick = "window.location.href='https://rpubs.com/leopoldmaurice/professions_ccne'",
+                        width = '100%'),
+           actionButton("personality", "Rapport à la personnalité humaine au sein des avis du CCNE",
+                        onclick = "window.location.href='https://rpubs.com/leopoldmaurice/personnalite_across_ccne'",
+                        width = '100%'),
+           actionButton("summary_citations", "Résumé des citations",
+                        onclick = "window.location.href='https://rpubs.com/leopoldmaurice/resume_citations_ccne'",
+                        width = '100%')
+    )
   ),
   
   # Description en bas
@@ -46,6 +65,7 @@ server <- function(input, output, session) {
     wake_app("https://leopoldmaurice.shinyapps.io/Mesonetwork/")
     wake_app("https://leopoldmaurice.shinyapps.io/Top_citations/")
     wake_app("https://leopoldmaurice.shinyapps.io/Liste_avis/")
+    wake_app("https://leopold-maurice.shinyapps.io/tableaux_croises/")
   })
 }
 

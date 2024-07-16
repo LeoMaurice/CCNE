@@ -63,6 +63,8 @@ pacman::p_load(arrow,
                patchwork,
                rmarkdown,
                quarto,
+               kableExtra,
+               knitr,
                readxl,
                readr)
 
@@ -76,6 +78,9 @@ significance = c("p < 0.0001", "p < 0.001", "p < 0.01", "p < 0.05", "p < 0.1", "
 signif_caption_text <- paste("Significance levels:\n", paste(symbols, ":", significance, collapse = ", "))
 
 ```
+
+# [Retour aux choix](https://leopoldmaurice.shinyapps.io/CCNE/)
+
 # Représentation de la personnalité humaine au cours des avis
 
 ## Vivant vs Morale
@@ -130,6 +135,9 @@ taille_avis%>%
               summarise(nb_phrases_interet = n())) -> repartion_phrase_interet_avis
 ```
 
+### Proportions 'Vivant' vs 'Personne/Individu' par avis
+
+#### Proportions au sein des phrases d'intérêt
 
 ```{r, fig.width=40, fig.height=15}
 
@@ -143,16 +151,19 @@ percentage_categorie <- predictions_BERT %>%
 # Graphique en barres empilées
 ggplot(percentage_categorie, aes(x = factor(num), y = percentage, fill = label)) +
   geom_bar(stat = "identity", position = "stack", alpha = 0.8) +
-  theme_ready(text_size = 30) +
+  theme_ready(text_size = 35) +
   theme(axis.text.x = element_text(angle = 90)) +
   scale_fill_manual(values = c("#624894","#BADE86")) +
   labs(fill = "Label", color = "Label",
-       title = "Proportion au sein des phrases d'intérêt des catégories au fil du temps par avis", x = "Numéro avis", y = "Pourcentage",
-       caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: Chaque barre représente un avis.\nDans le premier avis, l'ensemble des phrases référents à l'humain/l'individu/la personne en parlent sous l'aspect biologique/corps humain.") +
-  guides(fill = guide_legend(title.position = "top"))
+       title = "Proportion au sein des phrases d'intérêt des catégories au fil du temps par avis", x = "Numéro avis", y = "Pourcentage\nsur les phrases d'intérêt",
+       caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: Chaque barre représente un avis.\nDans le premier avis, l'ensemble des phrases référents à la personnalité humaine (individu, humain, personne) en parlent sous l'aspect biologique/corps humain.") +
+  guides(fill = guide_legend(title.position = "top"))+
+  theme(plot.caption = element_text(size = 40))
 
 
 ```
+
+#### Proportions au sein de l'entiéreté des phrases d'un avis
 
 ```{r, fig.width=50, fig.height=20}
 repartion_phrase_interet_avis%>%
@@ -178,18 +189,19 @@ percentage_par_rapport_tot_sentence <- percentage_par_rapport_tot_sentence%>%
 # Graphique en barres empilées
 percentage_all_sentences_plot <- ggplot(percentage_par_rapport_tot_sentence, aes(x = factor(num), y = percentage, fill = label)) +
   geom_bar(stat = "identity", position = "stack", alpha = 0.8, color = "black") +
-  theme_ready(text_size = 33) +
+  theme_ready(text_size = 37) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
   scale_fill_manual(values = c("white","#624894","#BADE86")) +
   labs(fill = "Label", color = "Label",
-       title = "Proportion des représentation de la personnalité humaine au cours des années par avis", x = "Numéro avis", y = "Pourcentage",
+       title = "Proportion des représentation de la personnalité humaine au cours des années par avis", x = "Numéro avis", y = "Pourcentage\nsur toutes les phrases",
        caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: Chaque barre représente un avis.\nL'avis 21 est composé à 29% de phrase, dont une majorité référant au corps humain.") +
   guides(fill = guide_legend(title.position = "top"))+
-  geom_hline(yintercept = 5, color = "red", linetype = "dotted")+
-geom_hline(yintercept = 10, color = "red", linetype = "dotted")+
-geom_hline(yintercept = 15, color = "red", linetype = "dotted")+
-geom_hline(yintercept = 20, color = "red", linetype = "dotted")+
-geom_hline(yintercept = 25, color = "red", linetype = "dotted")
+  geom_hline(yintercept = 5, color = "red", linetype = "dotted",size = 2)+
+geom_hline(yintercept = 10, color = "red", linetype = "dotted",size = 2)+
+geom_hline(yintercept = 15, color = "red", linetype = "dotted",size = 2)+
+geom_hline(yintercept = 20, color = "red", linetype = "dotted",size = 2)+
+geom_hline(yintercept = 25, color = "red", linetype = "dotted",size = 2)+
+  theme(plot.caption = element_text(size = 40))
 
 
 # Convert the Date to a numeric year for plotting
@@ -198,15 +210,16 @@ percentage_par_rapport_tot_sentence <- percentage_par_rapport_tot_sentence %>%
   group_by(year) %>%
   mutate(min_avis = min(num),
          max_avis = max(num)) %>%
-  ungroup()
+  ungroup()%>%
+  mutate(label_year = substr(as.character(year), 3, 4))
 
 # Create a timeline plot with black contours and varying heights based on counts
 timeline_avis<- ggplot(percentage_par_rapport_tot_sentence) +
-  geom_rect(aes(xmin = num - 0.5, xmax = num + 0.5, ymin = 0, ymax = 0.1, fill = president)) +
-  geom_rect(aes(xmin = min_avis - 0.5, xmax = max_avis + 0.5, ymin = 0, ymax = 0.1), 
+  geom_rect(aes(xmin = num - 0.5, xmax = num + 0.5, ymin = 0, ymax = 0.1, fill = president), size = 2) +
+  geom_rect(aes(xmin = min_avis - 0.5, xmax = max_avis + 0.5, ymin = 0, ymax = 0.1), size = 3,
             fill = NA, color = "black", linetype = "dotted") +
-  geom_text(data = percentage_par_rapport_tot_sentence %>% distinct(year, min_avis, max_avis), 
-            aes(x = (min_avis + max_avis) / 2, y = -0.02, label = year), angle = 90, vjust = 0.5, hjust = 0, size = 15) +
+  geom_text(data = percentage_par_rapport_tot_sentence %>% distinct(label_year, min_avis, max_avis), 
+            aes(x = (min_avis + max_avis) / 2, y = 0, label = label_year), angle = 90, vjust = 0.5, hjust = 0, size = 15) +
   scale_x_continuous(breaks = unique(percentage_par_rapport_tot_sentence$num), 
                      labels = unique(percentage_par_rapport_tot_sentence$num)) +
   theme_ready(text_size = 33)+
@@ -222,15 +235,16 @@ timeline_avis<- ggplot(percentage_par_rapport_tot_sentence) +
   labs(fill = "President",
        title = "Timeline des Avis par Président",
        x = "Numéro d'avis", y = NULL,
-       caption = "Graphique de l'auteur.\nDonnées collectées par l'auteur.") +
-  guides(fill = guide_legend(title.position = "top"))
+       caption = "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture : Les 3 premiers avis sont publiés en 1984, les 4 derniers en 2023.") +
+  guides(fill = guide_legend(title.position = "top"))+
+  theme(plot.caption = element_text(size = 40))
 
 ggarrange(percentage_all_sentences_plot,
           timeline_avis,
           ncol =1,
           nrow =2,
           align = "h",
-          heights = c(2,1))
+          heights = c(2,1.3))
 ```
 
 
@@ -248,10 +262,12 @@ percentage_par_rapport_tot_sentence%>%
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
   scale_color_manual(values = c("#624894","#BADE86")) +
   labs(fill = "Label", color = "Label",
-       title = "Proportion des représentation de la personnalité humaine\nau cours des années par avis", x = "Numéro avis", y = "Pourcentage",
+       title = "Proportion des représentation de la personnalité humaine\nau cours des années par avis", x = "Numéro avis", y = "Pourcentage\nsur toutes les phrases",
        caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: Chaque point représente un avis.\nAu cours du temps, les avis ont tendance à utiliser plus\nun vocabulaire de la personne (éco,droit) plutôt que centré sur le vivant (bio,écolo).") +
   guides(fill = guide_legend(title.position = "top"))
 ```
+
+### Proportions 'Vivant' vs 'Personne/Individu' regroupées par année
 
 ```{r, fig.width=40, fig.height=14}
 repartion_phrase_interet_avis%>%
@@ -277,18 +293,18 @@ repartion_phrase_interet_avis%>%
   filter(!is.na(year))%>%
   ggplot(aes(x = factor(year), y = percentage, fill = label)) +
   geom_bar(stat = "identity", position = "stack", alpha = 0.8, color = "black") +
-  theme_ready(text_size = 33) +
+  theme_ready(text_size = 37) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
   scale_fill_manual(values = c("white","#624894","#BADE86")) +
   labs(fill = "Label", color = "Label",
-       title = "Proportion des représentation de la personnalité humaine au cours des années", x = "Numéro avis", y = "Pourcentage",
+       title = "Proportion des représentation de la personnalité humaine au cours des années", x = "Numéro avis", y = "Pourcentage\nsur toutes les phrases\npubliées cette année",
        caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: L'avis 21 est composé à 29% de phrase, dont une majorité référant au corps humain.") +
   guides(fill = guide_legend(title.position = "top"))+
-  geom_hline(yintercept = 5, color = "red", linetype = "dotted")+
-geom_hline(yintercept = 10, color = "red", linetype = "dotted")+
-geom_hline(yintercept = 15, color = "red", linetype = "dotted")+
-geom_hline(yintercept = 20, color = "red", linetype = "dotted")+
-geom_hline(yintercept = 25, color = "red", linetype = "dotted")
+  geom_hline(yintercept = 5, color = "red", linetype = "dotted",size = 2)+
+geom_hline(yintercept = 10, color = "red", linetype = "dotted",size = 2)+
+geom_hline(yintercept = 15, color = "red", linetype = "dotted",size = 2)+
+geom_hline(yintercept = 20, color = "red", linetype = "dotted",size = 2)+
+geom_hline(yintercept = 25, color = "red", linetype = "dotted",size = 2)
 ```
 ```{r, fig.width=9, fig.height=5}
 repartion_phrase_interet_avis%>%
@@ -321,7 +337,7 @@ repartion_phrase_interet_avis%>%
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
   scale_color_manual(values = c("#624894","#BADE86")) +
   labs(fill = "Label", color = "Label",
-       title = "Proportion des représentation de la personnalité humaine\nau cours des années par année", x = "Années", y = "Pourcentage",
+       title = "Proportion des représentation de la personnalité humaine\nau cours des années par année", x = "Années", y = "Pourcentage\nsur toutes les phrases\npubliées cette année",
        caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: Chaque point représente le pourcentage de la catégorie parmis les phrases publiées cette année.\nAu cours du temps, les avis ont tendance à utiliser plus\nun vocabulaire de la personne (éco,droit) plutôt que centré sur le vivant (bio,écolo).") +
   guides(fill = guide_legend(title.position = "top"))
 ```
@@ -463,7 +479,8 @@ predictions_gpt$president <- factor(predictions_gpt$president, levels = levels_o
 # predictions_gpt%>%
 #   filter(Label == "Miscellaneous")
 ```
-
+### Tableaux récapitulatifs 
+#### Tableau des pourcentages d'avis contenant un certain traitement de la personnalité humaine au cours des mandats
 ```{r}
 # Libraries
 library(dplyr)
@@ -605,12 +622,13 @@ final_table <- bind_rows(percentage_cat,
   mutate(across(c(`Bernard (83-91)`, `Changeux (92-99)`, `Sicard (00-08)`, `Grimfeld (09-11)`, `Ameisen (12-15)`, `Delfraissy (16-)`), ~ round(., 1)))
 
 # Display the final table
-knitr::kable(final_table,
-             caption = "Tableau de l'auteur.\nDonnées de l'auteur.\nChamp : Ensembles des phrases sur la personnalité humaines dans les 144.\nLecture : Durant le mandat de Bernard, 85.7% des avis contiennent au moins une phrase sur le corps humain.\nOn peut conclure de l'augmentation de chaque catégorie, une diversification des rhétoriques.",
-             title = "Pourcentage des avis utilisant au moins une fois certaine catégorie de phrases.")
+kable(final_table, format = "html") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>%
+  add_header_above(c("Pourcentage des avis" = 1, "Pourcentage des avis publiées sous le mandat d'un président, selon le rapport à la personnalité humaine" = ncol(final_table) - 1), bold = TRUE) %>%
+  add_footnote("Tableau de l’auteur. Données de l’auteur. Champ : Ensembles des phrases sur la personnalité humaines dans les 144. Lecture : Durant le mandat de Bernard, 85.7% des avis contiennent au moins une phrase sur le corps humain. On peut conclure de l’augmentation de chaque catégorie, une diversification des rhétoriques.")
 
 ```
-
+#### Tableau des pourcentages de phrases contenant un certain traitement de la personnalité humaine au cours des mandats
 ```{r}
 # Libraries
 library(dplyr)
@@ -669,14 +687,17 @@ final_table <- bind_rows(percentage_cat) %>%
   mutate(across(c(`Bernard (83-91)`, `Changeux (92-99)`, `Sicard (00-08)`, `Grimfeld (09-11)`, `Ameisen (12-15)`, `Delfraissy (16-)`), ~ round(., 1)))
 
 # Display the final table
-knitr::kable(final_table,
-             caption = "Tableau de l'auteur.\nDonnées de l'auteur.\nChamp : Ensembles des phrases sur la personnalité humaines dans les 144.\nLecture : Durant le mandat de Bernard, 45.9% des phrases publiées portent sur le corps humain.",
-             title = "Pourcentage des phrases publiés utilisant certaine catégorie de phrases.")
+kable(final_table, format = "html") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>%
+  add_header_above(c("Pourcentage de phrases" = 1, "Pourcentage des phrases publiées sous le mandat d'un président, selon le rapport à la personnalité humaine" = ncol(final_table) - 1), bold = TRUE) %>%
+  add_footnote("Tableau de l’auteur. Données de l’auteur. Champ : Ensembles des phrases sur la personnalité humaines dans les 144. Lecture : Durant le mandat de Bernard, 45.9% des phrases publiées portent sur le corps humain.")
 
 ```
+### Proportions fines des personnalités humaines par avis
 
+#### Proportions au sein des phrases d'intérêt
 ```{r, fig.width=40, fig.height=15}
-
+#| eval: true
 percentage_categorie <- predictions_gpt %>%
   group_by(num, Label) %>%
   summarise(count = n(), .groups = 'drop') %>%
@@ -696,7 +717,7 @@ palette <- c("#E995EB","#7CA0D4","#A48AD3","#BADE86","#2B8AAE" ,"#624894","#8BA5
 # Graphique en barres empilées
 ggplot(percentage_categorie, aes(x = factor(num), y = percentage, fill = Label)) +
   geom_bar(stat = "identity", position = "stack", alpha = 0.8) +
-  theme_ready(text_size = 30) +
+  theme_ready(text_size = 35) +
   theme(axis.text.x = element_text(angle = 90)) +
   scale_fill_manual(values = palette) +
   labs(fill = "Label", color = "Label",
@@ -708,6 +729,7 @@ ggplot(percentage_categorie, aes(x = factor(num), y = percentage, fill = Label))
 ```
 
 ```{r}
+
 taille_avis <- read_csv('../data/raw/collected_metadata/taille_avis.csv')
 
 taille_avis%>%
@@ -720,8 +742,10 @@ levels_order <- c( "Bernard (83-91)", "Changeux (92-99)","Sicard (00-08)", "Grim
 
 base_avis$president <- factor(base_avis$president, levels = levels_order)
 ```
-
+#### Proportion sur l'ensemble des phrases de l'avis
 ```{r, fig.width=50, fig.height=20}
+#| eval: true
+
 repartion_phrase_interet_avis%>%
   mutate(count = nb_phrases - nb_phrases_interet,
          Label = "N'évoque pas personnalité humaine")%>%
@@ -751,7 +775,7 @@ palette <- c("white","#E995EB","#7CA0D4","#A48AD3","#BADE86","#2B8AAE" ,"#624894
 # Graphique en barres empilées
 percentage_all_sentences_plot <- ggplot(percentage_par_rapport_tot_sentence, aes(x = factor(num), y = percentage, fill = Label)) +
   geom_bar(stat = "identity", position = "stack", alpha = 0.8, color = "black") +
-  theme_ready(text_size = 33) +
+  theme_ready(text_size = 37) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
   scale_fill_manual(values = palette) +
   labs(fill = "Label", color = "Label",
@@ -762,7 +786,8 @@ percentage_all_sentences_plot <- ggplot(percentage_par_rapport_tot_sentence, aes
 geom_hline(yintercept = 10, color = "red", linetype = "dotted")+
 geom_hline(yintercept = 15, color = "red", linetype = "dotted")+
 geom_hline(yintercept = 20, color = "red", linetype = "dotted")+
-geom_hline(yintercept = 25, color = "red", linetype = "dotted")
+geom_hline(yintercept = 25, color = "red", linetype = "dotted")+
+  theme(plot.caption = element_text(size = 40))
 
 
 # Convert the Date to a numeric year for plotting
@@ -771,15 +796,16 @@ percentage_par_rapport_tot_sentence <- percentage_par_rapport_tot_sentence %>%
   group_by(year) %>%
   mutate(min_avis = min(num),
          max_avis = max(num)) %>%
-  ungroup()
+  ungroup()%>%
+  mutate(label_year = substr(as.character(year), 3, 4))
 
 # Create a timeline plot with black contours and varying heights based on counts
 timeline_avis<- ggplot(percentage_par_rapport_tot_sentence) +
-  geom_rect(aes(xmin = num - 0.5, xmax = num + 0.5, ymin = 0, ymax = 0.1, fill = president)) +
-  geom_rect(aes(xmin = min_avis - 0.5, xmax = max_avis + 0.5, ymin = 0, ymax = 0.1), 
+  geom_rect(aes(xmin = num - 0.5, xmax = num + 0.5, ymin = 0, ymax = 0.1, fill = president), size = 2) +
+  geom_rect(aes(xmin = min_avis - 0.5, xmax = max_avis + 0.5, ymin = 0, ymax = 0.1), size = 3, 
             fill = NA, color = "black", linetype = "dotted") +
-  geom_text(data = percentage_par_rapport_tot_sentence %>% distinct(year, min_avis, max_avis), 
-            aes(x = (min_avis + max_avis) / 2, y = -0.02, label = year), angle = 90, vjust = 0.5, hjust = 0, size = 15) +
+  geom_text(data = percentage_par_rapport_tot_sentence %>% distinct(label_year, min_avis, max_avis), 
+            aes(x = (min_avis + max_avis) / 2, y = 0, label = label_year), angle = 90, vjust = 0.5, hjust = 0, size = 15) +
   scale_x_continuous(breaks = unique(percentage_par_rapport_tot_sentence$num), 
                      labels = unique(percentage_par_rapport_tot_sentence$num)) +
   theme_ready(text_size = 33)+
@@ -795,17 +821,19 @@ timeline_avis<- ggplot(percentage_par_rapport_tot_sentence) +
   labs(fill = "President",
        title = "Timeline des Avis par Président",
        x = "Numéro d'avis", y = NULL,
-       caption = "Graphique de l'auteur.\nDonnées collectées par l'auteur.") +
-  guides(fill = guide_legend(title.position = "top"))
+       caption = "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture : Les 3 premiers avis sont publiés en 1984, les 4 derniers en 2023.") +
+  guides(fill = guide_legend(title.position = "top"))+
+  theme(plot.caption = element_text(size = 40))
 
 ggarrange(percentage_all_sentences_plot,
           timeline_avis,
           ncol =1,
           nrow =2,
           align = "h",
-          heights = c(2,1))
+          heights = c(2,1.3))
 ```
 
+### Proportions fines de la personnalité humaine regroupées par année, sur l'ensemble des phrases publiées
 
 ```{r, fig.width=19, fig.height=10}
 
@@ -830,6 +858,7 @@ percentage_par_rapport_tot_sentence%>%
 ```
 
 ```{r, fig.width=40, fig.height=14}
+#| eval: false
 
 palette <- c("white","#E995EB","#7CA0D4","#A48AD3","#BADE86","#2B8AAE" ,"#624894","#8BA56F")
 
@@ -909,7 +938,8 @@ repartion_phrase_interet_avis%>%
   labs(fill = "Label", color = "Label",
        title = "Proportion des représentation de la personnalité humaine\nau cours des années par année", x = "Années", y = "Pourcentage",
        caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: Chaque point représente le pourcentage de la catégorie parmis les phrases publiées cette année.\nAu cours du temps, les avis ont tendance à utiliser plus\nun vocabulaire de la personne (éco,droit) plutôt que centré sur le pur biologique.") +
-  guides(fill = guide_legend(title.position = "top"))
+  guides(fill = guide_legend(title.position = "top"))+
+  theme(plot.caption = element_text(size = 40))
 ```
 
 

@@ -38,6 +38,8 @@ execute:
 editor: source
 ---
 
+# [Retour aux choix](https://leopoldmaurice.shinyapps.io/CCNE/)
+
 ```{r}
 require(pacman,quietly = T)
 

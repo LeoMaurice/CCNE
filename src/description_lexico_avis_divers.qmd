@@ -1,0 +1,476 @@
+---
+title: "CCNE Descriptive figures"
+author: "Léopold MAURICE, ENSAE"
+date: "2024-02-29"
+project: CCNE
+supervision: Pr. Emmanuel Didier, CMH/ENS/EHESS
+output-ext: html
+format:
+  html:
+    toc: true
+    number-sections: true
+    colorlinks: true
+    geometry:
+      - top=10mm
+      - left=20mm
+      - right=20mm
+      - bottom=10mm  
+      - heightrounded
+    highlight-style: github
+    fontfamily: libertinus
+    documentclass: report
+    fig-width: 12
+    fig-height: 9
+  pdf:
+    documentclass: report
+    papersize: a4
+    toc: true
+    toc-depth: 4
+    number-sections: true
+    number-depth: 3
+    colorlinks: true
+    fig-width: 20
+    fig-height: 15
+    keep-tex: false
+execute:
+  eval: true
+  message: false
+  warning: false
+  echo: false
+  output: true
+  error: true
+editor: source
+---
+
+```{r}
+require(pacman,quietly = F)
+
+pacman::p_load(arrow,
+               tidyverse,
+               reshape2,
+
+               stats,
+               rstatix,
+               
+               ggplot2,
+               gridExtra,
+               ggprism,
+               ggpubr,
+               ggcorrplot,
+               ComplexHeatmap,
+               circlize,
+               patchwork)
+
+source("helpers/df_to_matrix.R")
+source("helpers/heatmap.R")
+source("helpers/lexico_helper.R")
+source("helpers/figures.R")
+
+save_figures = F
+cutpoints = c(0, 1e-04, 0.001, 0.01, 0.05, 0.1, 1)
+symbols = c("****", "***", "**", "*", "•","ns")
+significance = c("p < 0.0001", "p < 0.001", "p < 0.01", "p < 0.05", "p < 0.1", "p>0.1")
+signif_caption_text <- paste("Significance levels:\n", paste(symbols, ":", significance, collapse = ", "))
+
+```
+# [Retour aux choix](https://leopoldmaurice.shinyapps.io/CCNE/)
+
+#### Nature
+
+##### Nombre de phrase par mot clé
+
+```{r}
+nb_total_sentence <- data.frame(mot_cle = c("environnement", "vivant", "écosystème", "nature"),
+                                total = c(sum(base_sentences$environnement), sum(base_sentences$vivant), sum(base_sentences$écosystème), sum(base_sentences$nature)))
+
+base_sentences |>
+  pivot_longer(cols = c("environnement", "vivant", "écosystème", "nature"), names_to = "mot_cle", values_to = "presence") |>
+  mutate(mot_cle = factor(mot_cle, levels = c("nature","vivant","environnement", "écosystème"))) |>
+  group_by(president, mot_cle) |>
+  summarise(phrases = sum(presence)) |>
+  ggbarplot(x = "mot_cle", y = "phrases", fill = "president") +
+  scale_fill_prism(palette = "winter_bright") +
+  theme_ready() +
+  labs(title = "Nombre de phrase avec mots clés",
+       x = "Mot clé",
+       y = "Nombre de phrase") +
+  geom_text(data = nb_total_sentence, aes(x = mot_cle, y = total, label = paste("Total:", total)),
+            position = position_dodge(width = 0.9), vjust = -0.5, size = 3, color = "black")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+
+if (save_figures)
+  ggsave("../output/descriptive_figures/nombre_phrase_nature.png")
+
+```
+
+##### Proportion de mots clés
+
+Proportion de mots clés dans les phrases écrites sous une président Lecture : Sous Delfraissy, 1.5% des phrases publiées contenaient le mot nature.
+
+```{r}
+base_sentences |>
+  pivot_longer(cols = c("environnement", "vivant", "écosystème", "nature"), names_to = "mot_cle", values_to = "presence") |>
+  mutate(mot_cle = factor(mot_cle, levels = c("nature","vivant","environnement", "écosystème"))) |>
+  group_by(president, mot_cle) |>
+  summarise(phrases = 100*mean(presence)) |>
+  ggbarplot(x = "president", y = "phrases", fill = "mot_cle",
+            label = TRUE, lab.col = "white", lab.pos = "in",lab.size = 3, lab.vjust = 0, lab.hjust = 1.3, lab.nb.digits = 1) +
+  scale_fill_prism(palette = "winter_bright") +
+  theme_ready() +
+  labs(title = "Proportion de phrase avec mots clés par president",
+       x = "Mot clé",
+       y = "Proportion de phrase (%)") +
+  coord_flip()
+if (save_figures)
+  ggsave("../output/descriptive_figures/proportion_phrase_nature_president.png")
+```
+
+##### Box plot proportion avis
+
+Boxplot de la distribution de la proportion de phrases contenant un mot clé parmi les phrases d'un avis.
+
+```{r}
+test_result.t <- base_sentences |>
+  pivot_longer(cols = c("environnement", "vivant", "nature"), names_to = "mot_cle", values_to = "presence") |>
+  mutate(mot_cle = factor(mot_cle, levels = c("nature","vivant","environnement"))) |>
+  group_by(president, mot_cle, num) |>
+  summarise(proportion = 100*mean(presence)) |>
+  ungroup()|>
+  group_by(mot_cle)|>
+  t_test(proportion ~ president, p.adjust.method = "none")|> #bonferroni
+  add_significance(
+    cutpoints = cutpoints,
+    symbols = symbols
+    )
+
+base_sentences |>
+  pivot_longer(cols = c("environnement", "vivant", "nature"), names_to = "mot_cle", values_to = "presence") |>
+  mutate(mot_cle = factor(mot_cle, levels = c("nature","vivant","environnement"))) |>
+  group_by(president, mot_cle, num) |>
+  summarise(proportion = 100*mean(presence)) |>
+  ggboxplot(x = "president", y = "proportion", fill = "mot_cle", facet.by = "mot_cle") +
+  scale_fill_prism(palette = "winter_bright") +
+  theme_ready() +
+  labs(title = "Proportion de phrase avec mots clés par president",
+       caption = signif_caption_text,
+       x = "Mot clé",
+       y = "Proportion de phrase (%)",
+       fill = "Phrase avec") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
+  stat_pvalue_manual(test_result.t, label = "p.adj.signif", hide.ns = T, y.position = 15, step.group.by = "mot_cle",step.increase = 0.1)
+```
+
+#### Humanité vivant
+
+```{r}
+test_result.t <- base_sentences |>
+  pivot_longer(cols = c("vivant", "humanité"), names_to = "mot_cle", values_to = "presence") |>
+  mutate(mot_cle = factor(mot_cle, levels = c("vivant","humanité"))) |>
+  group_by(president, mot_cle, num) |>
+  summarise(proportion = 100*mean(presence)) |>
+  ungroup()|>
+  group_by(mot_cle)|>
+  t_test(proportion ~ president, p.adjust.method = "none")|> #bonferroni
+  add_significance(
+    cutpoints = cutpoints,
+    symbols = symbols
+    )|>
+  add_xy_position()
+
+base_sentences |>
+  pivot_longer(cols = c("vivant", "humanité"), names_to = "mot_cle", values_to = "presence") |>
+  mutate(mot_cle = factor(mot_cle, levels = c("vivant", "humanité"))) |>
+  group_by(president, mot_cle, num) |>
+  summarise(proportion = 100*mean(presence)) |>
+  ggboxplot(x = "president", y = "proportion", fill = "mot_cle", facet.by = "mot_cle") +
+  scale_fill_prism(palette = "winter_bright") +
+  theme_ready() +
+  labs(title = "Proportion de phrase avec mots clés par president",
+       caption = signif_caption_text,
+       x = "Mot clé",
+       y = "Proportion de phrase (%)",
+       fill = "Phrase avec") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
+  stat_pvalue_manual(test_result.t, label = "p.adj.signif", hide.ns = T)+
+  stat_anova_test()
+
+if (save_figures)
+  ggsave("../output/descriptive_figures/proportion_phrase_vivant_humanité.png")
+```
+
+#### Dignité
+
+```{r}
+
+cols_to_plt = c("dignité","dignité_humaine")
+test_result.t <- base_sentences |>
+  pivot_longer(cols = cols_to_plt, names_to = "mot_cle", values_to = "presence") |>
+  mutate(mot_cle = factor(mot_cle, levels = cols_to_plt)) |>
+  group_by(president, mot_cle, num) |>
+  summarise(proportion = 100*mean(presence)) |>
+  ungroup()|>
+  group_by(mot_cle)|>
+  t_test(proportion ~ president, p.adjust.method = "none")|> #bonferroni
+  add_significance(
+    cutpoints = cutpoints,
+    symbols = symbols
+    )|>
+  add_xy_position()
+
+base_sentences |>
+  pivot_longer(cols = cols_to_plt, names_to = "mot_cle", values_to = "presence") |>
+  mutate(mot_cle = factor(mot_cle, levels = cols_to_plt)) |>
+  group_by(president, mot_cle, num) |>
+  summarise(proportion = 100*mean(presence)) |>
+  ggboxplot(x = "president", y = "proportion", fill = "mot_cle", facet.by = "mot_cle") +
+  scale_fill_prism(palette = "winter_bright") +
+  theme_ready() +
+  labs(title = "Proportion de phrase avec mots clés par president",
+       caption = signif_caption_text,
+       x = "Mot clé",
+       y = "Proportion de phrase (%)",
+       fill = "Phrase avec") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
+  stat_pvalue_manual(test_result.t, label = "p.adj.signif", hide.ns = T)+
+  stat_anova_test()
+
+if (save_figures)
+  ggsave("../output/descriptive_figures/proportion_phrase_dignité.png")
+```
+
+```{r}
+# cols_to_plt = c("dignité","dignité_humaine")
+# 
+# base_sentences |>
+#   pivot_longer(cols = cols_to_plt, names_to = "mot_cle", values_to = "presence") |>
+#   mutate(mot_cle = factor(mot_cle, levels = cols_to_plt)) |>
+#   group_by(president, mot_cle, num) |>
+#   summarise(proportion = 100*mean(presence)) |>
+#   ggboxplot(x = "president", y = "proportion", fill = "mot_cle", facet.by = "mot_cle") +
+#   scale_fill_prism(palette = "winter_bright") +
+#   theme_ready() +
+#   labs(title = "Proportion de phrase avec mots clés par president",
+#        caption = signif_caption_text,
+#        x = "Mot clé",
+#        y = "Proportion de phrase (%)",
+#        fill = "Phrase avec") +
+#   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
+#   t_test_pvalue(group.by_var="mot_cle")+
+#   stat_anova_test(y.position =13)
+```
+
+### Au niveau phrase
+
+#### Heatmap
+
+```{r}
+# Assuming you have a data frame called 'base_sentences' with columns: num, human, person, societe, nature, position_in_avis
+quantile = 50
+
+# Calculate the quantiles for position_in_avis
+df_heatmap <- base_sentences |> 
+  mutate(position_in_avis =sentence_index/number_sentences)|>
+  arrange(num, position_in_avis) |>
+  group_by(num) |>
+  mutate(quantile_group = ntile(position_in_avis, quantile))|>
+  ungroup()|>
+  group_by(num,quantile_group,president,theme, number_sentences)|>
+  mutate(n_in_quantile = n())|>
+  summarise(humain = mean(humain),
+            personne = mean(personne),
+            individu = mean(individu),
+            nature = mean(nature),
+            vivant = mean(vivant),
+            environnement = mean(environnement))
+```
+
+Description : Pour chaque quantile, la couleur sur la carte de chaleur représente la fréquence relative d'un mot spécifique. Pour calculer cette fréquence, nous divisons le nombre d'occurrences du mot par le nombre total de phrases dans le quantile. Cette transformation fournit une mesure de la fréquence à laquelle le mot apparaît au sein du sous-ensemble de phrases représenté par chaque quantile, permettant ainsi de comparer l'utilisation du mot dans différentes parties du texte. \###### Heatmap personne humain individu
+
+```{r}
+#| eval: true
+#| fig-width: 20
+#| fig-height: 15
+#| label: hm_personne
+source("helpers/heatmap.R")
+plot_width = 20
+plot_height = 15
+
+  # Adjust size as needed
+
+hm_personne<- heatmap_figure_frequence_quantile(df_heatmap = df_heatmap,
+                                  X="num",Y="quantile_group",
+                                  Zs = c("personne","humain","individu"),
+                                  names_legend = c("personne","humain","individu"),
+                                  subrow_title = "Fréquence",
+                                  subcol_title = "Numéro de l'avis",
+                                  mainrow_title = "Position relative de la phrase",
+                                  maincol_title = "Cartes de chaleur de la fréquence de la présence de mots dans les phrases par groupe de phrase (2% quantile)",
+                                  colors_hexcodes = c("#40007F","#91188E","#66CCFE")
+                                  )
+if(save_figures){
+  png("../output/descriptive_figures/personne_humain_individu_complexheatmaps.png", width = plot_width, height = plot_height)
+  draw(hm_personne)
+  dev.off()
+}
+
+```
+
+##### Heatmap nature vivant environnement
+
+```{r}
+#| eval: true
+#| fig-width: 20
+#| fig-height: 15
+#| label: hm_nature
+source("helpers/heatmap.R")
+plot_width = 20
+plot_height = 15
+
+
+hm_nature<- heatmap_figure_frequence_quantile(df_heatmap = df_heatmap,
+                                  X="num",Y="quantile_group",
+                                  Zs = c("nature","vivant","environnement"),
+                                  names_legend = c("nature","vivant","environnement"),
+                                  subrow_title = "Fréquence",
+                                  subcol_title = "Numéro de l'avis",
+                                  mainrow_title = "Position relative de la phrase",
+                                  maincol_title = "Cartes de chaleur de la fréquence de la présence de mots dans les phrases par groupe de phrase (2% quantile)",
+                                  colors_hexcodes = c("#005A00","#099963","#539027")
+                                  )
+
+if(save_figures){
+  png("../output/descriptive_figures/nature_vivant_environnement_complexheatmaps.png", width = plot_width, height = plot_height)  # Adjust size as needed
+  draw(hm_nature)
+  dev.off()
+
+}
+```
+
+#### Distance entre mots clés
+
+```{r}
+#| eval: true
+#| fig-width: 20
+#| fig-height: 15
+#| label: distance
+base_sentences_pivoted <- base_sentences|>
+  pivot_longer(cols = c("personne","humain","individu"), names_to = "mot_cle",values_to = "presence")|>
+  filter(presence)|>
+  select(mot_cle,president,Date,theme,number_sentences,num,sentence_index)|>
+  mutate(unique_id = 10000 * num + sentence_index)
+
+max_number_sentence <- max(base_sentences$number_sentences)
+
+calculate_distances <- function(df_reference, df_comparison) {
+  distances <- df_reference |>
+    rowwise() |>
+    mutate(distance = min(abs(df_comparison$unique_id - unique_id))) |>
+    mutate(distance = ifelse(distance > max_number_sentence, Inf, distance))
+  return(distances$distance)
+}
+
+base_sentences_pivoted_personne <- base_sentences_pivoted |>
+  filter(mot_cle == "personne")
+
+base_sentences_pivoted_humain <- base_sentences_pivoted |>
+  filter(mot_cle == "humain")
+
+base_sentences_pivoted_individu <- base_sentences_pivoted |>
+  filter(mot_cle == "individu")
+
+base_sentences_pivoted_personne$distance_personne <- 0
+base_sentences_pivoted_personne$distance_humain <- calculate_distances(base_sentences_pivoted_personne, base_sentences_pivoted_humain)
+base_sentences_pivoted_personne$distance_individu <- calculate_distances(base_sentences_pivoted_personne, base_sentences_pivoted_individu)
+
+base_sentences_pivoted_humain$distance_personne <- calculate_distances(base_sentences_pivoted_humain, base_sentences_pivoted_personne)
+base_sentences_pivoted_humain$distance_humain <- 0
+base_sentences_pivoted_humain$distance_individu <- calculate_distances(base_sentences_pivoted_humain, base_sentences_pivoted_individu)
+
+base_sentences_pivoted_individu$distance_personne <- calculate_distances(base_sentences_pivoted_individu, base_sentences_pivoted_personne)
+base_sentences_pivoted_individu$distance_humain <- calculate_distances(base_sentences_pivoted_individu, base_sentences_pivoted_humain)
+base_sentences_pivoted_individu$distance_individu <- 0
+
+# Combined result
+base_sentences_distance <- bind_rows(base_sentences_pivoted_personne, base_sentences_pivoted_humain, base_sentences_pivoted_individu)|>
+  pivot_longer(cols = starts_with("distance_"), names_to = "comparaison", values_to = "distance") |>
+  mutate(comparaison = gsub("distance_", "", comparaison))|>
+  filter(mot_cle!=comparaison)|>
+  mutate(mot_cle = factor(mot_cle, levels = c("personne","humain","individu")),
+         comparaison = factor(comparaison, levels = c("personne","humain","individu")))
+
+
+# Display the result
+base_sentences_distance
+
+```
+
+```{r}
+# Graphique avec les modifications
+ggboxplot(base_sentences_distance|>
+            filter(!is.infinite(distance)), x = "comparaison", y = "distance", facet.by = "president", fill = "mot_cle") +
+  theme_minimal()
+if(save_figures)
+  ggsave("../output/descriptive_figures/distance_personne_humain_individu.png")
+```
+
+## Annotation
+
+```{r}
+n_annoté <- 1400
+
+# Création du dataframe
+# stat_annotation <- data.frame(
+#   tag = factor(c("Agent responsable", "Genre/espèce humain.e", "Humain comme empathie", "Individu", "Matériel biologique", "Personne à protéger", "Personne relationnelle", "Poubelle"),
+#                levels = rev(c("Agent responsable","Personne à protéger","Personne relationnelle","Individu","Matériel biologique","Genre/espèce humain.e","Humain comme empathie","Poubelle"))),
+#   Freq = c(104, 90,10 , 118, 130, 143, 97, 8)
+# ) |>
+#   mutate(FreqPerc = 100 * Freq / n_annoté)
+
+stat_annotation <- data.frame(
+  tag = factor(c("Corps humain", "Genre/espèce humain.e", "Individu ou sujet", "Personne à protéger", "Personne relationnelle","Personne responsable et autonome", "Poubelle","Sentiment humain"),
+               levels = rev(c("Personne responsable et autonome","Personne à protéger","Personne relationnelle","Individu ou sujet","Corps humain","Genre/espèce humain.e","Sentiment humain","Poubelle"))),
+  Freq = c(239, 215,235 , 235, 225, 203, 12, 36)
+) |>
+  mutate(FreqPerc = 100 * Freq / n_annoté)
+
+# Création du graphique avec ggbarplot
+p <- ggbarplot(stat_annotation, 
+          x = "tag", y = "FreqPerc", fill = "tag", 
+          color = "white", palette = "winter_bright") + 
+  labs(title = paste("Fréquence d'apparition des catégories pour", n_annoté, "annotations"),
+       x = "Catégorie",
+       y = "Fréquence (%)") +
+  coord_flip() +  # Inverse les axes pour mieux visualiser les étiquettes
+  geom_text(aes(label = Freq), position = position_dodge(width = 0.9), hjust = -0.2, size = 3.5)+
+   scale_fill_prism(palette = "office")+
+  theme_ready()
+
+
+if(T)
+  ggsave(paste0("../output/descriptive_figures/frequence_annotation_",n_annoté,".png"),width = 15, height = 12)
+
+```
+
+## Number according time
+
+```{r}
+base_numbers <- base_sentences |>
+  rowwise() |>
+  mutate(numbers_count = count_digits(sentence)) |>
+  ungroup() |>
+  group_by(num, Date,nb_mots) |>
+  summarise(numbers_count = sum(numbers_count)) |>
+  mutate(numbers_relative = 100*numbers_count/nb_mots)
+
+plot_chiffre_temps <- ggplot(base_numbers, aes(x = Date, y = numbers_relative)) +
+  geom_point() +  # Add points for each data point
+  geom_smooth(formula = 'y ~ x', method = "loess", se = FALSE, color = "#C000C0")+
+  labs(y = "Nombre d'occurence/Nombre de mots (%)",  # Add y-axis label
+       title = "Occurence relative des chiffres dans les avis,\n tous les chiffres confondus")+  # Add plot title)
+  theme_ready()   # Apply the theme_prism from ggprism
+if(save_figures)
+  ggsave("../output/descriptive_figures/raw_number_time.png", 
+         plot = plot_chiffre_temps)
+plot_chiffre_temps
+
+```
