@@ -1,7 +1,7 @@
 ---
-title: "CCNE Personne across avis"
+title: "Résumé citations CCNE"
 author: "Léopold MAURICE"
-date: "2024-06-05"
+date: "2024-07-16"
 project: CCNE
 supervision: Pr. Emmanuel Didier, CMH/ENS/EHESS
 format:
@@ -45,6 +45,8 @@ pacman::p_load(arrow,
                tidyverse,
                reshape2,
                stringr,
+               DT,
+               kable,
 
                stats,
                rstatix,
@@ -70,6 +72,7 @@ pacman::p_load(arrow,
                leaflet,
                
                rmarkdown,
+               knitr,
                
                openxlsx)
 
@@ -179,7 +182,7 @@ On peut conclure qu'il n'y a pas consciemment de la part des membres du CCNE une
 
 
 ```{r}
-#| eval: true
+#| eval: false
 # Load necessary libraries
 library(dplyr)
 library(networkD3)
@@ -303,7 +306,8 @@ ggraph(layout) +
   legend.title = element_text(size = 10),
   legend.position = "top",
   legend.margin = margin(0, 0, -30, 0),
-  legend.box.margin = margin(0, 0, 20, 0))
+  legend.box.margin = margin(0, 0, 20, 0))+
+  labs(caption = "Graphique de l'auteur.\nChamps : Tous les avis numérotés publiés par le CCNE jusqu'au 144 et leurs citations.\nDonnées : citations collectées par l'auteur.\nLecture: Les lois de bioéthique, dans la catégorie Loi, sont citées 26 fois dans les avis.")
 ```
 
 ```{r}
@@ -351,6 +355,8 @@ ggraph(layout) +
   )
 ```
 ```{r}
+#| eval: false
+
 library(ggraph)
 library(tidygraph)
 
@@ -677,11 +683,12 @@ final_table <- bind_rows(percentage_cat,
    mutate(across(c(`Bernard (83-91)`,`Changeux (92-99)`,`Sicard (00-08)`,`Grimfeld (09-11)`,`Ameisen (12-15)`,`Delfraissy (16-)`), ~ round(., 1)))
 
 # Afficher le tableau avec DT
-datatable(final_table, extensions = 'Buttons', options = list(
-  dom = 'Bfrtip',
-  buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
-))
+# datatable(final_table, extensions = 'Buttons', options = list(
+#   dom = 'Bfrtip',
+#   buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
+# ))
 
+kable(final_table, caption = "Tableau de l'auteur.\nChamps : Tous les avis numérotés publiés par le CCNE jusqu'au 144 et leurs citations.\nDonnées : citations collectées par l'auteur.\nLecture: Sous Bernard (83-91), 3.6% des avis publiés sous son mandat comprenait une citation d'un auteur remarquable.\nInterprétation : Au cours du temps, le nombre de catégorie mobilisées augmentent :\non passe d'une réflexion basée sur la loi, la science biomédicale et les organisations internationales à\nun moment où de nouvelles formes de légitimités sont mobilisés : expertises non directement académiques, rapports administratifs, publications de collectifs, autorités indépendantes, comités consultatifs.")
 ```
 
 
