@@ -382,7 +382,7 @@ percent_au_sein_labels %>%
   ggpie("percent", label.pos = "out", fill = "Label_gpt", color = "white",
         lab.font = c(8,"plain","black")) +
   scale_fill_manual(values = palette)+
-  labs(title = "Labels précis désignés par le modèle GPT\naux phrases labelisées 'vivant'",
+  labs(title = "Labels précis désignés par le modèle GPT\naux phrases labelisées 'Personne/individu'",
        caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: 56% des phrases dans la catégorie 'Vivant' réfère à la biologie.",
        fill = "Label GPT")+
   guides(fill = guide_legend(title.position = "top",nrow = 4, ncol = 2))+
