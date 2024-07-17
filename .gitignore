@@ -66,17 +66,17 @@ rsconnect/
 *.png
 
 # Unignore HTML files in the publications directory
-!publications/
-!publications/*.html
-!publications/*.htm
-!publications/
-!publications/**/*.html
-!publications/**/*.htm
-!publications/**/*.js
-!publications/**/*.css
-!publications/**/*.woff
-!publications/**/*.min.js
-!publications/**/*.png
+!docs/
+!docs/*.html
+!docs/*.htm
+!docs/
+!docs/**/*.html
+!docs/**/*.htm
+!docs/**/*.js
+!docs/**/*.css
+!docs/**/*.woff
+!docs/**/*.min.js
+!docs/**/*.png
 
 # tex
 *.tex
