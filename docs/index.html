@@ -17,9 +17,15 @@
             font-size: 1.2em;
             margin-top: 0;
         }
+        .link-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 40px;
+        }
         ul {
             list-style-type: none;
             padding: 0;
+            width: 45%;
         }
         li {
             margin: 20px 0;
@@ -35,24 +41,31 @@
         .credits {
             margin-top: 40px;
             font-size: 0.9em;
-            text-align: center;
+            text-align: left;
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
         }
     </style>
 </head>
 <body>
     <h1>Bienvenue sur le site de mon mémoire sur le CCNE</h1>
     <p>Graphiques interactifs créés dans le cadre d'un mémoire de sociologie sous la direction d'Emmanuel Didier, par Léopold MAURICE, sur le Comité Consultatif National d'Ethique (CCNE)</p>
-    <ul>
-        <li><a href="https://leopoldmaurice.shinyapps.io/Liste_avis/">Liste des avis du CCNE avec informations</a></li>
-        <li><a href="description_avis.html">Quelques informations sur les avis du CCNE</a></li>
-        <li><a href="description_membres.html">Description des professions des membres du CCNE</a></li>
-        <li><a href="personne_across_avis.html">Personnalité humaine au sein des avis du CCNE</a></li>
-        <li><a href="reseau_citations.html">Résumé des citations des avis du CCNE</a></li>
-        <li><a href="https://leopoldmaurice.shinyapps.io/Ego_Citation_avis/">Réseau ego des citations autour de chaque avis du CCNE</a></li>
-        <li><a href="https://leopoldmaurice.shinyapps.io/Mesonetwork/">Réseau entre les citations des avis du CCNE</a></li>
-        <li><a href="https://leopoldmaurice.shinyapps.io/Top_citations/">Top des citations des avis du CCNE</a></li>
-        <li><a href="https://leopold-maurice.shinyapps.io/tableaux_croises/">Tableaux croisés professions, citations, personnalité humaine</a></li>
-    </ul>
+    <div class="link-container">
+        <ul>
+            <li><a href="description_avis.html">Quelques informations sur les avis du CCNE</a></li>
+            <li><a href="description_membres.html">Description des professions des membres du CCNE</a></li>
+            <li><a href="personne_across_avis.html">Personnalité humaine au sein des avis du CCNE</a></li>
+            <li><a href="reseau_citations.html">Résumé des citations des avis du CCNE</a></li>
+        </ul>
+        <ul>
+            <li><a href="https://leopoldmaurice.shinyapps.io/Liste_avis/">Liste des avis du CCNE avec informations</a></li>
+            <li><a href="https://leopoldmaurice.shinyapps.io/Ego_Citation_avis/">Réseau ego des citations autour de chaque avis du CCNE</a></li>
+            <li><a href="https://leopoldmaurice.shinyapps.io/Mesonetwork/">Réseau entre les citations des avis du CCNE</a></li>
+            <li><a href="https://leopoldmaurice.shinyapps.io/Top_citations/">Top des citations des avis du CCNE</a></li>
+            <li><a href="https://leopold-maurice.shinyapps.io/tableaux_croises/">Tableaux croisés professions, citations, personnalité humaine</a></li>
+        </ul>
+    </div>
     <div class="credits">
         Crédit : Léopold MAURICE<br>
         Données : 144 avis du CCNE, citations collectées par l'auteur.<br>
