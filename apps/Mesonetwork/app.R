@@ -155,7 +155,7 @@ server <- function(input, output, session) {
     
     visNetwork(nodes, edges) %>%
       visEdges(arrows = 'to') %>%
-      visNodes(scaling = list(min = 10, max = 30)) %>%
+      visNodes(scaling = list(min = 20, max = 40)) %>%
       visOptions(highlightNearest = list(enabled = TRUE, degree = 1), nodesIdSelection = TRUE) %>%
       visGroups(groupname = "Auteurs", color = "#6CC7B3", shape = "square") %>%
       visGroups(groupname = "Autorités", color = "#285291", shape = "square") %>%
