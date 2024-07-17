@@ -61,7 +61,7 @@ ui <- fluidPage(
   tags$div(
     id = "backButton",
     actionButton("back", "Retour aux différents choix", 
-                 onclick = "window.location.href='https://leopoldmaurice.shinyapps.io/CCNE/'")
+                 onclick = "window.location.href='https://leomaurice.github.io/CCNE/'")
   ),
   tags$div(
     id = "explanationButton",

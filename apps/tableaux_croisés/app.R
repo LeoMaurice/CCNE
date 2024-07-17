@@ -52,7 +52,7 @@ server <- function(input, output, session) {
   })
   
   observeEvent(input$back_button, {
-    shinyjs::runjs("window.location.href = 'https://leopoldmaurice.shinyapps.io/CCNE/'")
+    shinyjs::runjs("window.location.href = 'https://leomaurice.github.io/CCNE/'")
   })
   
   observeEvent(input$explain_button, {
