@@ -72,6 +72,11 @@ rsconnect/
 !publications/
 !publications/**/*.html
 !publications/**/*.htm
+!publications/**/*.js
+!publications/**/*.css
+!publications/**/*.woff
+!publications/**/*.min.js
+!publications/**/*.png
 
 # tex
 *.tex
