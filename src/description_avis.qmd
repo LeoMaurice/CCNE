@@ -65,6 +65,8 @@ source("helpers/df_to_matrix.R")
 source("helpers/heatmap.R")
 source("helpers/lexico_helper.R")
 source("helpers/figures.R")
+source("helpers/database_creation.R")
+
 
 save_figures = F
 cutpoints = c(0, 1e-04, 0.001, 0.01, 0.05, 0.1, 1)
@@ -97,7 +99,7 @@ ggprism::prism_color_pal("office")(5)
 ```
 # Taille des avis au cours du temps
 
-```{r}
+```{r, fig.width=11, fig.height=4.9}
 #| eval: true
 # Create the first plot
 nb_page_plot <- ggplot(base_avis, aes(x = Date, y = nb_pages)) +
@@ -238,6 +240,7 @@ base_sentences|>
 ## Nombre de graphiques par président
 
 ```{r}
+#| eval: false
 base_avis|>
   group_by(president)|>
   summarise(n = sum(`tableaux et graphiques`))|>
@@ -247,10 +250,11 @@ base_avis|>
          x = "Mot clé",
          y = "Nombre de graphiques")+
   coord_flip()+
-  theme_ready()
+  theme_ready(default_theme = theme_pubclean(flip = TRUE))
 ```
 
 ```{r}
+#| eval: true
 base_avis|>
   group_by(president)|>
   mutate(`tableaux et graphiques` = (`tableaux et graphiques`>=1))|>
@@ -261,13 +265,19 @@ base_avis|>
          x = "Mot clé",
          y = "Nombre d'avis")+
   coord_flip()+
-  theme_ready()
+  theme_ready(default_theme = theme_pubclean(flip = TRUE))
 ```
 
 ## Nombre de dissensus par président
+```{r}
+metadata_avis <- open_metadata()
+```
 
 ```{r}
-base_avis|>
+metadata_avis|>
+  left_join(base_avis%>%
+              select(num,president),
+            by = "num")%>%
   group_by(president)|>
   summarise(n = sum(`divergence`))|>
   ggbarplot(x = "president", y ="n",fill = "president")+
@@ -276,7 +286,7 @@ base_avis|>
          x = "Mot clé",
          y = "Nombre d'avis")+
   coord_flip()+
-  theme_ready()
+  theme_ready(default_theme = theme_pubclean(flip = TRUE))
 ```
 
 # Phrases d'intérêt
