@@ -260,7 +260,7 @@ Voici une description des 12 catégories de professions recodées:
 
 ```{r}
 #| fig-width: 12
-#| fig-height: 10
+#| fig-height: 5.5
 metadata_auteur|>
   group_by(profession_recodée)|>
   summarise(count = n())|>
@@ -284,7 +284,7 @@ Sans trop d'étonnement, la profession dominante sont les médecins hospitaliers
 
 ```{r}
 #| fig-width: 12
-#| fig-height: 10
+#| fig-height: 5.5
 metadata_auteur|>
   group_by(président_première_nomination,sexe)|>
   summarise(count = n())|>
@@ -310,7 +310,7 @@ if(save_figures)
 
 ```{r}
 #| fig-width: 12
-#| fig-height: 10
+#| fig-height: 8
 metadata_auteur|>  
   ggboxplot(x='président_première_nomination',fill = 'sexe', y = 'durée_mandat',
             add = 'jitter',add.params = list(fill = 'sexe', shape = 21),
@@ -329,7 +329,7 @@ On voit que la durée du mandat est a eu tendance à baisser et à se normaliser
 ### Selon la profession
 ```{r}
 #| fig-width: 12
-#| fig-height: 10
+#| fig-height: 8
 metadata_auteur|>  
   ggboxplot(x='profession_recodée',fill = 'profession_recodée', y = 'age_première_nomination',
             #facet.by = 'président_première_nomination',
@@ -394,7 +394,7 @@ On se limite aux membres du CCNE qui l'ont rejoint après (ou égale) à 2002, c
 
 ```{r}
 #| fig-width: 12
-#| fig-height: 10
+#| fig-height: 7
 metadata_auteur_2002 <- metadata_auteur|>
   filter(début>= 2002 | début2 >= 2002)
 
@@ -412,7 +412,7 @@ if(save_figures)
 ## Histo rapporteurs
 ```{r}
 #| fig-width: 12
-#| fig-height: 10
+#| fig-height: 7
 metadata_auteur_2002|>
   gghistogram(x = "nb_avis_as_rapporteur", fill = "sexe",#fill = "#004080",
               position = position_stack(),
@@ -436,7 +436,7 @@ metadata_auteur_2002 <- metadata_auteur_2002|>
 
 ```{r}
 #| fig-width: 12
-#| fig-height: 10
+#| fig-height: 6
 metadata_auteur_2002 %>%
   mutate(nb_avis_as_rapporteur_discretized = case_when(
     nb_avis_as_rapporteur == 0 ~ "0",
@@ -470,7 +470,7 @@ if(save_figures)
 
 ```{r}
 #| fig-width: 12
-#| fig-height: 10
+#| fig-height: 6
 metadata_auteur_2002 %>%
   mutate(once_rapporteur = ifelse(once_rapporteur,'VRAI','FAUX'))%>%
   group_by(once_rapporteur, profession_recodée) %>%
@@ -533,7 +533,7 @@ plot_participation_par_avis
 
 ```{r}
 #| fig-width: 12
-#| fig-height: 10
+#| fig-height: 6
 metadata_auteur %>%
   mutate(multinominated = ifelse(str_count(nomination,';')>0,'VRAI','FAUX'))%>%
   group_by(multinominated, profession_recodée) %>%
@@ -541,7 +541,7 @@ metadata_auteur %>%
   group_by(multinominated) %>%
   mutate(total = sum(count), percentage = 100 * count / total) %>%
   ungroup() %>%
-  select(-total)%>%Deqs
+  select(-total)%>%
   ggbarplot(x='multinominated',fill = 'profession_recodée', y = 'percentage',
             position = position_stack(), 
             #label = TRUE,lab.nb.digits = 2,lab.pos = "in",
