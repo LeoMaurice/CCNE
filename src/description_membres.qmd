@@ -398,7 +398,7 @@ On se limite aux membres du CCNE qui l'ont rejoint après (ou égale) à 2002, c
 metadata_auteur_2002 <- metadata_auteur|>
   filter(début>= 2002 | début2 >= 2002)
 
-metadata_auteur_2002|>
+histo_participation_membre <- metadata_auteur_2002|>
   gghistogram(x = "nb_avis_as_participant", fill = "sexe",#fill = "#004080",
               position = position_stack(),
               ylab = "Nombre de membres", xlab = "Nombre de participation à un avis")+
@@ -406,23 +406,29 @@ metadata_auteur_2002|>
   scale_fill_prism(palette = "floral")+
   labs(caption = "Graphique de l'auteur.\nDonnées collectées dans 40 ans de Bioéthique (Delfraissy 2023) et par l'auteur.\nLecture : Sur les 151 membres nommés à partir de 2002,\n24 ont participé à un groupe de travail,\navec une égale répartition homme femme.")
 
+histo_participation_membre
 if(save_figures)
   ggsave("../output/descriptive_members/histo_participation.png")
 ```
 ## Histo rapporteurs
 ```{r}
-#| fig-width: 12
+#| fig-width: 7
 #| fig-height: 7
-metadata_auteur_2002|>
+histo_participation_rapporteurs <- metadata_auteur_2002|>
   gghistogram(x = "nb_avis_as_rapporteur", fill = "sexe",#fill = "#004080",
               position = position_stack(),
               ylab = "Nombre de membre", xlab = "Nombre de fois rapporteur d'un avis")+
   theme_ready()+
   scale_fill_prism(palette = "floral")+
   labs(caption = "Graphique de l'auteur.\nDonnées collectées dans 40 ans de Bioéthique (Delfraissy 2023) et par l'auteur.\nLecture : Sur les 151 membres nommés à partir de 2002,\nPlus de la moitié n'ont pas participé une fois en tant que rapporteur.")
-
+histo_participation_rapporteurs
 if(save_figures)
   ggsave("../output/descriptive_members/histo_nb_rapporteur.png")
+```
+## Histo membre et rapporteurs ensemble
+```{r, fig.height=5, fig.width=12}
+histo_participation_membre+histo_participation_rapporteurs
+
 ```
 
 ```{r}
@@ -519,8 +525,8 @@ percentage_participation <- metadata_avis_membre %>%
 
 # Graphique en barres empilées
 plot_participation_par_avis <- ggplot(percentage_participation, aes(x = factor(num), y = percentage, fill = profession_recodée)) +
-  geom_bar(stat = "identity", position = "stack", alpha = 1, color = "black") +
-  theme_ready(text_size = 35) +
+  geom_bar(stat = "identity", position = "stack", alpha = 1, color = "black", size =2) +
+  theme_ready(text_size = 37) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
   scale_fill_prism(palette = "floral") +
   labs(fill = "Profession", color = "Profession",
@@ -639,21 +645,21 @@ membres_ccne_qgs <- left_join(metadata_auteur_2002,QGS%>%
 
 ```{r,  fig.width=11, fig.height=7}
 membres_ccne_qgs |>
-  ggscatter(x = "nb_avis_as_participant", y = "nb_affiliations", shape = "sexe", color = "profession_recodée",
-            xlab = "Nombre d'avis en tant que participant", ylab = "Nombre d'affiliations (QGS)") +
+  ggscatter(x = "nb_avis_as_participant", y = "nb_affiliations", shape = "sexe", color = "président_première_nomination",
+            xlab = "Nombre d'avis en tant que participant", ylab = "Nombre d'affiliations (QGS)",
+            position = position_jitter(width = 0.2, height = 0.2)) +
   geom_text(
     data = subset(membres_ccne_qgs, sapply(nomination, is_president_CCNE)),
     aes(label = nom),
     vjust = -1, hjust = 0.5, size = 3, color = "red"
   ) +
   theme_ready() +
-  scale_fill_prism(palette = "floral") +
   theme_ready(text_size = 16) +
-  scale_color_prism(palette = "floral") +
+  scale_color_prism(palette = "winter_bright") +
   guides(color = guide_legend(title.position = "top"),
          shape = guide_legend(title.position = "top")) +
   labs(title = "Investissement en tant que rapporteurs,\ncomparés à l'investissement dans la direction de la science\n(membres nommés après 2002)",
-       color = "Profession",
+       color = "Président à la première nomination",
        caption = "Graphique de l'auteur.\nDonnées collectées par l'auteur; et issues de la base Qui Gouverne la Science (Laillier et Topalov 2022).\nLecture : L'investissement dans des institutions de gouvernance de la science semble aller à l'opposé de l'investissement au CCNE.") +
   scale_x_continuous(breaks = scales::breaks_pretty(n = 10), labels = scales::label_number(accuracy = 1, big.mark = "")) +
   scale_y_continuous(breaks = scales::breaks_pretty(n = 10), labels = scales::label_number(accuracy = 1, big.mark = "")) +
@@ -664,30 +670,93 @@ membres_ccne_qgs |>
 if(save_figures)
   ggsave("../output/descriptive_members/participation_vs_qgs.png")
 ```
+```{r, fig.width=11, fig.height=7}
+palette_colors <- c("1" = "#008080", "2" = "#55A0FB", "3" = "#285291", "4" = "#000080", 
+                    "5" = "#91188E", "6+" = "#AD07E3", "10+" = "#FF8080", "20+" = "#800040", "50+" = "#21063F")
+
+membres_ccne_qgs %>%
+  group_by(nb_avis_as_participant, nb_affiliations) %>%
+  summarise(`Nombre de membres` = n()) %>%
+  mutate(code_couleur = cut(`Nombre de membres`,
+                                   breaks = c(1, 2, 3, 4, 5, 6, 10, 20, 50, Inf),
+                                   labels = c("1", "2", "3", "4", "5", "6+", "10+", "20+", "50+"),
+                                   right = FALSE)) %>%
+ggplot(aes(x = nb_avis_as_participant, y = nb_affiliations, label = `Nombre de membres`, color = code_couleur)) +
+  geom_text(size = 6) +
+  scale_color_manual(values = palette_colors) +
+  theme_ready(text_size = 20) +
+  guides(color = guide_legend(title.position = "top")) +
+  labs(title = "Investissement dans un groupe de travail du CCNE,\ncomparés à l'investissement dans la direction de la science\n(membres nommés après 2002)",
+       color = "Nombre de membres avec ce nombre d'affiliation et d'avis en tant que rapporteurs",
+       caption = "Graphique de l'auteur.\nDonnées collectées par l'auteur et issues de la base Qui Gouverne la Science (Laillier et Topalov 2022).\nInterprétation : L'investissement dans des institutions de gouvernance de la science\nsemble aller à l'opposé de l'investissement au CCNE.\nLecture : Chaque chiffre est le nombre de membres qui partagent le même nombre\nd'institutions d'appartenance dans la base QGS et de participation à des groupes de travail.",
+       x = "Nombre d'avis en tant que membre d'un groupe de travail", y = "Nombre d'affiliations (QGS)") +
+  scale_x_continuous(breaks = scales::breaks_pretty(n = 10), labels = scales::label_number(accuracy = 1, big.mark = "")) +
+  scale_y_continuous(breaks = scales::breaks_pretty(n = 10), labels = scales::label_number(accuracy = 1, big.mark = "")) +
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "red") +
+  geom_vline(xintercept = 0.5, linetype = "dashed", color = "red") +
+  ggpubr::grids(axis = "xy")+
+  geom_text(data = subset(membres_ccne_qgs, sapply(nomination, is_president_CCNE)), 
+            aes(x = nb_avis_as_rapporteur, y = nb_affiliations, label = nom), 
+            vjust = 0.5, hjust = -0.1, size = 3, color = "red")
+
+```
 
 ```{r, fig.width=11, fig.height=7}
+# Exemple de palette de couleurs personnalisée
 membres_ccne_qgs |>
-  ggscatter(x = "nb_avis_as_rapporteur", y = "nb_affiliations", shape = "sexe", color = "profession_recodée",
-            size = 4,
+  ggscatter(x = "nb_avis_as_rapporteur", y = "nb_affiliations", shape = "sexe", color = "président_première_nomination",
+            size = 4, 
+            position = position_jitter(width = 0.2, height = 0.2),
             xlab = "Nombre d'avis en tant que rapporteur", ylab = "Nombre d'affiliations (QGS)") +
   geom_text(
     data = subset(membres_ccne_qgs, sapply(nomination, is_president_CCNE)),
     aes(label = nom),
-    vjust = -1, hjust = 0.5, size = 3, color = "red"
+    vjust = -1, hjust = 0.5, size = 3, color = "red",
+    position = position_jitter(width = 0.2, height = 0.2)
   ) +
   theme_ready(text_size = 16) +
-  scale_color_prism(palette = "floral") +
+  scale_color_prism(palette = "winter_bright") +
   guides(color = guide_legend(title.position = "top"),
          shape = guide_legend(title.position = "top")) +
   labs(title = "Investissement en tant que rapporteurs,\ncomparés à l'investissement dans la direction de la science\n(membres nommés après 2002)",
-       color = "Profession",
+       color = "Président à la première nomination",
        caption = "Graphique de l'auteur.\nDonnées collectées par l'auteur; et issues de la base Qui Gouverne la Science (Laillier et Topalov 2022).\nLecture : L'investissement dans des institutions de gouvernance de la science semble aller à l'opposé de l'investissement au CCNE.") +
   scale_x_continuous(breaks = scales::breaks_pretty(n = 10), labels = scales::label_number(accuracy = 1, big.mark = "")) +
   scale_y_continuous(breaks = scales::breaks_pretty(n = 10), labels = scales::label_number(accuracy = 1, big.mark = "")) +
   geom_hline(yintercept = 0.5, linetype = "dashed", color = "red") +
-  geom_vline(xintercept = 0.5, linetype = "dashed", color = "red")+
+  geom_vline(xintercept = 0.5, linetype = "dashed", color = "red") +
   ggpubr::grids(axis = "xy")
 
-if(save_figures)
-  ggsave("../output/descriptive_members/rapporteur_vs_qgs.png")
+
 ```
+
+```{r}
+palette_colors <- c("1" = "#008080", "2" = "#55A0FB", "3" = "#285291", "4" = "#000080", 
+                    "5" = "#91188E", "6+" = "#AD07E3", "10+" = "#FF8080", "20+" = "#800040", "50+" = "#21063F")
+
+membres_ccne_qgs %>%
+  group_by(nb_avis_as_rapporteur, nb_affiliations) %>%
+  summarise(`Nombre de membres` = n()) %>%
+  mutate(code_couleur = cut(`Nombre de membres`,
+                                   breaks = c(1, 2, 3, 4, 5, 6, 10, 20, 50, Inf),
+                                   labels = c("1", "2", "3", "4", "5", "6+", "10+", "20+", "50+"),
+                                   right = FALSE)) %>%
+ggplot(aes(x = nb_avis_as_rapporteur, y = nb_affiliations, label = `Nombre de membres`, color = code_couleur)) +
+  geom_text(size = 6) +
+  scale_color_manual(values = palette_colors) +
+  theme_ready(text_size = 20) +
+  guides(color = guide_legend(title.position = "top")) +
+  labs(title = "Investissement en tant que rapporteurs,\ncomparés à l'investissement dans la direction de la science\n(membres nommés après 2002)",
+       color = "Nombre de membres avec ce nombre d'affiliation et d'avis en tant que rapporteurs",
+       caption = "Graphique de l'auteur.\nDonnées collectées par l'auteur et issues de la base Qui Gouverne la Science (Laillier et Topalov 2022).\nInterprétation : L'investissement dans des institutions de gouvernance de la science\nsemble aller à l'opposé de l'investissement au CCNE.\nLecture : Chaque chiffre est le nombre de membres qui partagent le même nombre\nd'institutions d'appartenance dans la base QGS et d'avis rapportés.",
+       x = "Nombre d'avis en tant que rapporteur", y = "Nombre d'affiliations (QGS)") +
+  scale_x_continuous(breaks = scales::breaks_pretty(n = 10), labels = scales::label_number(accuracy = 1, big.mark = "")) +
+  scale_y_continuous(breaks = scales::breaks_pretty(n = 10), labels = scales::label_number(accuracy = 1, big.mark = "")) +
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "red") +
+  geom_vline(xintercept = 0.5, linetype = "dashed", color = "red") +
+  ggpubr::grids(axis = "xy")+
+  geom_text(data = subset(membres_ccne_qgs, sapply(nomination, is_president_CCNE)), 
+            aes(x = nb_avis_as_rapporteur, y = nb_affiliations, label = nom), 
+            vjust = 0.5, hjust = -0.1, size = 3, color = "red")
+```
+
