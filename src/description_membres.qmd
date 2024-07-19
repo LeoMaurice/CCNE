@@ -645,8 +645,10 @@ membres_ccne_qgs <- left_join(metadata_auteur_2002,QGS%>%
 
 ```{r,  fig.width=11, fig.height=7}
 membres_ccne_qgs |>
+  mutate(label_debut = ifelse(((nb_avis_as_rapporteur>=0)&(nb_affiliations>0)),début,""))%>%
   ggscatter(x = "nb_avis_as_participant", y = "nb_affiliations", shape = "sexe", color = "président_première_nomination",
-            xlab = "Nombre d'avis en tant que participant", ylab = "Nombre d'affiliations (QGS)",
+            xlab = "Nombre d'avis en tant que participant", ylab = "Nombre d'affiliations (QGS)", 
+            label = "label_debut", repel = T,
             position = position_jitter(width = 0.2, height = 0.2)) +
   geom_text(
     data = subset(membres_ccne_qgs, sapply(nomination, is_president_CCNE)),
@@ -704,8 +706,9 @@ ggplot(aes(x = nb_avis_as_participant, y = nb_affiliations, label = `Nombre de m
 ```{r, fig.width=11, fig.height=7}
 # Exemple de palette de couleurs personnalisée
 membres_ccne_qgs |>
+  mutate(label_debut = ifelse(((nb_avis_as_rapporteur>=0)&(nb_affiliations>0)),début,""))%>%
   ggscatter(x = "nb_avis_as_rapporteur", y = "nb_affiliations", shape = "sexe", color = "président_première_nomination",
-            size = 4, 
+            size = 4, label = "label_debut", repel = T,
             position = position_jitter(width = 0.2, height = 0.2),
             xlab = "Nombre d'avis en tant que rapporteur", ylab = "Nombre d'affiliations (QGS)") +
   geom_text(
