@@ -776,7 +776,7 @@ palette <- c("white","#E995EB","#7CA0D4","#A48AD3","#BADE86","#2B8AAE" ,"#624894
 percentage_all_sentences_plot <- ggplot(percentage_par_rapport_tot_sentence, aes(x = factor(num), y = percentage, fill = Label)) +
   geom_bar(stat = "identity", position = "stack", alpha = 0.8, color = "black") +
   theme_ready(text_size = 37) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, size = 20)) +
   scale_fill_manual(values = palette) +
   labs(fill = "Label", color = "Label",
        title = "Proportion des représentation de la personnalité humaine au cours des années par avis", x = "Numéro avis", y = "Pourcentage",
@@ -806,10 +806,10 @@ timeline_avis<- ggplot(percentage_par_rapport_tot_sentence) +
             fill = NA, color = "black", linetype = "dotted") +
   geom_text(data = percentage_par_rapport_tot_sentence %>% distinct(label_year, min_avis, max_avis), 
             aes(x = (min_avis + max_avis) / 2, y = 0, label = label_year), angle = 90, vjust = 0.5, hjust = 0, size = 15) +
-  # scale_x_continuous(breaks = unique(percentage_par_rapport_tot_sentence$num), 
-  #                    labels = unique(percentage_par_rapport_tot_sentence$num)) +
+  scale_x_continuous(breaks = unique(percentage_par_rapport_tot_sentence$num),
+                     labels = unique(percentage_par_rapport_tot_sentence$num)) +
   theme_ready(text_size = 33)+
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5),
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, size = 20),
         axis.ticks.y = element_blank(),
         axis.text.y = element_blank(),
         axis.title.y = element_blank(),
