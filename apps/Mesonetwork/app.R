@@ -117,6 +117,13 @@ server <- function(input, output, session) {
   })
   outputOptions(output, "networkVisible", suspendWhenHidden = FALSE)
   
+  observe({
+    visNetworkProxy("network") %>%
+      visEvents(selectNode = "function(nodes) {
+        Shiny.onInputChange('selected_node_id', nodes.nodes[0]);
+      }")
+  })
+  
   output$network <- renderVisNetwork({
     selected_categories <- input$categories
     avis_range <- input$avis_range
@@ -153,10 +160,17 @@ server <- function(input, output, session) {
       rename(from = from, to = to) %>%
       select(from, to)
     
+    nb_avis = avis_range[2] - avis_range[1] + 1
+    font_size = 0.17*nb_avis + 16.7
+    
     visNetwork(nodes, edges) %>%
-      visEdges(arrows = 'to') %>%
-      visNodes(scaling = list(min = 20, max = 40)) %>%
-      visOptions(highlightNearest = list(enabled = TRUE, degree = 1), nodesIdSelection = TRUE) %>%
+      visEdges(arrows = 'to', color = list(inherit = "to")) %>%
+      visNodes(scaling = list(min = 20, max = 2*font_size),
+               font = list(size = font_size)) %>%
+      visOptions(highlightNearest = list(enabled = TRUE, degree = 1, hideColor = "rgba(200,200,200,0.0005)", labelOnly = FALSE, algorithm = "hierarchical"), 
+                 nodesIdSelection = TRUE, collapse = TRUE) %>%
+      visPhysics(solver = "forceAtlas2Based", 
+                 forceAtlas2Based = list(gravitationalConstant = -25))%>%
       visGroups(groupname = "Auteurs", color = "#6CC7B3", shape = "square") %>%
       visGroups(groupname = "Autorités", color = "#285291", shape = "square") %>%
       visGroups(groupname = "CCNE", color = "#9D3A5E", shape = "triangle") %>%
@@ -170,6 +184,7 @@ server <- function(input, output, session) {
       visGroups(groupname = "Science, littérature", color = "#0B5C2D", shape = "square") %>%
       visGroups(groupname = "Société", color = "#BD6345", shape = "square")
   })
+    
   
   output$legend <- renderUI({
     selected_categories <- input$categories
@@ -222,6 +237,7 @@ server <- function(input, output, session) {
           <li>Autorités : Autorités administratives publics ou indépendantes, au sens de la loi de 2016, qui un pouvoir de contrôle effectif.</li>
           <li>CCNE : Ensemble des avis numérotés publiés par le CCNE.</li>
         </ul>
+        <p>N'hésitez pas à cliquer sur un noeud pour visualiser le réseau autour uniquement de ce noeud.</p>
         </div>")
       ,
       easyClose = TRUE,
