@@ -173,7 +173,7 @@ server <- function(input, output, session) {
                  forceAtlas2Based = list(gravitationalConstant = -25))%>%
       visGroups(groupname = "Auteurs", color = "#6CC7B3", shape = "square") %>%
       visGroups(groupname = "Autorités", color = "#285291", shape = "square") %>%
-      visGroups(groupname = "CCNE", color = "#9D3A5E", shape = "triangle") %>%
+      visGroups(groupname = "CCNE", color = "#9D3A5E", shape = "circle") %>%
       visGroups(groupname = "Comité d'éthique", color = "#579125", shape = "square") %>%
       visGroups(groupname = "Comparaison pays", color = "#0F0F5C", shape = "square") %>%
       visGroups(groupname = "Etat", color = "#91188F", shape = "square") %>%
