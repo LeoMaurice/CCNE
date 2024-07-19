@@ -269,7 +269,7 @@ percentage_par_rapport_tot_sentence%>%
 
 ### Proportions 'Vivant' vs 'Personne/Individu' regroupées par année
 
-```{r, fig.width=40, fig.height=14}
+```{r, fig.width=21, fig.height=9.9}
 repartion_phrase_interet_avis%>%
   mutate(count = nb_phrases - nb_phrases_interet,
          label = "N'évoque pas personnalité humaine")%>%
@@ -297,7 +297,7 @@ repartion_phrase_interet_avis%>%
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
   scale_fill_manual(values = c("white","#624894","#BADE86")) +
   labs(fill = "Label", color = "Label",
-       title = "Proportion des représentation de la personnalité humaine au cours des années", x = "Numéro avis", y = "Pourcentage\nsur toutes les phrases\npubliées cette année",
+       title = "Proportion des représentation de\nla personnalité humaine au cours des années", x = "Numéro avis", y = "Pourcentage\nsur toutes les phrases\npubliées cette année",
        caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: L'avis 21 est composé à 29% de phrase, dont une majorité référant au corps humain.") +
   guides(fill = guide_legend(title.position = "top"))+
   geom_hline(yintercept = 5, color = "red", linetype = "dotted",size = 2)+
@@ -743,7 +743,7 @@ levels_order <- c( "Bernard (83-91)", "Changeux (92-99)","Sicard (00-08)", "Grim
 base_avis$president <- factor(base_avis$president, levels = levels_order)
 ```
 #### Proportion sur l'ensemble des phrases de l'avis
-```{r, fig.width=50, fig.height=20}
+```{r, fig.width=30, fig.height=20}
 #| eval: true
 
 repartion_phrase_interet_avis%>%
@@ -806,8 +806,8 @@ timeline_avis<- ggplot(percentage_par_rapport_tot_sentence) +
             fill = NA, color = "black", linetype = "dotted") +
   geom_text(data = percentage_par_rapport_tot_sentence %>% distinct(label_year, min_avis, max_avis), 
             aes(x = (min_avis + max_avis) / 2, y = 0, label = label_year), angle = 90, vjust = 0.5, hjust = 0, size = 15) +
-  scale_x_continuous(breaks = unique(percentage_par_rapport_tot_sentence$num), 
-                     labels = unique(percentage_par_rapport_tot_sentence$num)) +
+  # scale_x_continuous(breaks = unique(percentage_par_rapport_tot_sentence$num), 
+  #                    labels = unique(percentage_par_rapport_tot_sentence$num)) +
   theme_ready(text_size = 33)+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5),
         axis.ticks.y = element_blank(),
