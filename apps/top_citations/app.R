@@ -65,7 +65,7 @@ ui <- fluidPage(
         uiOutput("president_buttons")
       ),
       br(),
-      sliderInput("avis_range", "Sélectionner la plage des avis à afficher (par numéro de publication, dans l'odre chronologique):",
+      sliderInput("avis_range", "Sélectionner la plage des avis à afficher (par numéro de publication, dans l'ordre chronologique):",
                   min = min(as.numeric(mesograph_nodes_df$name), na.rm = TRUE),
                   max = max(as.numeric(mesograph_nodes_df$name), na.rm = TRUE),
                   value = c(125, 144),  # Valeurs par défaut du slider
@@ -94,6 +94,12 @@ server <- function(input, output, session) {
     input$name_choice
   })
   current_degree_mode <- reactiveVal("in")
+  current_category <- reactiveVal()  # Initialiser sans valeur
+  
+  observe({
+    # Mettre à jour la valeur réactive lorsque la catégorie change
+    current_category(input$top_category)
+  })
   
   graph_data <- reactive({
     if (current_graph() == "meso") {
@@ -121,6 +127,7 @@ server <- function(input, output, session) {
   })
   
   observeEvent(input$top_category, {
+    current_category(input$top_category)  # Mettre à jour la catégorie actuelle
     if (input$top_category == "CCNE") {
       updateRadioButtons(session, "degree_mode", choices = list("Avis les plus cités" = "in", "Avis qui citent le plus" = "out"), selected = "in")
       shinyjs::disable("name_choice")
@@ -128,6 +135,11 @@ server <- function(input, output, session) {
       updateRadioButtons(session, "degree_mode", choices = list("Avis les plus cités" = "in"), selected = "in")
       shinyjs::enable("name_choice")
     }
+  })
+  
+  observeEvent(input$name_choice, {
+    # Mettre à jour la catégorie sélectionnée après avoir changé le type de nom
+    updateSelectInput(session, "top_category", selected = current_category())
   })
   
   observeEvent(input$toggle_degree, {
@@ -140,13 +152,13 @@ server <- function(input, output, session) {
     if (!"Loi" %in% choices) {
       choices <- c("Loi", choices)
     }
-    updateSelectInput(session, "top_category", choices = choices, selected = "Loi")
+    updateSelectInput(session, "top_category", choices = choices, selected = current_category())
   })
   
-  observe(if(input$top_category != "CCNE"){
+  observe(if(current_category() != "CCNE"){
     # Render the table counting single citations per document
     output$top_cited_single <- renderUI({
-      top_category <- input$top_category
+      top_category <- current_category()
       avis_range <- input$avis_range
       top_n <- as.numeric(input$top_n)
       
@@ -193,7 +205,7 @@ server <- function(input, output, session) {
     
     # Render the table counting multiple citations per document
     output$top_cited_multiple <- renderUI({
-      top_category <- input$top_category
+      top_category <- current_category()
       avis_range <- input$avis_range
       top_n <- as.numeric(input$top_n)
       
@@ -240,7 +252,7 @@ server <- function(input, output, session) {
   }else{
     # Render the table counting single citations per document
     output$top_cited_single <- renderUI({
-      top_category <- input$top_category
+      top_category <- current_category()
       avis_range <- input$avis_range
       top_n <- as.numeric(input$top_n)
       
@@ -287,7 +299,7 @@ server <- function(input, output, session) {
     
     # Render the table counting multiple citations per document
     output$top_cited_multiple <- renderUI({
-      top_category <- input$top_category
+      top_category <- current_category()
       avis_range <- input$avis_range
       top_n <- as.numeric(input$top_n)
       
