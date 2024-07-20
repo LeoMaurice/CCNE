@@ -17,11 +17,11 @@ ui <- fluidPage(
       width = 2  # Ajustez cette valeur pour définir la largeur de la barre latérale
     ),
     mainPanel(
-      h3(tags$b("Pourcentage des avis qui ont au moins une citation du type")),
+      h3(tags$b("Tableau croisé des pourcentages des avis qui ont au moins un type de citation, et une profession dans leurs rapporteurs")),
       DTOutput("citations_by_professions"),
-      h3(tags$b("Pourcentage des avis qui ont au moins une phrase associée à une certaine personnalité humaine (classification BERT, 2 classes)")),
+      h3(tags$b("Tableau croisé des pourcentages des avis qui ont au moins un type de phrase associée à une certaine personnalité humaine (classification BERT, 2 classes) dans leurs phrases, et une profession dans leurs rapporteurs")),
       DTOutput("bert_by_professions"),
-      h3(tags$b("Pourcentage des avis qui ont au moins une phrase associée à une certaine personnalité humaine (classification GPT, 7 classes)")),
+      h3(tags$b("Tableau croisé des pourcentages des avis qui ont au moins un type de phrase associée à une certaine personnalité humaine (classification GPT, 7 classes) dans leurs phrases, et une profession dans leurs rapporteurs")),
       DTOutput("gpt_by_professions")
     )
   )
