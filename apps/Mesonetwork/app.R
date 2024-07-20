@@ -3,6 +3,7 @@ library(dplyr)
 library(tidyr)
 library(igraph)
 library(visNetwork)
+library(shinybusy)  # Importer le package shinybusy
 
 # Vérifier si le fichier existe avant de le charger
 if (file.exists("network_data.RData")) {
@@ -43,6 +44,7 @@ max_min_par_president <- data.frame(
 
 # UI
 ui <- fluidPage(
+  add_busy_spinner(spin = "fading-circle"),  # Ajouter un spinner de chargement
   tags$head(
     tags$style(HTML("
       #backButton {
