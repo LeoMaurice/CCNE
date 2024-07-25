@@ -1,6 +1,10 @@
 # Model fils
 /src/models/
 
+/src/models_all/
+
+/original_output/
+
 /src/LLM/models/
 
 /data/ACL/anthology+abstracts.bib
