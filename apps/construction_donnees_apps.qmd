@@ -194,7 +194,7 @@ mesoreseau_citation_igraph <- as.igraph(mesoreseau_citation)
 ```
 
 ```{r}
-base_avis <- arrow::read_feather('../data/intermediate/big/base_avis.feather')
+base_avis <- arrow::read_feather('../data/intermediate/base_avis.feather')
 base_avis%>%
 group_by(president)%>%
 summarise(avis_max = max(num), avis_min = min(num)) -> max_min_par_president
