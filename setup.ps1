@@ -1,5 +1,6 @@
 # Définir les dossiers
 $OUTPUT_DIR = "output"
+
 $MODELS_DIR = ".\src\models"
 
 # Créer les dossiers si ils n'existent pas
