@@ -12,7 +12,7 @@ if (!(Test-Path -Path $MODELS_DIR)) {
 }
 
 # URL du fichier ZIP à télécharger
-$ZIP_URL = "https://github.com/LeoMaurice/CCNE/releases/download/memoire_v12/2024-06-24_CamemBERT_personne_1400annotations_twocat_vivant_personne_models.zip"
+$ZIP_URL = "https://github.com/LeoMaurice/CCNE/releases/download/memoire_v13/2024-06-24_CamemBERT_personne_1400annotations_twocat_vivant_personne_models.zip"
 
 # Nom du fichier ZIP (extraire le nom du fichier à partir de l'URL)
 $ZIP_FILE = [System.IO.Path]::GetFileName($ZIP_URL)
