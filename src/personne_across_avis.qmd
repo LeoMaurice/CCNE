@@ -634,6 +634,32 @@ kable(final_table, format = "html") %>%
 library(dplyr)
 library(tidyr)
 
+repartion_phrase_interet_avis%>%
+  mutate(count = nb_phrases - nb_phrases_interet,
+         Label = "N'évoque pas personnalité humaine")%>%
+  select(num, Label, count)%>%
+  rbind(predictions_gpt %>%
+  group_by(num, Label) %>%
+  summarise(count = n(), .groups = 'drop'))%>%
+  group_by(num) %>%
+  mutate(percentage = 100 * count / sum(count)) %>%
+  ungroup()%>%
+  mutate(Label = factor(Label, levels = c("N'évoque pas personnalité humaine",
+                                          "Personne relationnelle",
+                                          "Individu ou sujet",
+                                          "Genre/espèce humaine",
+                                         "Corps humain",
+                                         "Personne responsable et autonome",
+                                         "Personne à protéger",
+                                         "Sentiment humain")))%>%
+  mutate(percentage = ifelse(is.na(percentage),0,percentage))%>%
+  filter(!is.na(num))-> percentage_par_rapport_tot_sentence
+
+percentage_par_rapport_tot_sentence <- percentage_par_rapport_tot_sentence%>%
+  left_join(base_avis%>%
+              select(num,Date, president),
+            by = "num")
+
 # Assuming metadata_citation and metadata_avis are already loaded
 
 # Create a dataframe with all possible combinations of num and Label
@@ -693,6 +719,83 @@ kable(final_table, format = "html") %>%
   add_footnote("Tableau de l’auteur. Données de l’auteur. Champ : Ensembles des phrases sur la personnalité humaines dans les 144. Lecture : Durant le mandat de Bernard, 45.9% des phrases publiées portent sur le corps humain.")
 
 ```
+#### Tableau des pourcentages de phrases contenant un certain traitement de la personnalité humaine au cours des mandats sur l'ensemble des phrases
+```{r}
+# Libraries
+library(dplyr)
+library(tidyr)
+
+# Assuming metadata_citation and metadata_avis are already loaded
+taille_avis <- read_csv('../data/raw/collected_metadata/taille_avis.csv')
+
+taille_avis<- taille_avis%>%
+  left_join(base_avis%>%
+              select(num,Date, president),
+            by = "num")
+total_sentences_on_every_avis = sum(taille_avis$nb_phrases)
+
+nb_phrases_by_pres <- taille_avis%>%
+  group_by(president)%>%
+  summarise(total = sum(nb_phrases))
+
+# Create a dataframe with all possible combinations of num and Label
+all_combinations <- expand.grid(
+  num = 1:144,
+  Label = unique(predictions_gpt$Label)
+) %>%
+  mutate(num = as.numeric(num))
+
+# Join all_combinations with metadata_citation and metadata_avis
+citations_by_cat <- all_combinations %>%
+  left_join(predictions_gpt %>%
+              group_by(num, Label,president) %>%
+              mutate(num = as.numeric(num)) %>%
+              summarise(nb_sent = n(), .groups = 'drop'),
+            by = c("num", "Label")) %>%
+  replace_na(list(nb_sent = 0))
+
+# Calculate percentage by category
+percentage_by_cat <- citations_by_cat %>%
+  mutate(is_used = (nb_sent > 0),
+         total_sentence = total_sentences_on_every_avis) %>%
+  group_by(Label) %>%
+  summarise(Pourcentage = 100 * sum(nb_sent) / total_sentences_on_every_avis) %>%
+  rename(`Ensemble des avis` = Pourcentage)
+
+# Calculate percentage by category and president
+percentage_by_cat_pres <- citations_by_cat %>%
+  mutate(is_used = (nb_sent > 0),
+         total_sentence = total_sentences_on_every_avis) %>%
+  group_by(Label, president) %>%
+  summarise(Pourcentage = sum(nb_sent)) %>%
+  mutate(total = case_when(
+    president == "Bernard (83-91)" ~ 5367,
+    president == "Changeux (92-99)" ~ 10072,
+    president == "Sicard (00-08)" ~ 12898,
+    president == "Grimfeld (09-11)" ~ 4156,
+    president == "Ameisen (12-15)" ~ 5831,
+    president == "Delfraissy (16-)" ~ 15706
+  ),
+  Pourcentage = 100 * Pourcentage / total) %>%
+  select(Label, president, Pourcentage) %>%
+  pivot_wider(names_from = president, values_from = Pourcentage)
+
+# Join the two percentage tables
+percentage_cat <- left_join(percentage_by_cat, percentage_by_cat_pres, by = "Label")
+
+# Combine all the results into a final table
+final_table <- bind_rows(percentage_cat) %>%
+  select(Label, `Bernard (83-91)`, `Changeux (92-99)`, `Sicard (00-08)`, `Grimfeld (09-11)`, `Ameisen (12-15)`, `Delfraissy (16-)`) %>%
+  mutate(across(c(`Bernard (83-91)`, `Changeux (92-99)`, `Sicard (00-08)`, `Grimfeld (09-11)`, `Ameisen (12-15)`, `Delfraissy (16-)`), ~ round(., 2)))
+
+# Display the final table
+kable(final_table, format = "html") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>%
+  add_header_above(c("Pourcentage de phrases" = 1, "Pourcentage des phrases publiées sous le mandat d'un président, selon le rapport à la personnalité humaine" = ncol(final_table) - 1), bold = TRUE) %>%
+  add_footnote("Tableau de l’auteur. Données de l’auteur. Champ : Ensembles des phrases dans les 144. Lecture : Durant le mandat de Bernard, 5.8% des phrases publiées portent sur le corps humain.")
+
+```
+
 ### Proportions fines des personnalités humaines par avis
 
 #### Proportions au sein des phrases d'intérêt
@@ -746,31 +849,6 @@ base_avis$president <- factor(base_avis$president, levels = levels_order)
 ```{r, fig.width=30, fig.height=20}
 #| eval: true
 
-repartion_phrase_interet_avis%>%
-  mutate(count = nb_phrases - nb_phrases_interet,
-         Label = "N'évoque pas personnalité humaine")%>%
-  select(num, Label, count)%>%
-  rbind(predictions_gpt %>%
-  group_by(num, Label) %>%
-  summarise(count = n(), .groups = 'drop'))%>%
-  group_by(num) %>%
-  mutate(percentage = 100 * count / sum(count)) %>%
-  ungroup()%>%
-  mutate(Label = factor(Label, levels = c("N'évoque pas personnalité humaine",
-                                          "Personne relationnelle",
-                                          "Individu ou sujet",
-                                          "Genre/espèce humaine",
-                                         "Corps humain",
-                                         "Personne responsable et autonome",
-                                         "Personne à protéger",
-                                         "Sentiment humain")))%>%
-  mutate(percentage = ifelse(is.na(percentage),0,percentage))%>%
-  filter(!is.na(num))-> percentage_par_rapport_tot_sentence
-
-percentage_par_rapport_tot_sentence <- percentage_par_rapport_tot_sentence%>%
-  left_join(base_avis%>%
-              select(num,Date, president),
-            by = "num")
 palette <- c("white","#E995EB","#7CA0D4","#A48AD3","#BADE86","#2B8AAE" ,"#624894","#8BA56F")
 # Graphique en barres empilées
 percentage_all_sentences_plot <- ggplot(percentage_par_rapport_tot_sentence, aes(x = factor(num), y = percentage, fill = Label)) +
@@ -977,4 +1055,558 @@ repartion_phrase_interet_avis%>%
 #        caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: La majorité des phrases co-signées par les biologistes sont classées dans genre/espèce humaine.")
 # 
 ```
+
+## GPT 6 classes
+
+```{r}
+predictions_gpt <- read_csv("../data/intermediate/predictions/predictions_gpt35ft_1400annotations_6classes_2024-07-25.csv",
+    col_types = cols(sentence_id = col_integer()))%>%
+  filter(Label != "Miscellaneous")%>%
+  filter(Label != "Poubelle")
+
+levels_order <- c( "Bernard (83-91)", "Changeux (92-99)","Sicard (00-08)", "Grimfeld (09-11)", "Ameisen (12-15)", "Delfraissy (16-)")
+
+predictions_gpt$president <- factor(predictions_gpt$president, levels = levels_order)
+```
+
+```{r}
+# predictions_gpt%>%
+#   filter(Label == "Miscellaneous")
+```
+### Tableaux récapitulatifs 
+#### Tableau des pourcentages d'avis contenant un certain traitement de la personnalité humaine au cours des mandats
+```{r}
+# Libraries
+library(dplyr)
+library(tidyr)
+
+# Assuming metadata_citation and metadata_avis are already loaded
+
+# Create a dataframe with all possible combinations of num and Label
+all_combinations <- expand.grid(
+  num = 1:144,
+  Label = unique(predictions_gpt$Label)
+) %>%
+  mutate(num = as.numeric(num))
+
+# Join all_combinations with metadata_citation and metadata_avis
+citations_by_cat <- all_combinations %>%
+  left_join(predictions_gpt %>%
+              group_by(num, Label,president) %>%
+              mutate(num = as.numeric(num)) %>%
+              summarise(nb_sent = n(), .groups = 'drop'),
+            by = c("num", "Label")) %>%
+  replace_na(list(nb_sent = 0))
+
+# Calculate percentage by category
+percentage_by_cat <- citations_by_cat %>%
+  mutate(is_used = (nb_sent > 0),
+         total_avis = 144) %>%
+  group_by(Label) %>%
+  summarise(Pourcentage = 100 * sum(is_used) / 144) %>%
+  rename(`Ensemble des avis` = Pourcentage)
+
+# Calculate percentage by category and president
+percentage_by_cat_pres <- citations_by_cat %>%
+  mutate(is_used = (nb_sent > 0),
+         total_avis = 144) %>%
+  group_by(Label, president) %>%
+  summarise(Pourcentage = sum(is_used)) %>%
+  mutate(total = case_when(
+    president == "Bernard (83-91)" ~ 28,
+    president == "Changeux (92-99)" ~ 32,
+    president == "Sicard (00-08)" ~ 43,
+    president == "Grimfeld (09-11)" ~ 12,
+    president == "Ameisen (12-15)" ~ 9,
+    president == "Delfraissy (16-)" ~ 20
+  ),
+  Pourcentage = 100 * Pourcentage / total) %>%
+  select(Label, president, Pourcentage) %>%
+  pivot_wider(names_from = president, values_from = Pourcentage)
+
+# Join the two percentage tables
+percentage_cat <- left_join(percentage_by_cat, percentage_by_cat_pres, by = "Label")
+
+# Calculate percentage of citations covering all categories
+percentage_cite_toutes_cat <- citations_by_cat %>%
+  mutate(is_used = (nb_sent > 0)) %>%
+  group_by(num) %>%
+  summarise(is_used = all(is_used)) %>%
+  mutate(president = case_when(
+    num >= 1 & num <= 28 ~ "Bernard (83-91)",
+    num >= 29 & num <= 60 ~ "Changeux (92-99)",
+    num >= 61 & num <= 103 ~ "Sicard (00-08)",
+    num >= 104 & num <= 115 ~ "Grimfeld (09-11)",
+    num >= 116 & num <= 124 ~ "Ameisen (12-15)",
+    num >= 125 & num <= 144 ~ "Delfraissy (16-)"
+  ))
+
+percentage_cite_toutes_cat_tout_ccne <- 100 * sum(percentage_cite_toutes_cat$is_used) / 144
+
+percentage_cite_toutes_cat_by_pres <- percentage_cite_toutes_cat %>%
+  group_by(president) %>%
+  summarise(Pourcentage = sum(is_used)) %>%
+  mutate(total = case_when(
+    president == "Bernard (83-91)" ~ 28,
+    president == "Changeux (92-99)" ~ 32,
+    president == "Sicard (00-08)" ~ 43,
+    president == "Grimfeld (09-11)" ~ 12,
+    president == "Ameisen (12-15)" ~ 9,
+    president == "Delfraissy (16-)" ~ 20
+  ),
+  Pourcentage = 100 * Pourcentage / total) %>%
+  select(president, Pourcentage) %>%
+  pivot_wider(names_from = president, values_from = Pourcentage) %>%
+  mutate(`Ensemble des avis` = percentage_cite_toutes_cat_tout_ccne,
+         Label = "Cite toutes les catégories")
+
+# Function to calculate percentage of citations excluding n categories
+percentage_cite_toutes_sauf_n_cat <- function(n) {
+  cat_to_cite <- length(unique(citations_by_cat$Label)) - n
+  percentage_cite_sauf_n_cat <- citations_by_cat %>%
+    mutate(is_used = (nb_sent > 0)) %>%
+    group_by(num) %>%
+    summarise(is_used = sum(is_used)) %>%
+    mutate(president = case_when(
+      num >= 1 & num <= 28 ~ "Bernard (83-91)",
+      num >= 29 & num <= 60 ~ "Changeux (92-99)",
+      num >= 61 & num <= 103 ~ "Sicard (00-08)",
+      num >= 104 & num <= 115 ~ "Grimfeld (09-11)",
+      num >= 116 & num <= 124 ~ "Ameisen (12-15)",
+      num >= 125 & num <= 144 ~ "Delfraissy (16-)"
+    ),
+    is_used = (is_used >= cat_to_cite))
+  
+  percentage_cite_sauf_n_cat_ensemble <- 100 * sum(percentage_cite_sauf_n_cat$is_used) / 144
+  
+  percentage_cite_sauf_n_cat_by_pres <- percentage_cite_sauf_n_cat %>%
+    group_by(president) %>%
+    summarise(Pourcentage = sum(is_used)) %>%
+    mutate(total = case_when(
+      president == "Bernard (83-91)" ~ 28,
+      president == "Changeux (92-99)" ~ 32,
+      president == "Sicard (00-08)" ~ 43,
+      president == "Grimfeld (09-11)" ~ 12,
+      president == "Ameisen (12-15)" ~ 9,
+      president == "Delfraissy (16-)" ~ 20
+    ),
+    Pourcentage = 100 * Pourcentage / total) %>%
+    select(president, Pourcentage) %>%
+    pivot_wider(names_from = president, values_from = Pourcentage) %>%
+    mutate(`Ensemble des avis` = percentage_cite_sauf_n_cat_ensemble,
+           Label = paste("Cite", cat_to_cite, "des", length(unique(citations_by_cat$Label)), "catégories"))
+  
+  return(percentage_cite_sauf_n_cat_by_pres)
+}
+
+# Calculate percentages excluding one, two, three, and four categories
+percentage_sauf_1_cat <- percentage_cite_toutes_sauf_n_cat(1)
+percentage_sauf_2_cat <- percentage_cite_toutes_sauf_n_cat(2)
+percentage_sauf_3_cat <- percentage_cite_toutes_sauf_n_cat(3)
+percentage_sauf_4_cat <- percentage_cite_toutes_sauf_n_cat(4)
+
+# Combine all the results into a final table
+final_table <- bind_rows(percentage_cat,
+                         percentage_cite_toutes_cat_by_pres,
+                         percentage_sauf_1_cat,
+                         percentage_sauf_2_cat,
+                         percentage_sauf_3_cat,
+                         percentage_sauf_4_cat) %>%
+  select(Label, `Bernard (83-91)`, `Changeux (92-99)`, `Sicard (00-08)`, `Grimfeld (09-11)`, `Ameisen (12-15)`, `Delfraissy (16-)`) %>%
+  mutate(across(c(`Bernard (83-91)`, `Changeux (92-99)`, `Sicard (00-08)`, `Grimfeld (09-11)`, `Ameisen (12-15)`, `Delfraissy (16-)`), ~ round(., 1)))
+
+# Display the final table
+kable(final_table, format = "html") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>%
+  add_header_above(c("Pourcentage des avis" = 1, "Pourcentage des avis publiées sous le mandat d'un président, selon le rapport à la personnalité humaine" = ncol(final_table) - 1), bold = TRUE) %>%
+  add_footnote("Tableau de l’auteur. Données de l’auteur. Champ : Ensembles des phrases sur la personnalité humaines dans les 144. Lecture : Durant le mandat de Bernard, 85.7% des avis contiennent au moins une phrase sur le corps humain. On peut conclure de l’augmentation de chaque catégorie, une diversification des rhétoriques.")
+
+```
+#### Tableau des pourcentages de phrases contenant un certain traitement de la personnalité humaine au cours des mandats
+```{r}
+# Libraries
+library(dplyr)
+library(tidyr)
+
+# Assuming metadata_citation and metadata_avis are already loaded
+
+# Create a dataframe with all possible combinations of num and Label
+all_combinations <- expand.grid(
+  num = 1:144,
+  Label = unique(predictions_gpt$Label)
+) %>%
+  mutate(num = as.numeric(num))
+
+# Join all_combinations with metadata_citation and metadata_avis
+citations_by_cat <- all_combinations %>%
+  left_join(predictions_gpt %>%
+              group_by(num, Label,president) %>%
+              mutate(num = as.numeric(num)) %>%
+              summarise(nb_sent = n(), .groups = 'drop'),
+            by = c("num", "Label")) %>%
+  replace_na(list(nb_sent = 0))
+
+# Calculate percentage by category
+percentage_by_cat <- citations_by_cat %>%
+  mutate(is_used = (nb_sent > 0),
+         total_sentence = 7731) %>%
+  group_by(Label) %>%
+  summarise(Pourcentage = 100 * sum(nb_sent) / 7731) %>%
+  rename(`Ensemble des avis` = Pourcentage)
+
+# Calculate percentage by category and president
+percentage_by_cat_pres <- citations_by_cat %>%
+  mutate(is_used = (nb_sent > 0),
+         total_sentence = 7731) %>%
+  group_by(Label, president) %>%
+  summarise(Pourcentage = sum(nb_sent)) %>%
+  mutate(total = case_when(
+    president == "Bernard (83-91)" ~ 684,
+    president == "Changeux (92-99)" ~ 1173,
+    president == "Sicard (00-08)" ~ 1779,
+    president == "Grimfeld (09-11)" ~ 602,
+    president == "Ameisen (12-15)" ~ 1035,
+    president == "Delfraissy (16-)" ~ 2458
+  ),
+  Pourcentage = 100 * Pourcentage / total) %>%
+  select(Label, president, Pourcentage) %>%
+  pivot_wider(names_from = president, values_from = Pourcentage)
+
+# Join the two percentage tables
+percentage_cat <- left_join(percentage_by_cat, percentage_by_cat_pres, by = "Label")
+
+# Combine all the results into a final table
+final_table <- bind_rows(percentage_cat) %>%
+  select(Label, `Bernard (83-91)`, `Changeux (92-99)`, `Sicard (00-08)`, `Grimfeld (09-11)`, `Ameisen (12-15)`, `Delfraissy (16-)`) %>%
+  mutate(across(c(`Bernard (83-91)`, `Changeux (92-99)`, `Sicard (00-08)`, `Grimfeld (09-11)`, `Ameisen (12-15)`, `Delfraissy (16-)`), ~ round(., 1)))
+
+# Display the final table
+kable(final_table, format = "html") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>%
+  add_header_above(c("Pourcentage de phrases" = 1, "Pourcentage des phrases publiées sous le mandat d'un président, selon le rapport à la personnalité humaine" = ncol(final_table) - 1), bold = TRUE) %>%
+  add_footnote("Tableau de l’auteur. Données de l’auteur. Champ : Ensembles des phrases sur la personnalité humaines dans les 144. Lecture : Durant le mandat de Bernard, 45.9% des phrases publiées portent sur le corps humain.")
+
+```
+
+#### Tableau des pourcentages de phrases contenant un certain traitement de la personnalité humaine au cours des mandats sur l'ensemble des phrases
+```{r}
+# Libraries
+library(dplyr)
+library(tidyr)
+
+# Assuming metadata_citation and metadata_avis are already loaded
+taille_avis <- read_csv('../data/raw/collected_metadata/taille_avis.csv')
+
+taille_avis<- taille_avis%>%
+  left_join(base_avis%>%
+              select(num,Date, president),
+            by = "num")
+total_sentences_on_every_avis = sum(taille_avis$nb_phrases)
+
+nb_phrases_by_pres <- taille_avis%>%
+  group_by(president)%>%
+  summarise(total = sum(nb_phrases))
+
+# Create a dataframe with all possible combinations of num and Label
+all_combinations <- expand.grid(
+  num = 1:144,
+  Label = unique(predictions_gpt$Label)
+) %>%
+  mutate(num = as.numeric(num))
+
+# Join all_combinations with metadata_citation and metadata_avis
+citations_by_cat <- all_combinations %>%
+  left_join(predictions_gpt %>%
+              group_by(num, Label,president) %>%
+              mutate(num = as.numeric(num)) %>%
+              summarise(nb_sent = n(), .groups = 'drop'),
+            by = c("num", "Label")) %>%
+  replace_na(list(nb_sent = 0))
+
+# Calculate percentage by category
+percentage_by_cat <- citations_by_cat %>%
+  mutate(is_used = (nb_sent > 0),
+         total_sentence = total_sentences_on_every_avis) %>%
+  group_by(Label) %>%
+  summarise(Pourcentage = 100 * sum(nb_sent) / total_sentences_on_every_avis) %>%
+  rename(`Ensemble des avis` = Pourcentage)
+
+# Calculate percentage by category and president
+percentage_by_cat_pres <- citations_by_cat %>%
+  mutate(is_used = (nb_sent > 0),
+         total_sentence = total_sentences_on_every_avis) %>%
+  group_by(Label, president) %>%
+  summarise(Pourcentage = sum(nb_sent)) %>%
+  mutate(total = case_when(
+    president == "Bernard (83-91)" ~ 5367,
+    president == "Changeux (92-99)" ~ 10072,
+    president == "Sicard (00-08)" ~ 12898,
+    president == "Grimfeld (09-11)" ~ 4156,
+    president == "Ameisen (12-15)" ~ 5831,
+    president == "Delfraissy (16-)" ~ 15706
+  ),
+  Pourcentage = 100 * Pourcentage / total) %>%
+  select(Label, president, Pourcentage) %>%
+  pivot_wider(names_from = president, values_from = Pourcentage)
+
+# Join the two percentage tables
+percentage_cat <- left_join(percentage_by_cat, percentage_by_cat_pres, by = "Label")
+
+# Combine all the results into a final table
+final_table <- bind_rows(percentage_cat) %>%
+  select(Label, `Bernard (83-91)`, `Changeux (92-99)`, `Sicard (00-08)`, `Grimfeld (09-11)`, `Ameisen (12-15)`, `Delfraissy (16-)`) %>%
+  mutate(across(c(`Bernard (83-91)`, `Changeux (92-99)`, `Sicard (00-08)`, `Grimfeld (09-11)`, `Ameisen (12-15)`, `Delfraissy (16-)`), ~ round(., 2)))
+
+# Display the final table
+kable(final_table, format = "html") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>%
+  add_header_above(c("Pourcentage de phrases" = 1, "Pourcentage des phrases publiées sous le mandat d'un président, selon le rapport à la personnalité humaine" = ncol(final_table) - 1), bold = TRUE) %>%
+  add_footnote("Tableau de l’auteur. Données de l’auteur. Champ : Ensembles des phrases dans les 144. Lecture : Durant le mandat de Bernard, 5.8% des phrases publiées portent sur le corps humain.")
+
+```
+### Proportions fines des personnalités humaines par avis
+
+#### Proportions au sein des phrases d'intérêt
+```{r, fig.width=40, fig.height=15}
+#| eval: true
+percentage_categorie <- predictions_gpt %>%
+  group_by(num, Label) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  group_by(num) %>%
+  mutate(percentage = 100 * count / sum(count)) %>%
+  ungroup()%>%
+  mutate(Label = factor(Label, levels = c(
+                                          "Personne relationnelle",
+                                          "Individu ou sujet",
+                                          "Genre/espèce humaine",
+                                         "Corps humain",
+                                         "Personne juridique (protection/responsabilité)",
+                                         "Sentiment humain")))
+palette <- c("#E995EB","#7CA0D4","#A48AD3","#BADE86","#2B8AAE" ,"#624894")
+
+# Graphique en barres empilées
+ggplot(percentage_categorie, aes(x = factor(num), y = percentage, fill = Label)) +
+  geom_bar(stat = "identity", position = "stack", alpha = 0.8) +
+  theme_ready(text_size = 35) +
+  theme(axis.text.x = element_text(angle = 90)) +
+  scale_fill_manual(values = palette) +
+  labs(fill = "Label", color = "Label",
+       title = "Proportion au sein des phrases d'intérêt des catégories au fil du temps par avis", x = "Numéro avis", y = "Pourcentage",
+       caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: Chaque barre représente un avis.\nDans le premier avis, l'ensemble des phrases référents à l'humain/l'individu/la personne en parlent sous l'aspect biologique/corps humain.") +
+  guides(fill = guide_legend(title.position = "top"))
+
+
+```
+
+```{r}
+
+taille_avis <- read_csv('../data/raw/collected_metadata/taille_avis.csv')
+
+taille_avis%>%
+  left_join(predictions_gpt%>%
+              group_by(num,Date)%>%
+              summarise(nb_phrases_interet = n())) -> repartion_phrase_interet_avis
+
+base_avis <- arrow::read_feather('../data/intermediate/base_avis.feather')
+levels_order <- c( "Bernard (83-91)", "Changeux (92-99)","Sicard (00-08)", "Grimfeld (09-11)", "Ameisen (12-15)", "Delfraissy (16-)")
+
+base_avis$president <- factor(base_avis$president, levels = levels_order)
+```
+#### Proportion sur l'ensemble des phrases de l'avis
+```{r, fig.width=30, fig.height=20}
+#| eval: true
+
+repartion_phrase_interet_avis%>%
+  mutate(count = nb_phrases - nb_phrases_interet,
+         Label = "N'évoque pas personnalité humaine")%>%
+  select(num, Label, count)%>%
+  rbind(predictions_gpt %>%
+  group_by(num, Label) %>%
+  summarise(count = n(), .groups = 'drop'))%>%
+  group_by(num) %>%
+  mutate(percentage = 100 * count / sum(count)) %>%
+  ungroup()%>%
+  mutate(Label = factor(Label, levels = c("N'évoque pas personnalité humaine",
+                                          "Personne relationnelle",
+                                          "Individu ou sujet",
+                                          "Genre/espèce humaine",
+                                         "Corps humain",
+                                         "Personne juridique (protection/responsabilité)",
+                                         "Sentiment humain")))%>%
+  mutate(percentage = ifelse(is.na(percentage),0,percentage))%>%
+  filter(!is.na(num))-> percentage_par_rapport_tot_sentence
+
+percentage_par_rapport_tot_sentence <- percentage_par_rapport_tot_sentence%>%
+  left_join(base_avis%>%
+              select(num,Date, president),
+            by = "num")
+palette <- c("white","#E995EB","#7CA0D4","#A48AD3","#BADE86","#2B8AAE" ,"#624894")
+# Graphique en barres empilées
+percentage_all_sentences_plot <- ggplot(percentage_par_rapport_tot_sentence, aes(x = factor(num), y = percentage, fill = Label)) +
+  geom_bar(stat = "identity", position = "stack", alpha = 0.8, color = "black") +
+  theme_ready(text_size = 37) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, size = 20)) +
+  scale_fill_manual(values = palette) +
+  labs(fill = "Label", color = "Label",
+       title = "Proportion des représentation de la personnalité humaine au cours des années par avis", x = "Numéro avis", y = "Pourcentage",
+       caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: Chaque barre représente un avis.\nL'avis 21 est composé à 29% de phrase, dont une majorité référant au corps humain.") +
+  guides(fill = guide_legend(title.position = "top"))+
+  geom_hline(yintercept = 5, color = "red", linetype = "dotted")+
+geom_hline(yintercept = 10, color = "red", linetype = "dotted")+
+geom_hline(yintercept = 15, color = "red", linetype = "dotted")+
+geom_hline(yintercept = 20, color = "red", linetype = "dotted")+
+geom_hline(yintercept = 25, color = "red", linetype = "dotted")+
+  theme(plot.caption = element_text(size = 40))
+
+
+# Convert the Date to a numeric year for plotting
+percentage_par_rapport_tot_sentence <- percentage_par_rapport_tot_sentence %>%
+  mutate(year = as.numeric(format(Date, "%Y"))) %>%
+  group_by(year) %>%
+  mutate(min_avis = min(num),
+         max_avis = max(num)) %>%
+  ungroup()%>%
+  mutate(label_year = substr(as.character(year), 3, 4))
+
+# Create a timeline plot with black contours and varying heights based on counts
+timeline_avis<- ggplot(percentage_par_rapport_tot_sentence) +
+  geom_rect(aes(xmin = num - 0.5, xmax = num + 0.5, ymin = 0, ymax = 0.1, fill = president), size = 2) +
+  geom_rect(aes(xmin = min_avis - 0.5, xmax = max_avis + 0.5, ymin = 0, ymax = 0.1), size = 3, 
+            fill = NA, color = "black", linetype = "dotted") +
+  geom_text(data = percentage_par_rapport_tot_sentence %>% distinct(label_year, min_avis, max_avis), 
+            aes(x = (min_avis + max_avis) / 2, y = 0, label = label_year), angle = 90, vjust = 0.5, hjust = 0, size = 15) +
+  scale_x_continuous(breaks = unique(percentage_par_rapport_tot_sentence$num),
+                     labels = unique(percentage_par_rapport_tot_sentence$num)) +
+  theme_ready(text_size = 33)+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, size = 20),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        legend.text = element_text(size = 35), # Increased legend text size
+        legend.title = element_text(size = 38)) +
+  scale_fill_prism(palette = "floral") +
+  labs(fill = "President",
+       title = "Timeline des Avis par Président",
+       x = "Numéro d'avis", y = NULL,
+       caption = "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture : Les 3 premiers avis sont publiés en 1984, les 4 derniers en 2023.") +
+  guides(fill = guide_legend(title.position = "top"))+
+  theme(plot.caption = element_text(size = 40))
+
+ggarrange(percentage_all_sentences_plot,
+          timeline_avis,
+          ncol =1,
+          nrow =2,
+          align = "h",
+          heights = c(2,1.3))
+```
+
+### Proportions fines de la personnalité humaine regroupées par année, sur l'ensemble des phrases publiées
+
+```{r, fig.width=19, fig.height=10}
+
+palette <- c("#E995EB","#7CA0D4","#A48AD3","#BADE86","#2B8AAE" ,"#624894")
+
+percentage_par_rapport_tot_sentence%>%
+  #mutate(num = factor(num))%>%
+  filter(Label != "N'évoque pas personnalité humaine")%>%
+  ggscatter(x = "num", y = "percentage", color = "Label",facet.by = "Label",
+            add = "reg.line",
+            conf.int = TRUE, # Add confidence interval
+            add.params = list(fill = "lightgray"))+
+           #cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+           #cor.coeff.args = list(method = "pearson", label.x = 3, label.sep = "\n"))+
+  theme_ready(text_size = 25) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
+  scale_color_manual(values = palette) +
+  labs(fill = "Label", color = "Label",
+       title = "Proportion des représentation de la personnalité humaine\nau cours des années par avis", x = "Numéro avis", y = "Pourcentage",
+       caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: Chaque point représente un avis.\nAu cours du temps, les avis ont tendance à utiliser plus\nun vocabulaire de la personne (éco,droit) plutôt que centré sur le pur biologique.") +
+  guides(fill = guide_legend(title.position = "top"))
+```
+
+```{r, fig.width=40, fig.height=14}
+#| eval: false
+
+palette <- c("white","#E995EB","#7CA0D4","#A48AD3","#BADE86","#2B8AAE" ,"#624894")
+
+repartion_phrase_interet_avis%>%
+  mutate(count = nb_phrases - nb_phrases_interet,
+         Label = "N'évoque pas personnalité humaine")%>%
+  mutate(year = as.numeric(format(Date, format="%Y")))%>%
+  group_by(year, Label)%>%
+  summarise(count = sum(count))%>%
+  select(year,Label,count)%>%
+  rbind(predictions_gpt %>%
+  mutate(year = as.numeric(format(Date, format="%Y")))%>%
+  group_by(year, Label) %>%
+  summarise(count = n(), .groups = 'drop'))%>%
+  group_by(year) %>%
+  mutate(percentage = 100 * count / sum(count)) %>%
+  ungroup()%>%
+  mutate(Label = factor(Label, levels = c("N'évoque pas personnalité humaine",
+                                          "Personne relationnelle",
+                                          "Individu ou sujet",
+                                          "Genre/espèce humaine",
+                                         "Corps humain",
+                                         "Personne juridique (protection/responsabilité)",
+                                         "Sentiment humain")))%>%
+  mutate(percentage = ifelse(is.na(percentage),0,percentage))%>%
+  filter(!is.na(year))%>%
+  ggplot(aes(x = factor(year), y = percentage, fill = Label)) +
+  geom_bar(stat = "identity", position = "stack", alpha = 0.8, color = "black") +
+  theme_ready(text_size = 33) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
+  scale_fill_manual(values = palette) +
+  labs(fill = "Label", color = "Label",
+       title = "Proportion des représentation de la personnalité humaine au cours des années", x = "Numéro avis", y = "Pourcentage",
+       caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: L'année 1986, le CCNE a publié 15% de phrases référant au corps humain.") +
+  guides(fill = guide_legend(title.position = "top"))+
+  geom_hline(yintercept = 5, color = "red", linetype = "dotted")+
+geom_hline(yintercept = 10, color = "red", linetype = "dotted")+
+geom_hline(yintercept = 15, color = "red", linetype = "dotted")+
+geom_hline(yintercept = 20, color = "red", linetype = "dotted")+
+geom_hline(yintercept = 25, color = "red", linetype = "dotted")
+```
+```{r, fig.width=19, fig.height=10}
+palette <- c("#E995EB","#7CA0D4","#A48AD3","#BADE86","#2B8AAE" ,"#624894","#8BA56F")
+repartion_phrase_interet_avis%>%
+  mutate(count = nb_phrases - nb_phrases_interet,
+         Label = "N'évoque pas personnalité humaine")%>%
+  mutate(year = as.numeric(format(Date, format="%Y")))%>%
+  group_by(year, Label)%>%
+  summarise(count = sum(count))%>%
+  select(year,Label,count)%>%
+  rbind(predictions_gpt %>%
+  mutate(year = as.numeric(format(Date, format="%Y")))%>%
+  group_by(year, Label) %>%
+  summarise(count = n(), .groups = 'drop'))%>%
+  group_by(year) %>%
+  mutate(percentage = 100 * count / sum(count)) %>%
+  ungroup()%>%
+  mutate(Label = factor(Label, levels = c("N'évoque pas personnalité humaine",
+                                          "Personne relationnelle",
+                                          "Individu ou sujet",
+                                          "Genre/espèce humaine",
+                                         "Corps humain",
+                                         "Personne juridique (protection/responsabilité)",
+                                         "Sentiment humain")))%>%
+  mutate(percentage = ifelse(is.na(percentage),0,percentage))%>%
+  filter(!is.na(year))%>%
+  filter(Label != "N'évoque pas personnalité humaine")%>%
+  ggscatter(x = "year", y = "percentage", color = "Label",facet.by = "Label",
+            add = "reg.line",
+            conf.int = TRUE, # Add confidence interval
+            add.params = list(fill = "lightgray"))+
+  theme_ready(text_size = 25) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
+  scale_color_manual(values = palette) +
+  labs(fill = "Label", color = "Label",
+       title = "Proportion des représentation de la personnalité humaine\nau cours des années par année", x = "Années", y = "Pourcentage",
+       caption= "Graphique de l'auteur.\nDonnées collectées par l'auteur.\nLecture: Chaque point représente le pourcentage de la catégorie parmis les phrases publiées cette année.\nAu cours du temps, les avis ont tendance à utiliser plus\nun vocabulaire de la personne (éco,droit) plutôt que centré sur le pur biologique.") +
+  guides(fill = guide_legend(title.position = "top"))+
+  theme(plot.caption = element_text(size = 40))
+```
+
 
