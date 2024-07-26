@@ -4,7 +4,7 @@
 /src/models_all/
 
 /original_output/
-
+/output/
 /src/LLM/models/
 
 /data/ACL/anthology+abstracts.bib
