@@ -7,8 +7,10 @@
     <style>
         body {
             display: flex;
+            flex-direction: column;
             margin: 0;
             font-family: Arial, sans-serif;
+            min-height: 100vh;
         }
         #main-content {
             flex: 1;
@@ -19,18 +21,50 @@
             padding: 20px;
             background-color: #f0f0f0;
             border-left: 1px solid #ccc;
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            z-index: 1;
+        }
+        #toggle-sidebar {
+            display: none;
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            z-index: 2;
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
         }
         iframe {
             width: 100%;
-            height: 600px;
+            height: calc(100vh - 40px);
             border: none;
         }
         h1 {
             font-size: 24px;
         }
+        @media (min-width: 768px) {
+            body {
+                flex-direction: row;
+            }
+            #sidebar {
+                display: block;
+                position: static;
+                height: auto;
+            }
+            #toggle-sidebar {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
+    <button id="toggle-sidebar" onclick="toggleSidebar()">☰</button>
     <div id="main-content">
         <h1>Mémoire Léopold Maurice sur les avis du CCNE</h1>
         <iframe src="memoire.pdf"></iframe>
@@ -41,5 +75,16 @@
         <h2>Contexte</h2>
         <p>Ce mémoire explore les avis du Comité Consultatif National d'Éthique (CCNE). Il analyse le traitement de la personne dans les avis, et le réseau de citations. Il s'agit d'une recherche menée par Léopold Maurice, sous la supervision d'Emmanuel Didier et de Samuel Coavoux.</p>
     </div>
+
+    <script>
+        function toggleSidebar() {
+            var sidebar = document.getElementById("sidebar");
+            if (sidebar.style.display === "block") {
+                sidebar.style.display = "none";
+            } else {
+                sidebar.style.display = "block";
+            }
+        }
+    </script>
 </body>
 </html>
