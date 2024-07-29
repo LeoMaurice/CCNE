@@ -15,18 +15,14 @@
         #main-content {
             flex: 1;
             padding: 20px;
+            order: 2;
         }
         #sidebar {
-            width: 300px;
+            width: 100%;
             padding: 20px;
             background-color: #f0f0f0;
-            border-left: 1px solid #ccc;
-            display: none;
-            position: absolute;
-            right: 0;
-            top: 0;
-            height: 100%;
-            z-index: 1;
+            border-bottom: 1px solid #ccc;
+            order: 1;
         }
         #toggle-sidebar {
             display: none;
@@ -42,7 +38,7 @@
         }
         iframe {
             width: 100%;
-            height: calc(100vh - 40px);
+            height: 600px;
             border: none;
         }
         h1 {
@@ -53,9 +49,14 @@
                 flex-direction: row;
             }
             #sidebar {
-                display: block;
-                position: static;
+                width: 300px;
+                border-bottom: none;
+                border-left: 1px solid #ccc;
+                order: 0;
                 height: auto;
+            }
+            #main-content {
+                order: 1;
             }
             #toggle-sidebar {
                 display: none;
@@ -65,15 +66,15 @@
 </head>
 <body>
     <button id="toggle-sidebar" onclick="toggleSidebar()">☰</button>
-    <div id="main-content">
-        <h1>Mémoire Léopold Maurice sur les avis du CCNE</h1>
-        <iframe src="memoire.pdf"></iframe>
-    </div>
     <div id="sidebar">
         <h2>Ressources</h2>
         <p><a href="https://leomaurice.github.io/CCNE/" target="_blank">Site du mémoire</a></p>
         <h2>Contexte</h2>
         <p>Ce mémoire explore les avis du Comité Consultatif National d'Éthique (CCNE). Il analyse le traitement de la personne dans les avis, et le réseau de citations. Il s'agit d'une recherche menée par Léopold Maurice, sous la supervision d'Emmanuel Didier et de Samuel Coavoux.</p>
+    </div>
+    <div id="main-content">
+        <h1>Mémoire Léopold Maurice sur les avis du CCNE</h1>
+        <iframe src="memoire.pdf" type="application/pdf" allowfullscreen></iframe>
     </div>
 
     <script>
