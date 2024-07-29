@@ -74,7 +74,7 @@
     </div>
     <div id="main-content">
         <h1>Mémoire Léopold Maurice sur les avis du CCNE</h1>
-        <iframe src="memoire.pdf" type="application/pdf" allowfullscreen></iframe>
+        <iframe id="theFrame" src="memoire.pdf" style="height:1000px; width:100%;" allowfullscreen></iframe>
     </div>
 
     <script>
@@ -86,6 +86,19 @@
                 sidebar.style.display = "block";
             }
         }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            var theFrame = document.getElementById("theFrame");
+            theFrame.onload = function() {
+                var contentDoc = theFrame.contentDocument || theFrame.contentWindow.document;
+                if (contentDoc) {
+                    var img = contentDoc.getElementsByTagName("img")[0];
+                    if (img) {
+                        img.style.width = "100%";
+                    }
+                }
+            };
+        });
     </script>
 </body>
 </html>
