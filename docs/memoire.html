@@ -36,7 +36,7 @@
             border: none;
             cursor: pointer;
         }
-        iframe {
+        #pdf-viewer {
             width: 100%;
             height: 600px;
             border: none;
@@ -63,6 +63,7 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="pdfjs/web/viewer.css">
 </head>
 <body>
     <button id="toggle-sidebar" onclick="toggleSidebar()">☰</button>
@@ -74,10 +75,13 @@
     </div>
     <div id="main-content">
         <h1>Mémoire Léopold Maurice sur les avis du CCNE</h1>
-        <iframe id="theFrame" src="memoire.pdf" style="height:1000px; width:100%;" allowfullscreen></iframe>
+        <div id="pdf-viewer" class="pdfViewer"></div>
+        <button id="download-pdf">Télécharger le PDF</button>
     </div>
 
-    <script>
+    <script type="module">
+        import { getDocument, GlobalWorkerOptions } from './pdfjs/build/pdf.mjs';
+
         function toggleSidebar() {
             var sidebar = document.getElementById("sidebar");
             if (sidebar.style.display === "block") {
@@ -88,16 +92,45 @@
         }
 
         document.addEventListener("DOMContentLoaded", function() {
-            var theFrame = document.getElementById("theFrame");
-            theFrame.onload = function() {
-                var contentDoc = theFrame.contentDocument || theFrame.contentWindow.document;
-                if (contentDoc) {
-                    var img = contentDoc.getElementsByTagName("img")[0];
-                    if (img) {
-                        img.style.width = "100%";
-                    }
+            var pdfPath = 'memoire.pdf';
+            GlobalWorkerOptions.workerSrc = './pdfjs/build/pdf.worker.mjs';
+
+            var loadingTask = getDocument(pdfPath);
+            loadingTask.promise.then(function(pdf) {
+                console.log('PDF loaded');
+
+                var container = document.getElementById('pdf-viewer');
+                var scale = 1.5;
+
+                for (var pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                    pdf.getPage(pageNum).then(function(page) {
+                        var viewport = page.getViewport({ scale: scale });
+
+                        var canvas = document.createElement('canvas');
+                        container.appendChild(canvas);
+                        var context = canvas.getContext('2d');
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+
+                        var renderContext = {
+                            canvasContext: context,
+                            viewport: viewport
+                        };
+                        page.render(renderContext);
+                    });
                 }
-            };
+            }, function(reason) {
+                console.error(reason);
+            });
+
+            document.getElementById('download-pdf').addEventListener('click', function() {
+                var link = document.createElement('a');
+                link.href = pdfPath;
+                link.download = 'memoire.pdf';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
         });
     </script>
 </body>
