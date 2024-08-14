@@ -1,0 +1,435 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Accueil, Mémoire CCNE",
+    "section": "",
+    "text": "Bienvenue sur le site de mon mémoire sur le CCNE\nCe site présente les graphiques interactifs et annexe numérique créés dans le cadre de mon mémoire de sociologie\nsous la direction d’Emmanuel Didier et de Samuel Coavoux sur le Comité Consultatif National d’Ethique (CCNE),\npar Léopold MAURICE.\nLiens utiles :\n\nRépertoire Github, avec les codes et les données à l’adresse\nMémoire, au format PDF\nListe des avis analysés, avec métadonnées et liens téléchargeables\n\n\n\nGraphiques interactifs, dont les résultats sont présentés succintement dans le mémoire\nCitations les plus présentes dans les avis du CCNE\nRéseau ego des citations autour de chaque avis du CCNE\nRéseau entre les citations des avis du CCNE\n\n\nAnalyses et annexes numériques\nQuelques informations sur les avis du CCNE\nDescription des professions des membres du CCNE\nPersonnalité humaine au sein des avis du CCNE\nRésumé des citations des avis du CCNE\nInformation de l’angle des avis en fonction de la profession",
+    "crumbs": [
+      "Accueil",
+      "Accueil, Mémoire CCNE"
+    ]
+  },
+  {
+    "objectID": "personne_across_avis.html",
+    "href": "personne_across_avis.html",
+    "title": "Représentation personnalité humaine au cours des avis du CCNE",
+    "section": "",
+    "text": "Pourcentage des avis\n\n\nPourcentage des avis publiées sous le mandat d'un président, selon le rapport à la personnalité humaine\n\n\n\nLabel\nBernard (83-91)\nChangeux (92-99)\nSicard (00-08)\nGrimfeld (09-11)\nAmeisen (12-15)\nDelfraissy (16-)\n\n\n\n\nCorps humain\n85.7\n75.0\n69.8\n66.7\n88.9\n70\n\n\nGenre/espèce humaine\n53.6\n43.8\n72.1\n83.3\n88.9\n90\n\n\nIndividu ou sujet\n39.3\n68.8\n88.4\n91.7\n100.0\n100\n\n\nPersonne relationnelle\n35.7\n53.1\n67.4\n100.0\n100.0\n85\n\n\nPersonne responsable et autonome\n46.4\n56.2\n83.7\n83.3\n77.8\n80\n\n\nPersonne à protéger\n42.9\n71.9\n79.1\n83.3\n88.9\n90\n\n\nSentiment humain\n17.9\n25.0\n51.2\n83.3\n44.4\n80\n\n\nCite toutes les catégories\n7.1\n12.5\n25.6\n50.0\n22.2\n50\n\n\nCite 6 des 7 catégories\n14.3\n31.2\n53.5\n66.7\n77.8\n75\n\n\nCite 5 des 7 catégories\n21.4\n37.5\n67.4\n83.3\n88.9\n85\n\n\nCite 4 des 7 catégories\n42.9\n59.4\n81.4\n91.7\n100.0\n90\n\n\nCite 3 des 7 catégories\n60.7\n68.8\n88.4\n100.0\n100.0\n95\n\n\n\na Tableau de l’auteur. Données de l’auteur. Champ : Ensembles des phrases sur la personnalité humaines dans les 144. Lecture : Durant le mandat de Bernard, 85.7% des avis contiennent au moins une phrase sur le corps humain. On peut conclure de l’augmentation de chaque catégorie, une diversification des rhétoriques.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nPourcentage de phrases\n\n\nPourcentage des phrases publiées sous le mandat d'un président, selon le rapport à la personnalité humaine\n\n\n\nLabel\nBernard (83-91)\nChangeux (92-99)\nSicard (00-08)\nGrimfeld (09-11)\nAmeisen (12-15)\nDelfraissy (16-)\n\n\n\n\nCorps humain\n45.9\n22.5\n20.7\n41.9\n15.3\n9.3\n\n\nGenre/espèce humaine\n12.9\n14.7\n8.9\n11.5\n8.3\n16.5\n\n\nIndividu ou sujet\n14.8\n17.3\n17.7\n13.5\n16.4\n23.2\n\n\nPersonne relationnelle\n8.0\n12.4\n14.6\n9.6\n16.5\n19.4\n\n\nPersonne responsable et autonome\n11.4\n14.2\n16.0\n8.5\n24.5\n14.6\n\n\nPersonne à protéger\n5.6\n17.4\n16.0\n9.3\n16.5\n13.3\n\n\nSentiment humain\n1.5\n1.4\n6.1\n5.8\n2.4\n3.7\n\n\n\na Tableau de l’auteur. Données de l’auteur. Champ : Ensembles des phrases sur la personnalité humaines dans les 144. Lecture : Durant le mandat de Bernard, 45.9% des phrases publiées portent sur le corps humain.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nPourcentage de phrases\n\n\nPourcentage des phrases publiées sous le mandat d'un président, selon le rapport à la personnalité humaine\n\n\n\nLabel\nBernard (83-91)\nChangeux (92-99)\nSicard (00-08)\nGrimfeld (09-11)\nAmeisen (12-15)\nDelfraissy (16-)\n\n\n\n\nCorps humain\n5.85\n2.62\n2.86\n6.06\n2.71\n1.45\n\n\nGenre/espèce humaine\n1.64\n1.71\n1.23\n1.66\n1.47\n2.58\n\n\nIndividu ou sujet\n1.88\n2.02\n2.43\n1.95\n2.92\n3.63\n\n\nPersonne relationnelle\n1.02\n1.45\n2.02\n1.40\n2.93\n3.04\n\n\nPersonne responsable et autonome\n1.45\n1.66\n2.20\n1.23\n4.36\n2.29\n\n\nPersonne à protéger\n0.71\n2.03\n2.20\n1.35\n2.93\n2.08\n\n\nSentiment humain\n0.19\n0.17\n0.85\n0.84\n0.43\n0.59\n\n\n\na Tableau de l’auteur. Données de l’auteur. Champ : Ensembles des phrases dans les 144. Lecture : Durant le mandat de Bernard, 5.8% des phrases publiées portent sur le corps humain.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nPourcentage des avis\n\n\nPourcentage des avis publiées sous le mandat d'un président, selon le rapport à la personnalité humaine\n\n\n\nLabel\nBernard (83-91)\nChangeux (92-99)\nSicard (00-08)\nGrimfeld (09-11)\nAmeisen (12-15)\nDelfraissy (16-)\n\n\n\n\nCorps humain\n85.7\n68.8\n69.8\n66.7\n88.9\n65\n\n\nGenre/espèce humaine\n53.6\n46.9\n69.8\n75.0\n88.9\n95\n\n\nIndividu ou sujet\n50.0\n65.6\n88.4\n75.0\n100.0\n95\n\n\nPersonne juridique (protection/responsabilité)\n64.3\n75.0\n90.7\n91.7\n88.9\n95\n\n\nPersonne relationnelle\n39.3\n50.0\n65.1\n100.0\n88.9\n80\n\n\nSentiment humain\n25.0\n18.8\n53.5\n91.7\n66.7\n75\n\n\nCite toutes les catégories\n10.7\n9.4\n30.2\n33.3\n33.3\n45\n\n\nCite 5 des 6 catégories\n28.6\n28.1\n55.8\n66.7\n88.9\n75\n\n\nCite 4 des 6 catégories\n42.9\n50.0\n74.4\n100.0\n100.0\n85\n\n\nCite 3 des 6 catégories\n60.7\n56.2\n81.4\n100.0\n100.0\n100\n\n\nCite 2 des 6 catégories\n78.6\n81.2\n95.3\n100.0\n100.0\n100\n\n\n\na Tableau de l’auteur. Données de l’auteur. Champ : Ensembles des phrases sur la personnalité humaines dans les 144. Lecture : Durant le mandat de Bernard, 85.7% des avis contiennent au moins une phrase sur le corps humain. On peut conclure de l’augmentation de chaque catégorie, une diversification des rhétoriques.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nPourcentage de phrases\n\n\nPourcentage des phrases publiées sous le mandat d'un président, selon le rapport à la personnalité humaine\n\n\n\nLabel\nBernard (83-91)\nChangeux (92-99)\nSicard (00-08)\nGrimfeld (09-11)\nAmeisen (12-15)\nDelfraissy (16-)\n\n\n\n\nCorps humain\n45.3\n21.9\n19.7\n42.0\n13.5\n8.5\n\n\nGenre/espèce humaine\n12.4\n14.9\n9.6\n10.1\n10.0\n16.7\n\n\nIndividu ou sujet\n14.9\n16.5\n18.5\n13.3\n16.8\n22.4\n\n\nPersonne juridique (protection/responsabilité)\n17.8\n34.1\n32.7\n18.8\n42.1\n31.4\n\n\nPersonne relationnelle\n7.2\n10.7\n13.3\n8.0\n14.6\n16.6\n\n\nSentiment humain\n2.2\n1.9\n6.4\n6.8\n3.0\n4.0\n\n\n\na Tableau de l’auteur. Données de l’auteur. Champ : Ensembles des phrases sur la personnalité humaines dans les 144. Lecture : Durant le mandat de Bernard, 45.9% des phrases publiées portent sur le corps humain.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nPourcentage de phrases\n\n\nPourcentage des phrases publiées sous le mandat d'un président, selon le rapport à la personnalité humaine\n\n\n\nLabel\nBernard (83-91)\nChangeux (92-99)\nSicard (00-08)\nGrimfeld (09-11)\nAmeisen (12-15)\nDelfraissy (16-)\n\n\n\n\nCorps humain\n5.78\n2.55\n2.72\n6.09\n2.40\n1.34\n\n\nGenre/espèce humaine\n1.58\n1.74\n1.32\n1.47\n1.77\n2.62\n\n\nIndividu ou sujet\n1.90\n1.92\n2.55\n1.92\n2.98\n3.50\n\n\nPersonne juridique (protection/responsabilité)\n2.27\n3.97\n4.50\n2.72\n7.48\n4.92\n\n\nPersonne relationnelle\n0.91\n1.25\n1.83\n1.15\n2.59\n2.60\n\n\nSentiment humain\n0.28\n0.22\n0.88\n0.99\n0.53\n0.63\n\n\n\na Tableau de l’auteur. Données de l’auteur. Champ : Ensembles des phrases dans les 144. Lecture : Durant le mandat de Bernard, 5.8% des phrases publiées portent sur le corps humain.",
+    "crumbs": [
+      "Accueil",
+      "Représentation personnalité humaine au cours des avis du CCNE"
+    ]
+  },
+  {
+    "objectID": "personne_across_avis.html#biologique-vs-vivant-vs-social-vs-moral",
+    "href": "personne_across_avis.html#biologique-vs-vivant-vs-social-vs-moral",
+    "title": "Représentation personnalité humaine au cours des avis du CCNE",
+    "section": "",
+    "text": "Pourcentage des avis\n\n\nPourcentage des avis publiées sous le mandat d'un président, selon le rapport à la personnalité humaine\n\n\n\nLabel\nBernard (83-91)\nChangeux (92-99)\nSicard (00-08)\nGrimfeld (09-11)\nAmeisen (12-15)\nDelfraissy (16-)\n\n\n\n\nCorps humain\n85.7\n75.0\n69.8\n66.7\n88.9\n70\n\n\nGenre/espèce humaine\n53.6\n43.8\n72.1\n83.3\n88.9\n90\n\n\nIndividu ou sujet\n39.3\n68.8\n88.4\n91.7\n100.0\n100\n\n\nPersonne relationnelle\n35.7\n53.1\n67.4\n100.0\n100.0\n85\n\n\nPersonne responsable et autonome\n46.4\n56.2\n83.7\n83.3\n77.8\n80\n\n\nPersonne à protéger\n42.9\n71.9\n79.1\n83.3\n88.9\n90\n\n\nSentiment humain\n17.9\n25.0\n51.2\n83.3\n44.4\n80\n\n\nCite toutes les catégories\n7.1\n12.5\n25.6\n50.0\n22.2\n50\n\n\nCite 6 des 7 catégories\n14.3\n31.2\n53.5\n66.7\n77.8\n75\n\n\nCite 5 des 7 catégories\n21.4\n37.5\n67.4\n83.3\n88.9\n85\n\n\nCite 4 des 7 catégories\n42.9\n59.4\n81.4\n91.7\n100.0\n90\n\n\nCite 3 des 7 catégories\n60.7\n68.8\n88.4\n100.0\n100.0\n95\n\n\n\na Tableau de l’auteur. Données de l’auteur. Champ : Ensembles des phrases sur la personnalité humaines dans les 144. Lecture : Durant le mandat de Bernard, 85.7% des avis contiennent au moins une phrase sur le corps humain. On peut conclure de l’augmentation de chaque catégorie, une diversification des rhétoriques.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nPourcentage de phrases\n\n\nPourcentage des phrases publiées sous le mandat d'un président, selon le rapport à la personnalité humaine\n\n\n\nLabel\nBernard (83-91)\nChangeux (92-99)\nSicard (00-08)\nGrimfeld (09-11)\nAmeisen (12-15)\nDelfraissy (16-)\n\n\n\n\nCorps humain\n45.9\n22.5\n20.7\n41.9\n15.3\n9.3\n\n\nGenre/espèce humaine\n12.9\n14.7\n8.9\n11.5\n8.3\n16.5\n\n\nIndividu ou sujet\n14.8\n17.3\n17.7\n13.5\n16.4\n23.2\n\n\nPersonne relationnelle\n8.0\n12.4\n14.6\n9.6\n16.5\n19.4\n\n\nPersonne responsable et autonome\n11.4\n14.2\n16.0\n8.5\n24.5\n14.6\n\n\nPersonne à protéger\n5.6\n17.4\n16.0\n9.3\n16.5\n13.3\n\n\nSentiment humain\n1.5\n1.4\n6.1\n5.8\n2.4\n3.7\n\n\n\na Tableau de l’auteur. Données de l’auteur. Champ : Ensembles des phrases sur la personnalité humaines dans les 144. Lecture : Durant le mandat de Bernard, 45.9% des phrases publiées portent sur le corps humain.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nPourcentage de phrases\n\n\nPourcentage des phrases publiées sous le mandat d'un président, selon le rapport à la personnalité humaine\n\n\n\nLabel\nBernard (83-91)\nChangeux (92-99)\nSicard (00-08)\nGrimfeld (09-11)\nAmeisen (12-15)\nDelfraissy (16-)\n\n\n\n\nCorps humain\n5.85\n2.62\n2.86\n6.06\n2.71\n1.45\n\n\nGenre/espèce humaine\n1.64\n1.71\n1.23\n1.66\n1.47\n2.58\n\n\nIndividu ou sujet\n1.88\n2.02\n2.43\n1.95\n2.92\n3.63\n\n\nPersonne relationnelle\n1.02\n1.45\n2.02\n1.40\n2.93\n3.04\n\n\nPersonne responsable et autonome\n1.45\n1.66\n2.20\n1.23\n4.36\n2.29\n\n\nPersonne à protéger\n0.71\n2.03\n2.20\n1.35\n2.93\n2.08\n\n\nSentiment humain\n0.19\n0.17\n0.85\n0.84\n0.43\n0.59\n\n\n\na Tableau de l’auteur. Données de l’auteur. Champ : Ensembles des phrases dans les 144. Lecture : Durant le mandat de Bernard, 5.8% des phrases publiées portent sur le corps humain.",
+    "crumbs": [
+      "Accueil",
+      "Représentation personnalité humaine au cours des avis du CCNE"
+    ]
+  },
+  {
+    "objectID": "personne_across_avis.html#gpt-6-classes",
+    "href": "personne_across_avis.html#gpt-6-classes",
+    "title": "Représentation personnalité humaine au cours des avis du CCNE",
+    "section": "",
+    "text": "Pourcentage des avis\n\n\nPourcentage des avis publiées sous le mandat d'un président, selon le rapport à la personnalité humaine\n\n\n\nLabel\nBernard (83-91)\nChangeux (92-99)\nSicard (00-08)\nGrimfeld (09-11)\nAmeisen (12-15)\nDelfraissy (16-)\n\n\n\n\nCorps humain\n85.7\n68.8\n69.8\n66.7\n88.9\n65\n\n\nGenre/espèce humaine\n53.6\n46.9\n69.8\n75.0\n88.9\n95\n\n\nIndividu ou sujet\n50.0\n65.6\n88.4\n75.0\n100.0\n95\n\n\nPersonne juridique (protection/responsabilité)\n64.3\n75.0\n90.7\n91.7\n88.9\n95\n\n\nPersonne relationnelle\n39.3\n50.0\n65.1\n100.0\n88.9\n80\n\n\nSentiment humain\n25.0\n18.8\n53.5\n91.7\n66.7\n75\n\n\nCite toutes les catégories\n10.7\n9.4\n30.2\n33.3\n33.3\n45\n\n\nCite 5 des 6 catégories\n28.6\n28.1\n55.8\n66.7\n88.9\n75\n\n\nCite 4 des 6 catégories\n42.9\n50.0\n74.4\n100.0\n100.0\n85\n\n\nCite 3 des 6 catégories\n60.7\n56.2\n81.4\n100.0\n100.0\n100\n\n\nCite 2 des 6 catégories\n78.6\n81.2\n95.3\n100.0\n100.0\n100\n\n\n\na Tableau de l’auteur. Données de l’auteur. Champ : Ensembles des phrases sur la personnalité humaines dans les 144. Lecture : Durant le mandat de Bernard, 85.7% des avis contiennent au moins une phrase sur le corps humain. On peut conclure de l’augmentation de chaque catégorie, une diversification des rhétoriques.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nPourcentage de phrases\n\n\nPourcentage des phrases publiées sous le mandat d'un président, selon le rapport à la personnalité humaine\n\n\n\nLabel\nBernard (83-91)\nChangeux (92-99)\nSicard (00-08)\nGrimfeld (09-11)\nAmeisen (12-15)\nDelfraissy (16-)\n\n\n\n\nCorps humain\n45.3\n21.9\n19.7\n42.0\n13.5\n8.5\n\n\nGenre/espèce humaine\n12.4\n14.9\n9.6\n10.1\n10.0\n16.7\n\n\nIndividu ou sujet\n14.9\n16.5\n18.5\n13.3\n16.8\n22.4\n\n\nPersonne juridique (protection/responsabilité)\n17.8\n34.1\n32.7\n18.8\n42.1\n31.4\n\n\nPersonne relationnelle\n7.2\n10.7\n13.3\n8.0\n14.6\n16.6\n\n\nSentiment humain\n2.2\n1.9\n6.4\n6.8\n3.0\n4.0\n\n\n\na Tableau de l’auteur. Données de l’auteur. Champ : Ensembles des phrases sur la personnalité humaines dans les 144. Lecture : Durant le mandat de Bernard, 45.9% des phrases publiées portent sur le corps humain.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nPourcentage de phrases\n\n\nPourcentage des phrases publiées sous le mandat d'un président, selon le rapport à la personnalité humaine\n\n\n\nLabel\nBernard (83-91)\nChangeux (92-99)\nSicard (00-08)\nGrimfeld (09-11)\nAmeisen (12-15)\nDelfraissy (16-)\n\n\n\n\nCorps humain\n5.78\n2.55\n2.72\n6.09\n2.40\n1.34\n\n\nGenre/espèce humaine\n1.58\n1.74\n1.32\n1.47\n1.77\n2.62\n\n\nIndividu ou sujet\n1.90\n1.92\n2.55\n1.92\n2.98\n3.50\n\n\nPersonne juridique (protection/responsabilité)\n2.27\n3.97\n4.50\n2.72\n7.48\n4.92\n\n\nPersonne relationnelle\n0.91\n1.25\n1.83\n1.15\n2.59\n2.60\n\n\nSentiment humain\n0.28\n0.22\n0.88\n0.99\n0.53\n0.63\n\n\n\na Tableau de l’auteur. Données de l’auteur. Champ : Ensembles des phrases dans les 144. Lecture : Durant le mandat de Bernard, 5.8% des phrases publiées portent sur le corps humain.",
+    "crumbs": [
+      "Accueil",
+      "Représentation personnalité humaine au cours des avis du CCNE"
+    ]
+  },
+  {
+    "objectID": "reseau_citations.html",
+    "href": "reseau_citations.html",
+    "title": "Résumé des citations des avis du CCNE",
+    "section": "",
+    "text": "Résumé de la méthodologie et des données\nOn a collecté l’ensemble des citations dans les 144 avis du CCNE. Chaque citation a été mise en forme de la façon suivante : dans quel avis elle a été utilisée, quel est son auteur moral (ministère, sénat etc.) ou son domaine (article médical par exemple). De plus, pour rendre la lecture plus aisée, j’ai découpé chaque citation en différentes catégories :\n- Auteurs : personne suffisamment importante dont le nom a été relevé en propre au moment de la collecte. Cela concerne aussi bien des classiques (philosophes antiques, ou modernes d’avant le 20ème s.), que les auteurs les plus cités au cours des avis (Ricoeur, Canguilhem) que les membres du CCNE cités au sein des avis. - Autorités : Autorités administratives publics ou indépendantes, au sens de la loi de 2016, qui un pouvoir de contrôle effectif. - Comité d’éthique : Tout autre comité d’éthique, français ou d’un autre pays. - Comparaison pays : Pays qui font l’objet d’une comparaison dans l’un des avis. - Etat : Ministères, Parlement, Président, Premier Ministre, Administration (à l’exclusion des autorités indépendantes et/ou consultatives) - Forums : Organisations consultatives associées à une posture de conseils au gouvernement et d’expertise (Forums Hybride, Callon et al. 2001) comme le CCNE, les académies ou l’Ordre des médecins. - Loi : Codes de lois et lois votées au Parlement, regroupées par thématique. - Organisations Internationales : Toutes les organisations internationales incluant : institutions européennes (de l’UE ou Conseil de l’Europe), onusiennes (on a différencié l’OMS des autres, regroupées sous le terme ONU), économiques/financières (OCDE, FMI, Banque Mondiale), olympiques (CIO). - Presse : Journeaux de la presse quotidienne et bulletins spécialisés (médicaux ou en santé publique). - Science, littérature : livres et articles scientifiques, Oeuvres de fictions ou autobiographiques, regroupés par domaine. - Société : Société civile, regroupée dans des catégories simples : collectifs, syndicats, religion, fondations caritatives\nEn plus des visualisations présentes dans l’annexe numérique du mémoire, je présente ici les résultats les plus agrégés des citations. Pour une facilité de lecture, plutôt que parler citation par citation, ou même catégorie par catégorie, j’ai regroupé les citations entre elles, selon une logique qui dépend de la catégorie. Ainsi les lois ont été regroupé par leur thématique (lois de bioéthique, lois sur l’égalité des droits, sur la santé publique etc.), pour la presse un critère de fréquence a été attribué pour montrer les titres les plus importants et regroupés les autres. A l’avenir, je parlerais de noms détaillés pour la forme collectée et de noms simplifiés pour la forme regroupée.\n\n\nCitations les plus importantes sur l’ensemble de l’histoire du CCNE\nLes deux graphiques suivants permettent de se donner une idée des citations les plus importantes du CCNE sur la totalité des quarantes dernières années. Ces deux graphiques construis sur le même principe : chaque citation (avec son nom simplifié) est relié à sa catégorie, elle même relié au CCNE, dans une relation hiérarchique.\nOn y trouve les résultats suivants : - Auteurs : les membres du CCNE sont la catégories d’individus la plus cité avec 17 citations. Ensuite, ce sont les philosophes pré modernes mais dont aucun n’est cité plus d’une fois au cours des 144 avis (Spninoza, Nietzsche). Deux auteurs de la seconde moitié du XXème s. sortent vraiment du lot : Canguilhem et Ricoeur. Il faut quand même noté que le nombre de citations total de ces auteurs est très faible par rapport à la masse de citations scientifiques et littéraires, comme on peut le comparer avec les citations ‘Science, littérature’. - Science, littérature : en effet les sciences médicales sont largement les plus cités, avec un total de 1019 articles ou livres cités. La majorité des avis citent au moins un article médical, biologique, ou psychiatries/psychologies.En seconde place, les sciences humaines sont autant citées que la philosophie et l’éthique. Le droit, l’économie et l’écologie sont assez minoritaires : seulement 21 avis citent des ouvrages de droit, et seuls 16 des articles d’économie et seulement 2 avis citent des articles d’écologie (avis 133 par exemple). On a aussi quelques références à des oeuvres de fiction ou autobiographiques. En particulier, sur les questions “sensibles” comme l’autonisme, sur une période récente à partir de l’avis 102, des oeuvres autobiographiques écrites par des personnes sur le spectre autiste sont cités : c’est une première de tout les avis. On peut conclure qu’il n’y a pas consciemment de la part des membres du CCNE une référence explicite à certains philosophes. Canguilhem et Ricoeur sont les plus cités, mais combiné ils ne dépassent pas la douzaine d’avis faisant directement référence à eux. Le CCNE semble plutôt composé ses avis, de façon pragmatique, selon l’idée énoncé dès les premiers avis. Les citations scientifiques sont à l’image des membres mobilisés du CCNE : biomédical et sciences humaines. Par contre, il est intéressant de noter que le droit et l’économie sont très peu mobilisés : sciences de gouvernement c’est par leurs étatiques (tribunaux, rapports) qu’on peut y déceler leur influence, plutôt que par le pôle académique. - Autorités : Les autorités les plus cités sont très largement les autorités de sécurité sanitaire (AFSS) en particulier ce qui est actuellement dénommé comme l’Agence de la biomédecine (ABM) et la Haute Autorité de Santé (HAS). Au total 38 avis citent une expertise d’une des AFSS, pour un total de 67 citations. Le conseil d’Etat est largement l’institution la plus citée : 19 avis y font référence pour 27 citations. Cela vient probablement des forts historiques liens entre les deux institutions. - Forums : Sans trop de surprise les forums les plus citées sont l’académie nationale de médecine, l’ordre des médecins, le conseil national du Sida. Le reste est composé du CESE, du défenseur des droits, et de divers observatoires (OFDT, ONFV, CNCDH). - Etat : Le CCNE cite principalement les directions des ministères sociaux, et rapports commandités en leurs noms, puis le parlement (Assemblée nationale, Sénat, OPCEST) et pour finir les tribunaux (Cour de cassation et autres tribunaux). Le premier ministre ou le président sont plutôt rares. Le Premier ministre dans le cas de rapports qu’il a commandité, le président à l’occasion des lois de bioéthique (Etats généraux de la bioéthique).\n\nComité d’éthique : Principalement le Groupe d’Ethique Européen (GEE) mis en place par la Commission Européenne, les espaces éthiques régionaux, le comité d’éthique du CNRS (COMETS/COPE) et le comité d’éthique de la Nuffield Foundation.\nComparaison pays : Les institutions américaines et britanniques sont largement les plus citées (respectivement 36 et 20 avis qui les citent), viennent ensuite les pays européens (regroupés ils apparaissent dans une quinzaine d’avis, avec la Suisse et la Belgique en premier lieu). USA : domination médicale, Suisse : francophone et leader pharmaceutique, Belgique : Fr, UK : ?.\nLoi : Codes de lois et lois votées au Parlement, regroupées par thématique. Code de la santé publique, code civil, les lois de bioéthique (particulièrement 1994 et 2004) et surtout la loi Huriet la plus citées en elle même. Puis viennent ensuite les lois thématiques : Egalités des droits, santé publique, fin de vie, RGPD/informatique et libertés.\nOrganisations Internationales : UE &gt; ONU &gt; OMS. Quelques traités mais pas tant que ça : 5 avis avec la convention d’Oviedo et 9 avec la déclaration d’Helsinki, 6 pour le code de Nuremberg.\nPresse : Pas mal de presse spécialisée, mais surtout beaucoup le monde 17 avis qui le citent.\nSociété : Principalement des collectifs.\n\n\n\n\n\n\n\n\n\n\n\n\nNombre de citations au cours du temps\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nTableau récapitulatif\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nPourcentage d'avis citant\n\n\nTableau du pourcentage de présence de certaines citations parmi les avis publiés sous le mandat d'un président\n\n\n\nCatégorie\nBernard (83-91)\nChangeux (92-99)\nSicard (00-08)\nGrimfeld (09-11)\nAmeisen (12-15)\nDelfraissy (16-)\n\n\n\n\nAuteurs\n3.6\n12.5\n23.3\n41.7\n55.6\n50\n\n\nAutorités\n7.1\n18.8\n32.6\n91.7\n55.6\n85\n\n\nComité d'éthique\n0.0\n18.8\n34.9\n41.7\n77.8\n55\n\n\nComparaison pays\n10.7\n37.5\n32.6\n25.0\n77.8\n65\n\n\nEtat\n17.9\n43.8\n51.2\n91.7\n88.9\n100\n\n\nForums\n10.7\n28.1\n34.9\n58.3\n66.7\n70\n\n\nLoi\n50.0\n68.8\n58.1\n75.0\n88.9\n90\n\n\nOrg Internationales\n35.7\n40.6\n44.2\n58.3\n55.6\n80\n\n\nPresse\n0.0\n21.9\n25.6\n33.3\n66.7\n80\n\n\nScience, littérature\n32.1\n56.2\n60.5\n91.7\n100.0\n95\n\n\nSociété\n7.1\n15.6\n18.6\n25.0\n44.4\n90\n\n\nCite toutes les catégories\n0.0\n0.0\n0.0\n0.0\n0.0\n15\n\n\nCite 10 des 11 catégories\n0.0\n3.1\n0.0\n0.0\n22.2\n20\n\n\nCite 9 des 11 catégories\n0.0\n3.1\n4.7\n8.3\n55.6\n65\n\n\nCite 8 des 11 catégories\n0.0\n9.4\n11.6\n25.0\n55.6\n85\n\n\nCite 7 des 11 catégories\n0.0\n12.5\n16.3\n58.3\n77.8\n90\n\n\n\na Tableau de l'auteur.\nChamps : Tous les avis numérotés publiés par le CCNE jusqu'au 144 et leurs citations.\nDonnées : citations collectées par l'auteur.\nLecture: Sous Bernard (83-91), 3.6% des avis publiés sous son mandat comprenait une citation d'un auteur remarquable.\nInterprétation : Au cours du temps, le nombre de catégorie mobilisées augmentent : on passe d'une réflexion basée sur la loi, la science biomédicale et les organisations internationales à un moment où de nouvelles formes de légitimités sont mobilisés : expertises non directement académiques, rapports administratifs, publications de collectifs, autorités indépendantes, comités consultatifs.",
+    "crumbs": [
+      "Accueil",
+      "Résumé des citations des avis du CCNE"
+    ]
+  },
+  {
+    "objectID": "mesonetwork.html",
+    "href": "mesonetwork.html",
+    "title": "Réseau entre les citations des avis du CCNE",
+    "section": "",
+    "text": "Quand le choix est changé, l’intervalle des avis séléctionné est mis à jour.\n\nviewof president = Inputs.radio([\"Bernard (83-91)\", \"Changeux (92-99)\", \"Sicard (00-08)\", \"Grimfeld (09-11)\", \"Ameisen (12-15)\", \"Delfraissy (16-)\"], {\n  label: \"Présent\",\n  value: \"Delfraissy (16-)\"\n})\n\n\n\n\n\n\n\n\n\n\npresident_data = await d3.json(\"data/max_min_par_president.json\");\n\n// Trouver la plage correspondant au président sélectionné\nselected_president_data = president_data.find(d =&gt; d.president === president);\n\n// Définir la plage des avis en fonction du président sélectionné\nimport {interval} from '@mootari/range-slider'\nviewof avis_range = interval([1, 144], {\n  step: 1,\n  value: [selected_president_data.avis_min, selected_president_data.avis_max],\n  label: \"Plage avis\",\n})\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nlist_all_categories = [\"Auteurs\",\"Autorités\",\"CCNE\",\"Comité d'éthique\",\"Comparaison pays\",\"Etat\",\"Forums\",\"Loi\",\"Org Internationales\",\"Presse\", \"Science, littérature\",\"Société\"];\nviewof categories = Inputs.checkbox(\n  list_all_categories, \n  {label: \"Catégories\", value: [\"Loi\", \"CCNE\"]}\n);",
+    "crumbs": [
+      "Accueil",
+      "Réseau entre les citations des avis du CCNE"
+    ]
+  },
+  {
+    "objectID": "mesonetwork.html#sélectionnez-un-président-pour-avoir-les-avis-publiés-sous-sa-présidence",
+    "href": "mesonetwork.html#sélectionnez-un-président-pour-avoir-les-avis-publiés-sous-sa-présidence",
+    "title": "Réseau entre les citations des avis du CCNE",
+    "section": "",
+    "text": "Quand le choix est changé, l’intervalle des avis séléctionné est mis à jour.\n\nviewof president = Inputs.radio([\"Bernard (83-91)\", \"Changeux (92-99)\", \"Sicard (00-08)\", \"Grimfeld (09-11)\", \"Ameisen (12-15)\", \"Delfraissy (16-)\"], {\n  label: \"Présent\",\n  value: \"Delfraissy (16-)\"\n})",
+    "crumbs": [
+      "Accueil",
+      "Réseau entre les citations des avis du CCNE"
+    ]
+  },
+  {
+    "objectID": "mesonetwork.html#sélectionner-lintervalle-des-avis-à-afficher-par-numéro-de-publication-dans-lordre-chronologique",
+    "href": "mesonetwork.html#sélectionner-lintervalle-des-avis-à-afficher-par-numéro-de-publication-dans-lordre-chronologique",
+    "title": "Réseau entre les citations des avis du CCNE",
+    "section": "",
+    "text": "president_data = await d3.json(\"data/max_min_par_president.json\");\n\n// Trouver la plage correspondant au président sélectionné\nselected_president_data = president_data.find(d =&gt; d.president === president);\n\n// Définir la plage des avis en fonction du président sélectionné\nimport {interval} from '@mootari/range-slider'\nviewof avis_range = interval([1, 144], {\n  step: 1,\n  value: [selected_president_data.avis_min, selected_president_data.avis_max],\n  label: \"Plage avis\",\n})",
+    "crumbs": [
+      "Accueil",
+      "Réseau entre les citations des avis du CCNE"
+    ]
+  },
+  {
+    "objectID": "mesonetwork.html#choisir-les-catégories-à-afficher",
+    "href": "mesonetwork.html#choisir-les-catégories-à-afficher",
+    "title": "Réseau entre les citations des avis du CCNE",
+    "section": "",
+    "text": "list_all_categories = [\"Auteurs\",\"Autorités\",\"CCNE\",\"Comité d'éthique\",\"Comparaison pays\",\"Etat\",\"Forums\",\"Loi\",\"Org Internationales\",\"Presse\", \"Science, littérature\",\"Société\"];\nviewof categories = Inputs.checkbox(\n  list_all_categories, \n  {label: \"Catégories\", value: [\"Loi\", \"CCNE\"]}\n);",
+    "crumbs": [
+      "Accueil",
+      "Réseau entre les citations des avis du CCNE"
+    ]
+  },
+  {
+    "objectID": "mesonetwork.html#afficher-ou-cacher-le-réseau",
+    "href": "mesonetwork.html#afficher-ou-cacher-le-réseau",
+    "title": "Réseau entre les citations des avis du CCNE",
+    "section": "Afficher ou cacher le réseau",
+    "text": "Afficher ou cacher le réseau\n\n// Afficher ou cacher le réseau\nviewof toggle_network = Inputs.toggle({label: \"Afficher le réseau\", value: true});\n\n\n\n\n\n\n\n#| edit: false\n#| echo: false\n#| warning: false\n#| message: false\n#| input:\n#|   - nodes\n#|   - edges\n#|   - toggle_network\n#|   - categories\n#|   - avis_range\nlibrary(dplyr, quietly = TRUE)\nlibrary(tidyr, quietly = TRUE)\nlibrary(igraph, quietly = TRUE)\nlibrary(visNetwork, quietly = TRUE)\ncategory_colors &lt;- c(\n  \"Auteurs\" = \"#6CC7B3\",\n  \"Autorités\" = \"#285291\",\n  \"CCNE\" = \"#9D3A5E\",\n  \"Comité d'éthique\" = \"#579125\",\n  \"Comparaison pays\" = \"#0F0F5C\",\n  \"Etat\" = \"#91188F\",\n  \"Forums\" = \"#0E405C\",\n  \"Loi\" = \"#915B11\",\n  \"Org Internationales\" = \"#4F2B91\",\n  \"Presse\" = \"#91181E\",\n  \"Science, littérature\" = \"#0B5C2D\",\n  \"Société\" = \"#BD6345\",\n  \"Avis étudié\" = \"#4269A0\"\n)\n\nif (toggle_network) {\n\n\n  # Filtrer les noeuds par catégories sélectionnées et plage d'avis\n  selected_nodes &lt;- nodes %&gt;%\n    filter(Categorie %in% categories & \n           as.numeric(name) &gt;= avis_range[1] & \n           as.numeric(name) &lt;= avis_range[2])\n\n  # Filtrer les edges\n  selected_edges &lt;- edges %&gt;%\n    filter(Categorie %in% categories &\n           ((as.numeric(from) &gt;= avis_range[1] & as.numeric(from) &lt;= avis_range[2]) |\n            (as.numeric(to) &gt;= avis_range[1] & as.numeric(to) &lt;= avis_range[2])))\n\n  linked_nodes &lt;- unique(c(selected_edges$from, selected_edges$to))\n  selected_nodes &lt;- nodes %&gt;%\n    filter(name %in% linked_nodes & Categorie %in% categories)\n\n  nodes &lt;- selected_nodes %&gt;%\n    mutate(id = name,\n           label = name,\n           group = Categorie,\n           color = category_colors[Categorie]) %&gt;%\n    select(id, label, group, color)\n\n  edges &lt;- selected_edges %&gt;%\n    rename(from = from, to = to) %&gt;%\n    select(from, to)\n\n  nb_avis = avis_range[2] - avis_range[1] + 1\n  font_size = 0.17 * nb_avis + 16.7\n\n  visNetwork(nodes, edges) %&gt;%\n    visEdges(arrows = 'to', color = list(inherit = \"to\")) %&gt;%\n    visNodes(scaling = list(min = 20, max = 2 * font_size),\n             font = list(size = font_size)) %&gt;%\n    visOptions(highlightNearest = list(enabled = TRUE, degree = 1, hideColor = \"rgba(200,200,200,0.0005)\", labelOnly = FALSE, algorithm = \"hierarchical\"), \n               nodesIdSelection = TRUE, collapse = TRUE) %&gt;%\n    visPhysics(solver = \"forceAtlas2Based\", \n               forceAtlas2Based = list(gravitationalConstant = -25)) %&gt;%\n    visGroups(groupname = \"Auteurs\", color = \"#6CC7B3\", shape = \"square\") %&gt;%\n    visGroups(groupname = \"Autorités\", color = \"#285291\", shape = \"square\") %&gt;%\n    visGroups(groupname = \"CCNE\", color = \"#9D3A5E\", shape = \"circle\") %&gt;%\n    visGroups(groupname = \"Comité d'éthique\", color = \"#579125\", shape = \"square\") %&gt;%\n    visGroups(groupname = \"Comparaison pays\", color = \"#0F0F5C\", shape = \"square\") %&gt;%\n    visGroups(groupname = \"Etat\", color = \"#91188F\", shape = \"square\") %&gt;%\n    visGroups(groupname = \"Forums\", color = \"#0E405C\", shape = \"square\") %&gt;%\n    visGroups(groupname = \"Loi\", color = \"#915B11\", shape = \"square\") %&gt;%\n    visGroups(groupname = \"Org Internationales\", color = \"#4F2B91\", shape = \"square\") %&gt;%\n    visGroups(groupname = \"Presse\", color = \"#91181E\", shape = \"square\") %&gt;%\n    visGroups(groupname = \"Science, littérature\", color = \"#0B5C2D\", shape = \"square\") %&gt;%\n    visGroups(groupname = \"Société\", color = \"#BD6345\", shape = \"square\")\n}",
+    "crumbs": [
+      "Accueil",
+      "Réseau entre les citations des avis du CCNE"
+    ]
+  },
+  {
+    "objectID": "top_citations.html",
+    "href": "top_citations.html",
+    "title": "Top citations des avis du CCNE",
+    "section": "",
+    "text": "viewof top_n = Inputs.radio([10,20,50], {\n  label: \"Nombre citations\",\n  value: 10\n})\n\n\n\n\n\n\n\n\n\n\nviewof type_nom = Inputs.radio([\"Noms détaillés\",\"Nom simplifiés\"], {\n  label: \"Type de noms\",\n  value: \"Noms détaillés\"\n})\n\n\n\n\n\n\n\n\n\nQuand le choix est changé, l’intervalle des avis séléctionné est mis à jour.\n\nviewof president = Inputs.radio([\"Bernard (83-91)\", \"Changeux (92-99)\", \"Sicard (00-08)\", \"Grimfeld (09-11)\", \"Ameisen (12-15)\", \"Delfraissy (16-)\"], {\n  label: \"Présent\",\n  value: \"Delfraissy (16-)\"\n})\n\n\n\n\n\n\n\n\n\n\npresident_data = await d3.json(\"data/max_min_par_president.json\");\n\n// Trouver la plage correspondant au président sélectionné\nselected_president_data = president_data.find(d =&gt; d.president === president);\n\n// Définir la plage des avis en fonction du président sélectionné\nimport {interval} from '@mootari/range-slider'\nviewof avis_range = interval([1, 144], {\n  step: 1,\n  value: [selected_president_data.avis_min, selected_president_data.avis_max],\n  label: \"Plage avis\",\n})\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nviewof top_category = Inputs.select([\"Science\", \"Presse\", \"Etat\", \"Auteurs\", \"Loi\", \"Forums\", \"Comité d'éthique\", \"Org Internationales\", \"Comparaison pays\", \"Société\", \"Autorités\", \"CCNE\"], {\n  label: \"Catégorie\",\n  value: \"Loi\"\n})",
+    "crumbs": [
+      "Accueil",
+      "Top citations des avis du CCNE"
+    ]
+  },
+  {
+    "objectID": "top_citations.html#sélectionnez-le-nombre-de-citations-à-afficher-dans-le-top",
+    "href": "top_citations.html#sélectionnez-le-nombre-de-citations-à-afficher-dans-le-top",
+    "title": "Top citations des avis du CCNE",
+    "section": "",
+    "text": "viewof top_n = Inputs.radio([10,20,50], {\n  label: \"Nombre citations\",\n  value: 10\n})",
+    "crumbs": [
+      "Accueil",
+      "Top citations des avis du CCNE"
+    ]
+  },
+  {
+    "objectID": "top_citations.html#choisir-le-type-de-noms",
+    "href": "top_citations.html#choisir-le-type-de-noms",
+    "title": "Top citations des avis du CCNE",
+    "section": "",
+    "text": "viewof type_nom = Inputs.radio([\"Noms détaillés\",\"Nom simplifiés\"], {\n  label: \"Type de noms\",\n  value: \"Noms détaillés\"\n})",
+    "crumbs": [
+      "Accueil",
+      "Top citations des avis du CCNE"
+    ]
+  },
+  {
+    "objectID": "top_citations.html#sélectionnez-un-président-pour-avoir-les-avis-publiés-sous-sa-présidence",
+    "href": "top_citations.html#sélectionnez-un-président-pour-avoir-les-avis-publiés-sous-sa-présidence",
+    "title": "Top citations des avis du CCNE",
+    "section": "",
+    "text": "Quand le choix est changé, l’intervalle des avis séléctionné est mis à jour.\n\nviewof president = Inputs.radio([\"Bernard (83-91)\", \"Changeux (92-99)\", \"Sicard (00-08)\", \"Grimfeld (09-11)\", \"Ameisen (12-15)\", \"Delfraissy (16-)\"], {\n  label: \"Présent\",\n  value: \"Delfraissy (16-)\"\n})",
+    "crumbs": [
+      "Accueil",
+      "Top citations des avis du CCNE"
+    ]
+  },
+  {
+    "objectID": "top_citations.html#sélectionner-lintervalle-des-avis-à-afficher-par-numéro-de-publication-dans-lordre-chronologique",
+    "href": "top_citations.html#sélectionner-lintervalle-des-avis-à-afficher-par-numéro-de-publication-dans-lordre-chronologique",
+    "title": "Top citations des avis du CCNE",
+    "section": "",
+    "text": "president_data = await d3.json(\"data/max_min_par_president.json\");\n\n// Trouver la plage correspondant au président sélectionné\nselected_president_data = president_data.find(d =&gt; d.president === president);\n\n// Définir la plage des avis en fonction du président sélectionné\nimport {interval} from '@mootari/range-slider'\nviewof avis_range = interval([1, 144], {\n  step: 1,\n  value: [selected_president_data.avis_min, selected_president_data.avis_max],\n  label: \"Plage avis\",\n})",
+    "crumbs": [
+      "Accueil",
+      "Top citations des avis du CCNE"
+    ]
+  },
+  {
+    "objectID": "top_citations.html#choisir-une-catégorie-de-citations-pour-le-calcul-du-top-parmi-cette-catégorie",
+    "href": "top_citations.html#choisir-une-catégorie-de-citations-pour-le-calcul-du-top-parmi-cette-catégorie",
+    "title": "Top citations des avis du CCNE",
+    "section": "",
+    "text": "viewof top_category = Inputs.select([\"Science\", \"Presse\", \"Etat\", \"Auteurs\", \"Loi\", \"Forums\", \"Comité d'éthique\", \"Org Internationales\", \"Comparaison pays\", \"Société\", \"Autorités\", \"CCNE\"], {\n  label: \"Catégorie\",\n  value: \"Loi\"\n})",
+    "crumbs": [
+      "Accueil",
+      "Top citations des avis du CCNE"
+    ]
+  },
+  {
+    "objectID": "liste_avis.html",
+    "href": "liste_avis.html",
+    "title": "Liste des avis analysés",
+    "section": "",
+    "text": "Informations concernant les avis\n\n\n\n\n\n\n\n\nListe des avis à télécharger\n\nAvis 001.pdf\n\n\nAvis 002.pdf\n\n\nAvis 003.pdf\n\n\nAvis 004.pdf\n\n\nAvis 005.pdf\n\n\nAvis 006.pdf\n\n\nAvis 007.pdf\n\n\nAvis 008.pdf\n\n\nAvis 009.pdf\n\n\nAvis 010.pdf\n\n\nAvis 011.pdf\n\n\nAvis 012.pdf\n\n\nAvis 013.pdf\n\n\nAvis 014.pdf\n\n\nAvis 015.pdf\n\n\nAvis 016.pdf\n\n\nAvis 017.pdf\n\n\nAvis 018.pdf\n\n\nAvis 019.pdf\n\n\nAvis 020.pdf\n\n\nAvis 021.pdf\n\n\nAvis 022.pdf\n\n\nAvis 023.pdf\n\n\nAvis 024.pdf\n\n\nAvis 025.pdf\n\n\nAvis 026.pdf\n\n\nAvis 027.pdf\n\n\nAvis 028.pdf\n\n\nAvis 029.pdf\n\n\nAvis 030.pdf\n\n\nAvis 031.pdf\n\n\nAvis 032.pdf\n\n\nAvis 033.pdf\n\n\nAvis 034.pdf\n\n\nAvis 035.pdf\n\n\nAvis 036.pdf\n\n\nAvis 037.pdf\n\n\nAvis 038.pdf\n\n\nAvis 039.pdf\n\n\nAvis 040.pdf\n\n\nAvis 041.pdf\n\n\nAvis 042.pdf\n\n\nAvis 043.pdf\n\n\nAvis 044.pdf\n\n\nAvis 045.pdf\n\n\nAvis 046.pdf\n\n\nAvis 047.pdf\n\n\nAvis 048.pdf\n\n\nAvis 049.pdf\n\n\nAvis 050.pdf\n\n\nAvis 051.pdf\n\n\nAvis 052.pdf\n\n\nAvis 053.pdf\n\n\nAvis 054.pdf\n\n\nAvis 055.pdf\n\n\nAvis 056.pdf\n\n\nAvis 057.pdf\n\n\nAvis 058.pdf\n\n\nAvis 059.pdf\n\n\nAvis 060.pdf\n\n\nAvis 061.pdf\n\n\nAvis 062.pdf\n\n\nAvis 063.pdf\n\n\nAvis 064.pdf\n\n\nAvis 065.pdf\n\n\nAvis 066.pdf\n\n\nAvis 067.pdf\n\n\nAvis 068.pdf\n\n\nAvis 069.pdf\n\n\nAvis 070.pdf\n\n\nAvis 071.pdf\n\n\nAvis 072.pdf\n\n\nAvis 073.pdf\n\n\nAvis 074.pdf\n\n\nAvis 075.pdf\n\n\nAvis 076.pdf\n\n\nAvis 077.pdf\n\n\nAvis 078.pdf\n\n\nAvis 079.pdf\n\n\nAvis 080.pdf\n\n\nAvis 081.pdf\n\n\nAvis 082.pdf\n\n\nAvis 083.pdf\n\n\nAvis 084.pdf\n\n\nAvis 085.pdf\n\n\nAvis 086.pdf\n\n\nAvis 087.pdf\n\n\nAvis 088.pdf\n\n\nAvis 089.pdf\n\n\nAvis 090.pdf\n\n\nAvis 091.pdf\n\n\nAvis 092.pdf\n\n\nAvis 093.pdf\n\n\nAvis 094.pdf\n\n\nAvis 095.pdf\n\n\nAvis 096.pdf\n\n\nAvis 097.pdf\n\n\nAvis 098.pdf\n\n\nAvis 099.pdf\n\n\nAvis 100.pdf\n\n\nAvis 101.pdf\n\n\nAvis 102.pdf\n\n\nAvis 103.pdf\n\n\nAvis 104.pdf\n\n\nAvis 105.pdf\n\n\nAvis 106.pdf\n\n\nAvis 107.pdf\n\n\nAvis 108.pdf\n\n\nAvis 109.pdf\n\n\nAvis 110.pdf\n\n\nAvis 111.pdf\n\n\nAvis 112.pdf\n\n\nAvis 113.pdf\n\n\nAvis 114.pdf\n\n\nAvis 115.pdf\n\n\nAvis 116.pdf\n\n\nAvis 117.pdf\n\n\nAvis 118.pdf\n\n\nAvis 119.pdf\n\n\nAvis 120.pdf\n\n\nAvis 121.pdf\n\n\nAvis 122.pdf\n\n\nAvis 123.pdf\n\n\nAvis 124.pdf\n\n\nAvis 125.pdf\n\n\nAvis 126.pdf\n\n\nAvis 127.pdf\n\n\nAvis 128.pdf\n\n\nAvis 129.pdf\n\n\nAvis 130.pdf\n\n\nAvis 131.pdf\n\n\nAvis 132.pdf\n\n\nAvis 133.pdf\n\n\nAvis 134.pdf\n\n\nAvis 135.pdf\n\n\nAvis 136.pdf\n\n\nAvis 137.pdf\n\n\nAvis 138.pdf\n\n\nAvis 139.pdf\n\n\nAvis 140.pdf\n\n\nAvis 141.pdf\n\n\nAvis 142.pdf\n\n\nAvis 143.pdf\n\n\nAvis 144.pdf"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "À propos",
+    "section": "",
+    "text": "Crédit : Léopold MAURICE, ENSAE, Master Sociologie Quantitative, Démographie (Université Paris-Saclay/UVSQ), Centre Maurice Halbwachs (CMH).\nThème du Mémoire : Mémoire de recherche sur le Comité Consultatif National d’Éthique (CCNE), analysant les dynamiques des publications au cours du temps.\nEncadrement : Sous la direction d’Emmanuel Didier (CMH) et de Samuel Coavoux (ENSAE.\nAnnée : Réalisation : 2023-2024.\nObjectif du Site : Ce site présente les résultats et les annexes numériques de mon mémoire, ainsi que des outils interactifs pour explorer les données.\nRemerciements : Je tiens à exprimer ma gratitude aux personnes suivantes, sans qui ce mémoire n’aurait pas été possible : - A Emmanuel Didier, que je remercie chaleureusement pour le temps précieux qu’il a consacré à me guider et à m’encourager tout au long de ce projet. Je lui suis particulièrement reconnaissant des ressources financières qu’il a consacré pour le modèle de langage utilisé. - A **Samuel *Coavoux**, pour son aide précieuse en particulier sur l’usage des LLM et ses retours constructifs, qui ont grandement contribué à l’amélioration de mon travail. Je le remercie tout particulièrement pour m’avoir donné accès à ActiveTigger et ses ressources huma-num1. - A Ivayloa Petev et mes camarades du suivi de mémoire du Master SQD, pour leurs retours constants et leur soutien tout au long de l’année. - A Joël Laillier et Christian Topalov pour m’avoir donné les informations disponibles sur les membres du CCNE dans la base Qui Gouverne la Science. - A Thomas Amossé, pour son retour perspicace sur mon rendu de socio-histoire de la statistique, qui a enrichi ma réflexion et affiné mon analyse. - Un grand merci également aux différents masterants, doctorants et membres de l’équipe autour d’Emmanuel Didier pour les discussions stimulantes et enrichissantes tout au long de l’année. Leur soutien et leurs conseils ont été inestimables..\nLiens Utiles : Pour plus d’informations sur mes travaux, vous pouvez consulter mon profil Github."
+  },
+  {
+    "objectID": "memoire.html",
+    "href": "memoire.html",
+    "title": "Mémoire (pdf) Léopold Maurice sur les avis du CCNE",
+    "section": "",
+    "text": "Download PDF file."
+  },
+  {
+    "objectID": "tableaux_croises.html",
+    "href": "tableaux_croises.html",
+    "title": "Information de l’angle des avis en fonction de la profession",
+    "section": "",
+    "text": "On a construit 3 tableaux pour voir si on peut lier l’angle des avis (mesuré par le type de citation ou le type de personnalité humaine évoquée) :\n\nTableau des citations par professions : On y compte pour les avis ayant au moins une des professions en tant que rapporteurs, le pourcentage de ces avis qui citent une des catégories établies.\nTableau des catégories BERT par professions : On y compte pour les avis ayant au moins une des professions en tant que rapporteurs, le pourcentage de ces avis qui utilisent au moins une fois une des catégories établies.\nTableau des catégories GPT par professions: On y compte pour les avis ayant au moins une des professions en tant que rapporteurs, le pourcentage de ces avis qui utilisent au moins une fois une des catégories établies.",
+    "crumbs": [
+      "Accueil",
+      "Information de l'angle des avis en fonction de la profession"
+    ]
+  },
+  {
+    "objectID": "reseau_ego.html",
+    "href": "reseau_ego.html",
+    "title": "Réseau ego des citations autour de chaque avis du CCNE",
+    "section": "",
+    "text": "// Créer l'input select avec les numéros d'avis triés\nviewof node_id = Inputs.range([1, 144], {value: 1, step: 1, label: \"Numéro\"})\n\n\n\n\n\n\n\n\n\n\nlist_all_categories = [\"Auteurs\",\"Autorités\",\"CCNE\",\"Comité d'éthique\",\"Comparaison pays\",\"Etat\",\"Forums\",\"Loi\",\"Org Internationales\",\"Presse\", \"Science, littérature\",\"Société\"]\nviewof categories = Inputs.checkbox(\n  list_all_categories, \n  {label: \"Catégories\", value: list_all_categories}\n)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nviewof non_direct_links = Inputs.radio(\n  [true, false], \n  {label: \"Liens\", value: true,format: (x) =&gt; x ? \"Directs et indirects\":\"Directs uniquements\"}\n)\n\n\n\n\n\n\n\n\n\n Citations directes\n\n\n Citations indirectes\n\n\n\n\n\n\nviewof graph_mode = Inputs.radio(\n  [true, false], \n  {label: \"Noms\", value: false,format: (x) =&gt; x ? \"complets\":\"simplifiés\"}\n)\n\n\n\n\n\n\n\nnodes = graph_mode\n  ? await d3.json(\"data/mesograph_nodes.json\")\n  : await d3.json(\"data/micrograph_nodes.json\");\n\nedges = graph_mode\n  ? await d3.json(\"data/mesograph_edgelist.json\")\n  : await d3.json(\"data/micrograph_edgelist.json\");"
+  },
+  {
+    "objectID": "reseau_ego.html#sélectionner-le-numéro-de-lavis",
+    "href": "reseau_ego.html#sélectionner-le-numéro-de-lavis",
+    "title": "Réseau ego des citations autour de chaque avis du CCNE",
+    "section": "",
+    "text": "// Créer l'input select avec les numéros d'avis triés\nviewof node_id = Inputs.range([1, 144], {value: 1, step: 1, label: \"Numéro\"})"
+  },
+  {
+    "objectID": "reseau_ego.html#choisir-les-catégories-à-afficher-dans-le-réseau",
+    "href": "reseau_ego.html#choisir-les-catégories-à-afficher-dans-le-réseau",
+    "title": "Réseau ego des citations autour de chaque avis du CCNE",
+    "section": "",
+    "text": "list_all_categories = [\"Auteurs\",\"Autorités\",\"CCNE\",\"Comité d'éthique\",\"Comparaison pays\",\"Etat\",\"Forums\",\"Loi\",\"Org Internationales\",\"Presse\", \"Science, littérature\",\"Société\"]\nviewof categories = Inputs.checkbox(\n  list_all_categories, \n  {label: \"Catégories\", value: list_all_categories}\n)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nviewof non_direct_links = Inputs.radio(\n  [true, false], \n  {label: \"Liens\", value: true,format: (x) =&gt; x ? \"Directs et indirects\":\"Directs uniquements\"}\n)\n\n\n\n\n\n\n\n\n\n Citations directes\n\n\n Citations indirectes"
+  },
+  {
+    "objectID": "reseau_ego.html#choisir-le-mode-du-graphe-noms-simplifiés-citations-fortement-regroupées-noms-complets-citations-peu-regroupées",
+    "href": "reseau_ego.html#choisir-le-mode-du-graphe-noms-simplifiés-citations-fortement-regroupées-noms-complets-citations-peu-regroupées",
+    "title": "Réseau ego des citations autour de chaque avis du CCNE",
+    "section": "",
+    "text": "viewof graph_mode = Inputs.radio(\n  [true, false], \n  {label: \"Noms\", value: false,format: (x) =&gt; x ? \"complets\":\"simplifiés\"}\n)\n\n\n\n\n\n\n\nnodes = graph_mode\n  ? await d3.json(\"data/mesograph_nodes.json\")\n  : await d3.json(\"data/micrograph_nodes.json\");\n\nedges = graph_mode\n  ? await d3.json(\"data/mesograph_edgelist.json\")\n  : await d3.json(\"data/micrograph_edgelist.json\");"
+  },
+  {
+    "objectID": "reseau_ego.html#paramètres-1",
+    "href": "reseau_ego.html#paramètres-1",
+    "title": "Réseau ego des citations autour de chaque avis du CCNE",
+    "section": "Paramètres",
+    "text": "Paramètres\n\nSélection du numéro de l’avis : Ce paramètre vous permet de choisir l’avis que vous souhaitez analyser.\nChoix des catégories à afficher : Sélectionnez les catégories de citations que vous souhaitez inclure dans le graphe. Les catégories disponibles sont les suivantes :\n\nScience, littérature\nPresse\nEtat\nAuteurs\nLoi\nForums\nComité d’éthique\nOrg Internationales\nComparaison pays\nSociété\nAutorités\nCCNE\n\nLiens non directs : Vous pouvez choisir d’afficher ou de masquer les liens non directs, c’est-à-dire les citations qui ne sont pas directement liées au nœud central sélectionné.\nMode du graphe : Ce paramètre vous permet de basculer entre les noms complets et une version simplifiée des noms dans le graphe.\n\nLe graphe interactif est généré à partir de ces paramètres, et vous permet de visualiser les relations entre les différents avis et les catégories sélectionnées."
+  },
+  {
+    "objectID": "reseau_ego.html#visualisation-du-graphe",
+    "href": "reseau_ego.html#visualisation-du-graphe",
+    "title": "Réseau ego des citations autour de chaque avis du CCNE",
+    "section": "Visualisation du Graphe",
+    "text": "Visualisation du Graphe\nLe graphe est interactif et vous permet de survoler les nœuds pour voir les détails, ainsi que de zoomer et de déplacer le graphe pour une meilleure visualisation."
+  },
+  {
+    "objectID": "reseau_ego.html#légende",
+    "href": "reseau_ego.html#légende",
+    "title": "Réseau ego des citations autour de chaque avis du CCNE",
+    "section": "Légende",
+    "text": "Légende\nLes couleurs des nœuds correspondent aux différentes catégories sélectionnées. Le nœud représentant l’avis étudié est mis en avant avec une couleur et une forme distinctes (étoile)."
+  },
+  {
+    "objectID": "description_avis.html#selon-le-thème",
+    "href": "description_avis.html#selon-le-thème",
+    "title": "Quelques informations sur les avis du CCNE",
+    "section": "Selon le thème",
+    "text": "Selon le thème",
+    "crumbs": [
+      "Accueil",
+      "Quelques informations sur les avis du CCNE"
+    ]
+  },
+  {
+    "objectID": "description_avis.html#selon-le-président",
+    "href": "description_avis.html#selon-le-président",
+    "title": "Quelques informations sur les avis du CCNE",
+    "section": "Selon le président",
+    "text": "Selon le président",
+    "crumbs": [
+      "Accueil",
+      "Quelques informations sur les avis du CCNE"
+    ]
+  },
+  {
+    "objectID": "description_avis.html#nombre-de-pages",
+    "href": "description_avis.html#nombre-de-pages",
+    "title": "Quelques informations sur les avis du CCNE",
+    "section": "Nombre de pages",
+    "text": "Nombre de pages",
+    "crumbs": [
+      "Accueil",
+      "Quelques informations sur les avis du CCNE"
+    ]
+  },
+  {
+    "objectID": "description_avis.html#nombre-de-phrases",
+    "href": "description_avis.html#nombre-de-phrases",
+    "title": "Quelques informations sur les avis du CCNE",
+    "section": "Nombre de phrases",
+    "text": "Nombre de phrases",
+    "crumbs": [
+      "Accueil",
+      "Quelques informations sur les avis du CCNE"
+    ]
+  },
+  {
+    "objectID": "description_avis.html#nombre-de-graphiques-par-président",
+    "href": "description_avis.html#nombre-de-graphiques-par-président",
+    "title": "Quelques informations sur les avis du CCNE",
+    "section": "Nombre de graphiques par président",
+    "text": "Nombre de graphiques par président",
+    "crumbs": [
+      "Accueil",
+      "Quelques informations sur les avis du CCNE"
+    ]
+  },
+  {
+    "objectID": "description_avis.html#nombre-de-dissensus-par-président",
+    "href": "description_avis.html#nombre-de-dissensus-par-président",
+    "title": "Quelques informations sur les avis du CCNE",
+    "section": "Nombre de dissensus par président",
+    "text": "Nombre de dissensus par président",
+    "crumbs": [
+      "Accueil",
+      "Quelques informations sur les avis du CCNE"
+    ]
+  },
+  {
+    "objectID": "description_avis.html#nombre-total-de-phrases-dintérêt",
+    "href": "description_avis.html#nombre-total-de-phrases-dintérêt",
+    "title": "Quelques informations sur les avis du CCNE",
+    "section": "Nombre total de phrases d’intérêt",
+    "text": "Nombre total de phrases d’intérêt",
+    "crumbs": [
+      "Accueil",
+      "Quelques informations sur les avis du CCNE"
+    ]
+  },
+  {
+    "objectID": "description_membres.html",
+    "href": "description_membres.html",
+    "title": "Professions des membres du CCNE",
+    "section": "",
+    "text": "Par simplicité, j’ai attribué à chaque membre le président en exercice au moment de sa nomination. Cela permet d’avoir un indicateur de temps simple pour comparer, mais cela ne donne pas à chaque instant t, la composition du CCNE. De plus je n’ai que les années de nomination, a moins d’aller sur le JORF pour trouver toutes les dates de nomination, mais celle du JORF sont souvent en retard sur les dates réelles.\nVoici une description des 12 catégories de professions recodées:\n\nPoliticien ou militant : Inclut les personnes ayant une profession liée à la politique ou à l’activisme (notamment association de défense de la famille, beaucoup nommé par le Ministère de la famille), y compris ceux qui ont une carrière antérieure dans la médecine.\nJournaliste/presse : Regroupe les individus travaillant dans le journalisme ou les médias, dont les patrons de presse.\nThéologien : Comprend les personnes spécialisées dans la théologie, toutes religions comprises.\nMédecin PUPH : Se réfère aux médecins Professeurs des Universités-Praticiens Hospitaliers (PUPH), excluant les généralistes et libéraux.\nChercheur bio : Regroupe les chercheurs en biologie, physiologie ou pharmacologie.\nAutres professions santé : Inclut les pharmaciens, infirmiers, psychologues, généralistes, et cadres supérieurs de santé.\nProfession du droit : Englobe les avocats, magistrats, juges et juristes, dont les conseillers d’état et membres de la cours de cassation.\nCadre public/privé : Regroupe les hauts fonctionnaires, enarques, cadres et ingénieurs. Un certain nombre de personnes ont été haut fonctionnaire puis cadre de grands groupes industriels notamment dans les personnes nommées par le ministère de l’industrie. Peut être faudrait il séparer les hauts fonctionnaires selon leur type de spécialité.\nChercheur droit : Juriste universitaire.\nChercheur SHS (Sciences Humaines et Sociales) : Inclut les chercheurs en sociologie, anthropologie, histoire, économie, psychologie, démographie, philosophie, géographie, sciences politiques, littérature, muséologie, et des spécialistes universitaires des religions (judaïsme notamment)\nChercheur sciences exactes : Regroupe les chercheurs en mathématiques, chimie, physique et informatique.\nInconnue : Catégorie pour les professions qui ne correspondent à aucune des précédentes ou dont les informations sont insuffisantes pour le recodage.",
+    "crumbs": [
+      "Accueil",
+      "Professions des membres du CCNE"
+    ]
+  },
+  {
+    "objectID": "description_membres.html#nombre-de-membres",
+    "href": "description_membres.html#nombre-de-membres",
+    "title": "Professions des membres du CCNE",
+    "section": "Nombre de membres",
+    "text": "Nombre de membres\n\nSelon la profession\n\n\n\n\n\n\n\n\n\nSans trop d’étonnement, la profession dominante sont les médecins hospitaliers et universitaires (PUPH), suivi de près par les chercheurs en sciences humaines (en majorité en philosophie), puis les biologistes et les politiciens (dont un certain nombre sont des médecins, mais plutôt libéraux). Pour finir le droit est aussi bien représenté entre les membres du conseil d’état, de la cour de cassation, des juristes (de profession ou universitaires).\n\n\nSelon le genre",
+    "crumbs": [
+      "Accueil",
+      "Professions des membres du CCNE"
+    ]
+  },
+  {
+    "objectID": "description_membres.html#durée-mandat",
+    "href": "description_membres.html#durée-mandat",
+    "title": "Professions des membres du CCNE",
+    "section": "durée mandat",
+    "text": "durée mandat\n\nSelon le genre et le président\n\n\n\n\n\n\n\n\n\nOn voit que la durée du mandat est a eu tendance à baisser et à se normaliser autour de 5 ans, avec encore quelques personnes qui font plus.",
+    "crumbs": [
+      "Accueil",
+      "Professions des membres du CCNE"
+    ]
+  },
+  {
+    "objectID": "description_membres.html#âge-à-la-première-nomination",
+    "href": "description_membres.html#âge-à-la-première-nomination",
+    "title": "Professions des membres du CCNE",
+    "section": "Âge à la première nomination",
+    "text": "Âge à la première nomination\n\nSelon la profession\n\n\n\n\n\n\n\n\n\nGlobalement les membres du CCNE sont assez âgés quand ils sont nommés pour la première fois, à l’exception notable des théologiens (toutes religions comprises). L’âge moyen est de 60 ans sur l’ensemble des membres. Aucune tendance en terme d’évolution de l’âge à la première nomination semble vraiment être identifiable.",
+    "crumbs": [
+      "Accueil",
+      "Professions des membres du CCNE"
+    ]
+  },
+  {
+    "objectID": "description_membres.html#complétude-des-données-récoltées",
+    "href": "description_membres.html#complétude-des-données-récoltées",
+    "title": "Professions des membres du CCNE",
+    "section": "Complétude des données récoltées",
+    "text": "Complétude des données récoltées\n\n\n\n\n\n\n\n\n\nOn voit qu’il y a une différence de genre : il est plus dure de trouver certaines informations pour les femmes.",
+    "crumbs": [
+      "Accueil",
+      "Professions des membres du CCNE"
+    ]
+  },
+  {
+    "objectID": "description_membres.html#histo-participation",
+    "href": "description_membres.html#histo-participation",
+    "title": "Professions des membres du CCNE",
+    "section": "Histo participation",
+    "text": "Histo participation",
+    "crumbs": [
+      "Accueil",
+      "Professions des membres du CCNE"
+    ]
+  },
+  {
+    "objectID": "description_membres.html#histo-rapporteurs",
+    "href": "description_membres.html#histo-rapporteurs",
+    "title": "Professions des membres du CCNE",
+    "section": "Histo rapporteurs",
+    "text": "Histo rapporteurs",
+    "crumbs": [
+      "Accueil",
+      "Professions des membres du CCNE"
+    ]
+  },
+  {
+    "objectID": "description_membres.html#histo-membre-et-rapporteurs-ensemble",
+    "href": "description_membres.html#histo-membre-et-rapporteurs-ensemble",
+    "title": "Professions des membres du CCNE",
+    "section": "Histo membre et rapporteurs ensemble",
+    "text": "Histo membre et rapporteurs ensemble",
+    "crumbs": [
+      "Accueil",
+      "Professions des membres du CCNE"
+    ]
+  },
+  {
+    "objectID": "description_membres.html#rapporteurs-selon-profession",
+    "href": "description_membres.html#rapporteurs-selon-profession",
+    "title": "Professions des membres du CCNE",
+    "section": "Rapporteurs selon profession",
+    "text": "Rapporteurs selon profession",
+    "crumbs": [
+      "Accueil",
+      "Professions des membres du CCNE"
+    ]
+  }
+]

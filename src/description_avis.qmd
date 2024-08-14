@@ -8,7 +8,7 @@ output-ext: html
 format:
   html:
     toc: true
-    number-sections: true
+    number-sections: false
     colorlinks: true
     geometry:
       - top=10mm
@@ -21,24 +21,13 @@ format:
     documentclass: report
     fig-width: 12
     fig-height: 9
-  pdf:
-    documentclass: report
-    papersize: a4
-    toc: true
-    toc-depth: 4
-    number-sections: true
-    number-depth: 3
-    colorlinks: true
-    fig-width: 20
-    fig-height: 15
-    keep-tex: false
 execute:
   eval: true
   message: false
   warning: false
   echo: false
   output: true
-  error: true
+  error: false
 editor: source
 ---
 
@@ -75,7 +64,6 @@ significance = c("p < 0.0001", "p < 0.001", "p < 0.01", "p < 0.05", "p < 0.1", "
 signif_caption_text <- paste("Significance levels:\n", paste(symbols, ":", significance, collapse = ", "))
 
 ```
-# [Retour aux choix](https://leopoldmaurice.shinyapps.io/CCNE/)
 
 ```{r}
 # base au niveau de phrases

@@ -1,0 +1,212 @@
+---
+format: live-html
+engine: knitr
+title: "Réseau ego des citations autour de chaque avis du CCNE"
+author: "Léopold MAURICE, ENSAE"
+execute: 
+  echo: false
+---
+
+{{< include ./_extensions/r-wasm/live/_knitr.qmd >}}
+
+# Paramètres
+## Sélectionner le numéro de l'avis
+```{ojs}
+// Créer l'input select avec les numéros d'avis triés
+viewof node_id = Inputs.range([1, 144], {value: 1, step: 1, label: "Numéro"})
+```
+## Choisir les catégories à afficher dans le réseau
+```{ojs}
+list_all_categories = ["Auteurs","Autorités","CCNE","Comité d'éthique","Comparaison pays","Etat","Forums","Loi","Org Internationales","Presse", "Science, littérature","Société"]
+viewof categories = Inputs.checkbox(
+  list_all_categories, 
+  {label: "Catégories", value: list_all_categories}
+)
+```
+
+```{ojs}
+viewof non_direct_links = Inputs.radio(
+  [true, false], 
+  {label: "Liens", value: true,format: (x) => x ? "Directs et indirects":"Directs uniquements"}
+)
+```
+### Légende des flèches
+
+<p style="display: flex; align-items: center;">
+  <span style="width: 20px; height: 2px; background-color: black; margin-right: 5px; display: inline-block;"></span>
+  Citations directes
+</p>
+<p style="display: flex; align-items: center; margin-top: 5px;">
+  <span style="width: 20px; height: 2px; border-top: 2px dashed gray; margin-right: 5px; display: inline-block;"></span>
+  Citations indirectes
+</p>
+
+## Choisir le mode du graphe : noms simplifiés (citations fortement regroupées), noms complets (citations peu regroupées)
+```{ojs}
+viewof graph_mode = Inputs.radio(
+  [true, false], 
+  {label: "Noms", value: false,format: (x) => x ? "complets":"simplifiés"}
+)
+```
+
+```{ojs}
+// Charger les fichiers JSON en fonction de "graph_mode"
+nodes = graph_mode
+  ? await d3.json("data/mesograph_nodes.json")
+  : await d3.json("data/micrograph_nodes.json");
+
+edges = graph_mode
+  ? await d3.json("data/mesograph_edgelist.json")
+  : await d3.json("data/micrograph_edgelist.json");
+
+```
+
+# Ego réseau
+
+```{webr}
+#| edit: false
+#| echo: false
+#| message: false
+#| warning: false
+#| input:
+#|   - nodes
+#|   - edges
+#|   - non_direct_links
+#|   - categories
+#|   - node_id
+
+library(dplyr, quietly = T)
+library(tidyr, quietly = T)
+library(igraph, quietly = T)
+library(visNetwork, quietly = T)
+
+selected_node <- as.character(node_id)
+selected_categories <- categories
+show_non_direct_val <- as.logical(non_direct_links)
+
+category_colors <- c(
+  "Auteurs" = "#6CC7B3",
+  "Autorités" = "#285291",
+  "CCNE" = "#9D3A5E",
+  "Comité d'éthique" = "#579125",
+  "Comparaison pays" = "#0F0F5C",
+  "Etat" = "#91188F",
+  "Forums" = "#0E405C",
+  "Loi" = "#915B11",
+  "Org Internationales" = "#4F2B91",
+  "Presse" = "#91181E",
+  "Science, littérature" = "#0B5C2D",
+  "Société" = "#BD6345",
+  "Avis étudié" = "#4269A0"
+)
+
+reseau_citation_igraph <- graph_from_data_frame(d = edges, vertices = nodes, directed = TRUE)
+
+# Filtrer les noeuds et les liens pour afficher seulement ceux à une profondeur de 1 du noeud sélectionné
+subgraph_nodes <- neighborhood(reseau_citation_igraph, order = 1, nodes = selected_node, mode = "all")[[1]]
+subgraph <- induced_subgraph(reseau_citation_igraph, subgraph_nodes)
+
+# Ajouter "Avis étudié" à la liste des catégories sélectionnées
+if ("CCNE" %in% selected_categories) {
+  selected_categories <- c(selected_categories, "Avis étudié")
+}
+
+# Filtrer par catégories sélectionnées, en gardant "Avis étudié"
+subgraph <- delete_vertices(subgraph, V(subgraph)[!(V(subgraph)$Categorie %in% selected_categories | V(subgraph)$name == selected_node)])
+
+# Convertir le sous-graph en format compatible avec visNetwork
+nodes <- data.frame(id = V(subgraph)$name, label = V(subgraph)$name, group = V(subgraph)$Categorie)
+edges <- as.data.frame(as_data_frame(subgraph, what = "edges"))
+
+# Mettre à jour la catégorie et les attributs du noeud sélectionné
+if (nrow(nodes) == 0) {
+  nodes <- data.frame(id = selected_node, label = selected_node, group = "Avis étudié", size = 30, color = "#022013")
+  edges <- data.frame(from = character(0), to = character(0), color = character(0), dashes = logical(0), width = numeric(0))
+} else {
+  nodes <- nodes %>%
+    mutate(group = ifelse(id == selected_node, "Avis étudié", group),
+           size = ifelse(id == selected_node, 30, 15))  # Augmenter la taille du noeud sélectionné
+}
+
+# Appliquer les couleurs fixes aux catégories
+nodes$color <- category_colors[nodes$group]
+
+# Mettre en gras les liens à partir du noeud sélectionné et les autres en pointillé ou les enlever
+if (nrow(edges) > 0) {
+  if (show_non_direct_val) {
+    edges <- edges %>%
+      mutate(color = ifelse(from == selected_node | to == selected_node, "black", "gray"),
+             dashes = ifelse(from == selected_node | to == selected_node, FALSE, TRUE),
+             width = ifelse(from == selected_node | to == selected_node, 2, 1))
+  } else {
+    edges <- edges %>%
+      filter(from == selected_node | to == selected_node) %>%
+      mutate(color = "black", dashes = FALSE, width = 2)
+  }
+}
+
+# Créer le graphique visNetwork
+visNetwork(nodes, edges) %>%
+  visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
+  visGroups(groupname = "Auteurs", color = "#6CC7B3", shape = "square") %>%
+  visGroups(groupname = "Autorités", color = "#285291", shape = "square") %>%
+  visGroups(groupname = "CCNE", color = "#9D3A5E", shape = "circle") %>%
+  visGroups(groupname = "Comité d'éthique", color = "#579125", shape = "square") %>%
+  visGroups(groupname = "Comparaison pays", color = "#0F0F5C", shape = "square") %>%
+  visGroups(groupname = "Etat", color = "#91188F", shape = "square") %>%
+  visGroups(groupname = "Forums", color = "#0E405C", shape = "square") %>%
+  visGroups(groupname = "Loi", color = "#915B11", shape = "square") %>%
+  visGroups(groupname = "Org Internationales", color = "#4F2B91", shape = "square") %>%
+  visGroups(groupname = "Presse", color = "#91181E", shape = "square") %>%
+  visGroups(groupname = "Science, littérature", color = "#0B5C2D", shape = "square") %>%
+  visGroups(groupname = "Société", color = "#BD6345", shape = "square") %>%
+  visGroups(groupname = "Avis étudié", color = "#4269A0", shape = "star", 
+            font = list(size = 30, color = "#4269A0")) %>%
+  addFontAwesome() %>%
+  visLegend(useGroups = TRUE, position = "right", width = 0.2, ncol = 1,
+            main = list(text = "Catégorie de citations",
+                        style = "color:#000000;font-size:24px;text-align:center;")) %>%
+  visEdges(arrows = 'to', color = list(color = "gray", highlight = "black")) %>%
+  visNodes(font = list(size = 20))
+```
+
+
+# Explications
+
+Cette application permet de visualiser le graphe des citations autour de chaque avis émis par le Comité Consultatif National d'Éthique (CCNE).
+
+## Paramètres
+
+- **Sélection du numéro de l'avis** : Ce paramètre vous permet de choisir l'avis que vous souhaitez analyser.
+  
+- **Choix des catégories à afficher** : Sélectionnez les catégories de citations que vous souhaitez inclure dans le graphe. Les catégories disponibles sont les suivantes :
+  - Science, littérature
+  - Presse
+  - Etat
+  - Auteurs
+  - Loi
+  - Forums
+  - Comité d'éthique
+  - Org Internationales
+  - Comparaison pays
+  - Société
+  - Autorités
+  - CCNE
+
+- **Liens non directs** : Vous pouvez choisir d'afficher ou de masquer les liens non directs, c'est-à-dire les citations qui ne sont pas directement liées au nœud central sélectionné.
+
+- **Mode du graphe** : Ce paramètre vous permet de basculer entre les noms complets et une version simplifiée des noms dans le graphe.
+
+Le graphe interactif est généré à partir de ces paramètres, et vous permet de visualiser les relations entre les différents avis et les catégories sélectionnées.
+
+## Visualisation du Graphe
+
+Le graphe est interactif et vous permet de survoler les nœuds pour voir les détails, ainsi que de zoomer et de déplacer le graphe pour une meilleure visualisation.
+
+## Légende
+
+Les couleurs des nœuds correspondent aux différentes catégories sélectionnées. Le nœud représentant l'avis étudié est mis en avant avec une couleur et une forme distinctes (étoile).
+
+
+# Standalone app
+[**Réseau égo des citations, en application standalone**](https://leopoldmaurice.shinyapps.io/Ego_Citation_avis/)

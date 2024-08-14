@@ -1,0 +1,32 @@
+[
+  {
+    "president": "Ameisen (12-15)",
+    "avis_max": 124,
+    "avis_min": 116
+  },
+  {
+    "president": "Bernard (83-91)",
+    "avis_max": 28,
+    "avis_min": 1
+  },
+  {
+    "president": "Changeux (92-99)",
+    "avis_max": 60,
+    "avis_min": 29
+  },
+  {
+    "president": "Delfraissy (16-)",
+    "avis_max": 144,
+    "avis_min": 125
+  },
+  {
+    "president": "Grimfeld (09-11)",
+    "avis_max": 115,
+    "avis_min": 104
+  },
+  {
+    "president": "Sicard (00-08)",
+    "avis_max": 103,
+    "avis_min": 61
+  }
+]

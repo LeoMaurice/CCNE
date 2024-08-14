@@ -1,0 +1,41 @@
+---
+title: "Liste des avis analysés"
+echo: false
+warning: false
+format:
+  html:
+    toc-location: left
+---
+# Informations concernant les avis
+
+```{r}
+library(DT)
+library(jsonlite)
+library(tidyverse)
+data <- as.data.frame(fromJSON("../data/intermediate/site/base_avis_site.json"))
+# Create the interactive table with horizontal scrolling, without row numbers
+datatable(data, 
+          options = list(
+            pageLength = 10,  # Number of rows per page
+            autoWidth = TRUE, 
+            searching = TRUE, 
+            ordering = TRUE,
+            scrollX = TRUE    # Enable horizontal scrolling
+          ),
+          rownames = FALSE,   # Remove row numbers
+          class = 'cell-border stripe', # CSS class for styling
+)
+```
+
+# Liste des avis à télécharger
+
+```{r, results='asis'}
+# This R code chunk generates the list of download links
+for (i in 1:144) {
+  avis_num <- sprintf("%03d", i)  # Format the number with leading zeros
+  avis_name <- paste0("Avis ", avis_num, ".pdf")
+  avis_path <- paste0("avis/", avis_name)
+  cat(sprintf("<p><a href='%s' download>%s</a></p>\n", avis_path, avis_name))
+}
+```
+

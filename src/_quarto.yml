@@ -1,0 +1,69 @@
+project:
+  render:
+    - "index.qmd"
+    - "about.qmd"
+    - "description_avis.qmd"
+    - "description_membres.qmd"
+    - "personne_across_avis.qmd"
+    - "reseau_citations.qmd"
+    - "memoire.qmd"
+    - "memoire.pdf"
+    - "memoire.png"
+    - "liste_avis.qmd"
+    - "tableaux_croises.qmd"
+    - "avis"
+    - "top_citations.qmd"
+    - "network_data.RData"
+    - "reseau_ego.qmd"
+    - 'mesonetwork.qmd'
+  resources: pdfjs
+  type: website
+  output-dir: ../docs
+    
+
+website:
+  title: "Mémoire CCNE"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Accueil
+      - href: memoire.qmd
+        text: "Mémoire"
+      - href: liste_avis.qmd
+        text: "Liste des avis"
+      - href: about.qmd
+        text: "A propos"
+    tools:
+      - icon: github
+        href: https://github.com/LeoMaurice/CCNE
+  sidebar:
+    style : "docked"
+    search: false
+    contents:
+      - "index.qmd"
+      - "memoire.pdf"
+      - "description_avis.qmd"
+      - "description_membres.qmd"
+      - "personne_across_avis.qmd"
+      - 'reseau_citations.qmd'
+      - 'tableaux_croises.qmd'
+      - "top_citations.qmd"
+      - "ego_citations.qmd"
+      - "mesonetwork.qmd"
+  page-navigation: false
+  page-footer: "Copyright 2024, Léopold MAURICE" 
+format:
+  html:
+    theme: lumen
+    css: styles.css
+    toc: true
+lang: fr
+language:
+  ui:
+    toc: "Sur cette page"          # "On this page" becomes "Sur cette page"
+    contents: "Contenu"            # "Contents" becomes "Contenu"
+    references: "Références"       # "References" becomes "Références"
+    figure: "Figure"               # "Figure" remains "Figure" (you could change it)
+
+
+

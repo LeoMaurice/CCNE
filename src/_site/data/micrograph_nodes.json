@@ -1,0 +1,2367 @@
+[
+  {
+    "name": "SHS",
+    "Categorie": "Science, littérature",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Médical",
+    "Categorie": "Science, littérature",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Quotidien du médecin",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Le Monde",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "France-Soir",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Ministères sociaux",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Fagot-Largeault (CCNE)",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Ethique & philo",
+    "Categorie": "Science, littérature",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Ministères Education, Recherche, Enseignement",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 6 août 2004 (Bioéthique)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Académie nationale de médecine",
+    "Categorie": "Forums",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 20 décembre 1988 (Huriet)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "CCB (Belgique)",
+    "Categorie": "Comité d'éthique",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Commission européenne",
+    "Categorie": "Org Internationales",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Conseil de l'Europe",
+    "Categorie": "Org Internationales",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Convention d'Oviedo",
+    "Categorie": "Org Internationales",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "CNS",
+    "Categorie": "Forums",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "USA",
+    "Categorie": "Comparaison pays",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "ONU",
+    "Categorie": "Org Internationales",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Pascal",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Christiannisme",
+    "Categorie": "Société",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Conseil d'Etat",
+    "Categorie": "Autorités",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "CNCDH",
+    "Categorie": "Forums",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Ministère Justice",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Assemblée Nationale",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Droit",
+    "Categorie": "Science, littérature",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Premier Ministre",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Code Civil",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Code Santé Publique",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Sénat",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 29 juillet 1994 (Bioéthique)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Tribunaux",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Cour de Cassation",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Cour des Comptes",
+    "Categorie": "Autorités",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Code Déontologie Médicale",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Deutscher Ethikrat",
+    "Categorie": "Comité d'éthique",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "GEE",
+    "Categorie": "Comité d'éthique",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Biologie",
+    "Categorie": "Science, littérature",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Code de la propriété intellectuelle",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 18 janvier 1994 (Santé publique;ProcSoc)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 4 mars 2002 (Kouchner, Droits malade)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 9 juin 1999 (Soins Palliatifs)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 22 avril 2005 (Leonetti, fin de vie)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 11 février 2005 (Egalité droits handicap)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "CESE",
+    "Categorie": "Forums",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Collectif",
+    "Categorie": "Société",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "OMS",
+    "Categorie": "Org Internationales",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "INSERM/CNRS",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "World Bank",
+    "Categorie": "Org Internationales",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Académie des sciences",
+    "Categorie": "Forums",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "AFSS",
+    "Categorie": "Autorités",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Ministère économie",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "COMETS (CNRS)",
+    "Categorie": "Comité d'éthique",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Commission éthique (Québec)",
+    "Categorie": "Comité d'éthique",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "CEA",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Ministère environnement",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "UK",
+    "Categorie": "Comparaison pays",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "OPECST",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "UE",
+    "Categorie": "Org Internationales",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Parlement européen",
+    "Categorie": "Org Internationales",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Entreprise privée",
+    "Categorie": "Société",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Code de procédure pénale",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Déclaration Droits de l'Homme",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "ERER",
+    "Categorie": "Comité d'éthique",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 12 juillet 1999 (Intercommunalité)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi Programmation de la Recherche",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "FMI",
+    "Categorie": "Org Internationales",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Economie",
+    "Categorie": "Science, littérature",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "INSEE/SSM",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "JP Moatti",
+    "Categorie": "Science, littérature",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "OCDE",
+    "Categorie": "Org Internationales",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Psycho & neuro",
+    "Categorie": "Science, littérature",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Autobiographie",
+    "Categorie": "Science, littérature",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Martin Buber",
+    "Categorie": "Science, littérature",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Charles Darwin",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "HAS",
+    "Categorie": "Autorités",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 6 janvier 1978 (Informatique et libertés)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Code de la Sécurité Sociale",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 13 août 2004 (Responsabilités locales)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "CNIL",
+    "Categorie": "Autorités",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Ordre des médecins et sociétés médicales",
+    "Categorie": "Forums",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Actualité et Dossier en Santé Publique",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Dreifuss-Netter (CCNE)",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 17 janvier 1975 (Veil)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 4 juillet 2001 (IVG, Contraception)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 9 août 2004 (Santé publique)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Réforme constitutionnelle de 2008",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "ABM",
+    "Categorie": "Autorités",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Ministère Défense",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "InVS",
+    "Categorie": "Autorités",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Esprit",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 5 mars 2007 (Protection enfance)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Fondations caritatives",
+    "Categorie": "Société",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Journal du CNRS",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Fictions",
+    "Categorie": "Science, littérature",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Etats généraux de la bioéthique",
+    "Categorie": "Comité d'éthique",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Président",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Conseil Constitutionnel",
+    "Categorie": "Autorités",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Religion",
+    "Categorie": "Société",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "ABC News",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Sophocle",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "CEDH/CEJ",
+    "Categorie": "Org Internationales",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Aristote",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "ONPES",
+    "Categorie": "Forums",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Revue du Practicien",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "OFDT",
+    "Categorie": "Forums",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Code du Travail",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 22 décembre 1976 (Caillavet, Don Organes)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Marcel Mauss",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Montaigne",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Conseil de l'UE",
+    "Categorie": "Org Internationales",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Suisse",
+    "Categorie": "Comparaison pays",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Canguilhem",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 7 juillet 2011 (Bioéthique)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Bioethics Commission (USA)",
+    "Categorie": "Comité d'éthique",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Ludwig Wittgenstein",
+    "Categorie": "Science, littérature",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Ricoeur",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Berkeley",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "L'Express",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Journées annuelles d'éthique",
+    "Categorie": "Comité d'éthique",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Spinoza",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Gazette SantéSocial",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Ombre et Lumière",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Epidémiologie",
+    "Categorie": "Science, littérature",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Institutions financières et économiques",
+    "Categorie": "Org Internationales",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Code Pénal",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Gould",
+    "Categorie": "Science, littérature",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Cahiers du CCNE",
+    "Categorie": "Comité d'éthique",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "ONFV",
+    "Categorie": "Forums",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "INED",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Camus",
+    "Categorie": "Science, littérature",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Canada",
+    "Categorie": "Comparaison pays",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Marianne",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Belgique",
+    "Categorie": "Comparaison pays",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Luxembourg",
+    "Categorie": "Comparaison pays",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Médecine Palliative",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Pays-Bas",
+    "Categorie": "Comparaison pays",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "The Independent",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Allemagne",
+    "Categorie": "Comparaison pays",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Nuffield Council on Bioethics (UK)",
+    "Categorie": "Comité d'éthique",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 5 mars 2012 (Recherches sur personne)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Huxley",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "EFS",
+    "Categorie": "Autorités",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Libération",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "DDD",
+    "Categorie": "Forums",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 17 mai 2013 (Mariage pour tous)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "de Maupertuis",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Sciences et Avenir",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "stat",
+    "Categorie": "Science, littérature",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Cambon-Thomsen (CCNE)",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Cahiers du numérique",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "La Vie des idées",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Code des Assurances",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 6 août 2004 (Informatique et libertés)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Pinchot et Muir",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Ecologie & Environnement",
+    "Categorie": "Science, littérature",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "IPBES",
+    "Categorie": "Org Internationales",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "COP",
+    "Categorie": "Org Internationales",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Comité Ethique Agronomie",
+    "Categorie": "Comité d'éthique",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "CEI (INSERM)",
+    "Categorie": "Comité d'éthique",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Ministère Affaires Etrangères",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Convention de Washington",
+    "Categorie": "Org Internationales",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Latour",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Malthus",
+    "Categorie": "Science, littérature",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Buffon",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Traités divers",
+    "Categorie": "Org Internationales",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "CNET",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 4 août 2014 (Egalité Femme-Homme)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 17 août 2015 (Transition énergétique)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Edgar Morin",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Genéthique",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 22 janvier 2002 (Origines personnes)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "la libre",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Constitution",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Ministère Intérieur",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Ministère Logement",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "ARS",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "IRD",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 27 juillet 1999 (CMU)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 28 décembre 2015 (Viellissement)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 26 janvier 2016 (Système santé)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "France Stratégie",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Sécurité Sociale",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Protection sociale",
+    "Categorie": "Science, littérature",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Regards",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Senior Actu",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Fondation de France",
+    "Categorie": "Société",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "ONS",
+    "Categorie": "Forums",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "RGPD",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 1er juillet 1994 (Données de santé)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 7 octobre 2016 (République numérique)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Le Débat",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 23 avril 2005 (Orientation de la recherche)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Syndicat",
+    "Categorie": "Société",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "CER-VD (Suisse)",
+    "Categorie": "Comité d'éthique",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "CIB (UNESCO) ",
+    "Categorie": "Comité d'éthique",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Rapport Belmont",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Bacon",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "La Recherche",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Boston Globe",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "NY Times",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "CNPE",
+    "Categorie": "Forums",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Prescrire",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Les Echos",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Comité Ethique et Cancer",
+    "Categorie": "Comité d'éthique",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Pharma analyses",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 29 décembre 2011 (Sécurité sanitaire)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "LFSS 2015",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Déclaration d'Helsinki et de Manille",
+    "Categorie": "Org Internationales",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Voix des patients",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "La Croix",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Wikipédia",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "HCSP",
+    "Categorie": "Forums",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Washington Post",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 2 août 2021 (Bioéthique)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Plutarque",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Platon",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Huffington Post",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Code de Nuremberg (1947)",
+    "Categorie": "Org Internationales",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Radio France",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Pour la science",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "The Conversation",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Caducée",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Jonas",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Weber",
+    "Categorie": "Science, littérature",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 2 février 2016  (Clayes-Leonetti, fin de vie)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Irlande",
+    "Categorie": "Comparaison pays",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Le Point",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Philomag",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Elias",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "JDD",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Lévinas",
+    "Categorie": "Science, littérature",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Comité éthique FHF",
+    "Categorie": "Comité d'éthique",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Nietzsche",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Autriche",
+    "Categorie": "Comparaison pays",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Australie",
+    "Categorie": "Comparaison pays",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Nouvelle Zélande",
+    "Categorie": "Comparaison pays",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Espagne",
+    "Categorie": "Comparaison pays",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Euronews",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Le Figaro",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "La Razon",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "knowablemagazine.org",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "RFI",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Conseil COVID",
+    "Categorie": "Forums",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Hopital",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Le Parisien",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Questions en santé publique",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "France Télé",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "AOC",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "CNPEN",
+    "Categorie": "Comité d'éthique",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 2 janvier 2002 (Action sociale)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "les Tribunes de la Santé",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Didier (CCNE)",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Santé Publique France",
+    "Categorie": "Autorités",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Numerama",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "HCE",
+    "Categorie": "Forums",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Europe1",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Nouvel Obs",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Code de l'action sociale et des familles",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Health Data Hub",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "CASD",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "informatique",
+    "Categorie": "Science, littérature",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Revue du digital",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "IFOP",
+    "Categorie": "Science, littérature",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Tic Pharma",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "BPI France",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 5 août 2021 (Gestion Covid)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 23 février 2017 (ANSM)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Bulletin Epidémiologique Hebdomadaire",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 1er juillet 1964 (Vaccination)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Foucault",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 15 février 1902 (Santé publique)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Léon Bourgeois",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 31 mai 2021 (Sortie Covid)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Italie",
+    "Categorie": "Comparaison pays",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 30 décembre 1988 (Agricole)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Danemark",
+    "Categorie": "Comparaison pays",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Org Inter divers",
+    "Categorie": "Org Internationales",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 28 juin 1989 (Dopage animaux)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 13 juillet 1992 (Déchets)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Bourdieu",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Brésil",
+    "Categorie": "Comparaison pays",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 31 décembre 1970 (Réforme hospitalière)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Axel Kahn (CCNE)",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "BBC",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Le Généraliste",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Infos du monde",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "CFJ-Infos",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Mendel",
+    "Categorie": "Science, littérature",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Kanner",
+    "Categorie": "Science, littérature",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 4 décembre 1974 (Contraception)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 28 mai 1996 (Santé publique)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "loi du 4 février 1995 (Aménagement territoire)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "NREC (Norvège)",
+    "Categorie": "Comité d'éthique",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "CNECV (Portugal)",
+    "Categorie": "Comité d'éthique",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Kant",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 3 janvier 1968 (Droits incapables majeurs)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 17 juillet 1970 (Garantie droits)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 24 janvier 1997 (Dépendance)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 1er juillet 1998 (Veille sanitaire)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 31 juillet 1991 (Réforme hospitalière)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Déclaration universelle sur le génome humain",
+    "Categorie": "Org Internationales",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Office des brevets",
+    "Categorie": "Org Internationales",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Judaïsme",
+    "Categorie": "Société",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Courrier de la Transplantation",
+    "Categorie": "Presse",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 27 juin 1990 (droits troubles mentaux)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Norvège",
+    "Categorie": "Comparaison pays",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Finlande",
+    "Categorie": "Comparaison pays",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Japon",
+    "Categorie": "Comparaison pays",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Suède",
+    "Categorie": "Comparaison pays",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Estonie",
+    "Categorie": "Comparaison pays",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Tonga",
+    "Categorie": "Comparaison pays",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Islande",
+    "Categorie": "Comparaison pays",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Lettonie",
+    "Categorie": "Comparaison pays",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Montesquieu",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Financement",
+    "Categorie": "Etat",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Déclaration d'Helsinki (2000)",
+    "Categorie": "Org Internationales",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Charte Environnement",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Michelet",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 8 janvier 1993 (JAF)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Mexique",
+    "Categorie": "Comparaison pays",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "physique",
+    "Categorie": "Science, littérature",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Philosophes antiques",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Chine",
+    "Categorie": "Comparaison pays",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Fassin (CCNE)",
+    "Categorie": "Auteurs",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 6 août 2013 (Bioéthique, embryon)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Loi du 30 mai 2013 (Biologie médicale)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Réforme Debré (Banque)",
+    "Categorie": "Loi",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "Réunion internationale des comités d'éthique",
+    "Categorie": "Comité d'éthique",
+    "shape": "Extra citation"
+  },
+  {
+    "name": "144",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "143",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "142",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "141",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "140",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "139",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "138",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "137",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "136",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "135",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "134",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "133",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "132",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "131",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "130",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "129",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "128",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "127",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "126",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "125",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "124",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "123",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "122",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "121",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "120",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "119",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "118",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "117",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "116",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "115",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "114",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "113",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "112",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "111",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "110",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "109",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "108",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "107",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "106",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "105",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "104",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "103",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "102",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "101",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "100",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "99",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "98",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "97",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "96",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "95",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "94",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "93",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "92",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "91",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "90",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "89",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "88",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "87",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "86",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "85",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "84",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "83",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "82",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "81",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "80",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "79",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "78",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "77",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "76",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "75",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "74",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "73",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "72",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "71",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "70",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "69",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "68",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "67",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "66",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "65",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "64",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "63",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "62",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "61",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "60",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "59",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "58",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "57",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "56",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "55",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "54",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "53",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "52",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "51",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "50",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "49",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "48",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "47",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "46",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "45",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "44",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "43",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "42",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "41",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "40",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "39",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "38",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "37",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "36",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "35",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "34",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "33",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "32",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "31",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "30",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "29",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "28",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "27",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "26",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "25",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "24",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "23",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "22",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "21",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "20",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "19",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "18",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "17",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "16",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "15",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "14",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "13",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "12",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "11",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "10",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "9",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "8",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "7",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "6",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "5",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "4",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "3",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "2",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  },
+  {
+    "name": "1",
+    "Categorie": "CCNE",
+    "shape": "Intra citation"
+  }
+]

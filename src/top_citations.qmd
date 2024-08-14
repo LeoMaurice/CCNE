@@ -1,0 +1,195 @@
+---
+format: 
+  live-html:
+    toc: true
+engine: knitr
+title: "Top citations des avis du CCNE"
+author: "Léopold MAURICE, ENSAE"
+execute: 
+  echo: false
+---
+
+{{< include ./_extensions/r-wasm/live/_knitr.qmd >}}
+
+# Paramètres
+
+## Sélectionnez le nombre de citations à afficher dans le top:
+```{ojs}
+viewof top_n = Inputs.radio([10,20,50], {
+  label: "Nombre citations",
+  value: 10
+})
+
+```
+## Choisir le type de noms:
+```{ojs}
+viewof type_nom = Inputs.radio(["Noms détaillés","Nom simplifiés"], {
+  label: "Type de noms",
+  value: "Noms détaillés"
+})
+
+```
+
+## Sélectionnez un président pour avoir les avis publiés sous sa présidence
+
+Quand le choix est *changé*, l'intervalle des avis séléctionné est mis à jour.
+
+```{ojs}
+viewof president = Inputs.radio(["Bernard (83-91)", "Changeux (92-99)", "Sicard (00-08)", "Grimfeld (09-11)", "Ameisen (12-15)", "Delfraissy (16-)"], {
+  label: "Présent",
+  value: "Delfraissy (16-)"
+})
+
+```
+
+## Sélectionner l'intervalle des avis à afficher (par numéro de publication, dans l'ordre chronologique):
+
+```{ojs}
+
+president_data = await d3.json("data/max_min_par_president.json");
+
+// Trouver la plage correspondant au président sélectionné
+selected_president_data = president_data.find(d => d.president === president);
+
+// Définir la plage des avis en fonction du président sélectionné
+import {interval} from '@mootari/range-slider'
+viewof avis_range = interval([1, 144], {
+  step: 1,
+  value: [selected_president_data.avis_min, selected_president_data.avis_max],
+  label: "Plage avis",
+})
+
+```
+
+## Choisir une catégorie de citations pour le calcul du top (parmi cette catégorie)
+
+```{ojs}
+viewof top_category = Inputs.select(["Science", "Presse", "Etat", "Auteurs", "Loi", "Forums", "Comité d'éthique", "Org Internationales", "Comparaison pays", "Société", "Autorités", "CCNE"], {
+  label: "Catégorie",
+  value: "Loi"
+})
+
+```
+
+# Top des citations selon les paramètres
+```{ojs}
+
+// Charger les fichiers JSON en fonction de "type_nom"
+nodes_df = type_nom === "Nom simplifiés"
+  ? await d3.json("data/mesograph_nodes.json")
+  : await d3.json("data/micrograph_nodes.json");
+  
+edges_df = type_nom === "Nom simplifiés"
+  ? await d3.json("data/mesograph_edgelist.json")
+  : await d3.json("data/micrograph_edgelist.json");
+  
+// Filter edges based on the selected range of avis
+filtered_edges = edges_df.filter(d => 
+  (+d.from >= avis_range[0] && +d.from <= avis_range[1]) || 
+  (+d.to >= avis_range[0] && +d.to <= avis_range[1])
+);
+
+// Get unique nodes involved in the filtered edges
+linked_nodes = new Set(filtered_edges.flatMap(d => [d.from, d.to]));
+
+// Further filter nodes to include only those linked in the selected edges
+filtered_nodes_linked = nodes_df.filter(d => linked_nodes.has(d.name));
+
+// Count the number of distinct citations for each "to" node (simple citations)
+citation_count = d3.rollups(
+  filtered_edges,
+  v => new Set(v.map(d => d.from)).size,
+  d => d.to
+);
+
+// Prepare a map for quick lookup
+citation_map = new Map(citation_count);
+
+// Filter and sort the top nodes by simple citation count
+top_nodes_single = filtered_nodes_linked
+  .filter(d => d.Categorie === top_category)
+  .map(d => ({ ...d, citations: citation_map.get(d.name) || 0 }))
+  .sort((a, b) => d3.descending(a.citations, b.citations))
+  .slice(0, top_n)
+  .map(d=> ({Nom: d.name, Citations: d.citations}));
+  
+// Afficher le titre du tableau
+md`## Top ${top_n} des documents les plus cités pour ${top_category}, parmi la plage sélectionnée, en comptant une citation par avis :`
+
+// Afficher le tableau des nœuds
+Inputs.table(top_nodes_single, {sort: "Citations", reverse: true})
+
+// Count the number of total citations for each "to" node (multiple citations)
+citation_count_multiple = d3.rollups(
+  filtered_edges,
+  v => d3.sum(v, d => +d.Citations || 1),
+  d => d.to
+);
+
+// Prepare a map for quick lookup of multiple citations
+citation_map_multiple = new Map(citation_count_multiple);
+
+// Filter and sort the top nodes by multiple citation count
+top_nodes_multiple = filtered_nodes_linked
+  .filter(d => d.Categorie === top_category)
+  .map(d => ({ ...d, citations: citation_map_multiple.get(d.name) || 0 }))
+  .sort((a, b) => d3.descending(a.citations, b.citations))
+  .slice(0, top_n)
+  .map(d=> ({Nom: d.name, Citations: d.citations}));
+  
+  // Afficher le titre du tableau
+md`## Top ${top_n} des documents les plus cités pour ${top_category}, parmi la plage sélectionnée, en comptant de multiple citation par avis :`
+
+// Afficher le tableau des nœuds
+Inputs.table(top_nodes_multiple, {sort: "Citations", reverse: true})
+```
+
+# Explications
+
+Cette application permet de visualiser les documents les plus cités au sein des avis émis par le Comité Consultatif National d'Éthique (CCNE).
+
+En sélectionnant une plage d'avis et une catégorie, l'application génère deux listes :
+
+- Top des documents les plus cités en comptant une citation par avis.
+
+- Top des documents les plus cités en comptant de multiples citations par avis.
+
+La plage d'avis permet de se restreindre à certains avis et à leurs citations.
+
+Les six noms de présidents du CCNE permet de restreindre la plage des avis publiés sous leur mandat.
+
+Il est aussi possible de choisir entre avoir le nom détaillé des documents cités (sauf pour les références scientifiques) ou avoir des agrégations de documents rendus la lecture plus intelligible.
+
+Dans le cas où l'option CCNE est choisi, on s'intéresse au réseau des citations internes entre avis.
+
+L'option Noms détaillés/Simplifiés est alors caduc, l'application génère deux listes :
+
+- Top des avis les plus cités (en comptant une citation par avis).
+
+- Top des avis qui citent le plus d'autres avis (en comptant de multiples citations par avis).
+
+On peut choisir les catégories de citations à afficher parmi :
+
+- Science, littérature : livres et articles scientifiques, Oeuvres de fictions ou autobiographiques, regroupés par domaine.
+
+- Presse : Journeaux de la presse quotidienne et Bulletins spécialisés (médicaux ou en santé publique).
+
+- Etat : Ministères, Parlement, Président, Premier Ministre, Administration (à l'exclusion des autorités indépendantes et/ou consultatives)
+
+- Auteurs : Auteurs considérés comme suffisamment importants pour apparaitre en propre, inclus des membres du CCNE et des 'classiques'.
+
+- Loi : Lois votées au Parlement, regroupées par thématique et Codes de lois.
+
+- Forums : Organisations consultatives associées à une posture de conseils au gouvernement et d'expertise (Forums Hybride, Callon et al. 2001) comme le CCNE, les académies ou l'Ordre des médecins.
+
+- Comité d'éthique : Tout autre comité d'éthique, français ou d'un autre pays.
+
+- Org Internationales : Toutes les organisations internationales incluant : institutions européennes, onusiennes, économiques/financières, olympiques.
+
+- Comparaison pays : Pays qui font l'objet d'une comparaison dans l'un des avis.
+
+- Société : Société civile, regroupée dans des catégories simples : collectifs, syndicats, religion, fondations caritatives
+
+- Autorités : Autorités administratives publics ou indépendantes, au sens de la loi de 2016, qui un pouvoir de contrôle effectif.
+
+- CCNE : Ensemble des avis numérotés publiés par le CCNE.

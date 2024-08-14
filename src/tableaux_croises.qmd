@@ -1,0 +1,86 @@
+---
+title: "Information de l'angle des avis en fonction de la profession"
+echo: false
+warning: false
+format:
+  html:
+    toc: true
+    toc-location: left
+    toc-width: 20%     # Adjust the TOC width
+    margin-left: 0px   # Remove any left margin if it's present
+    main-content-width: 80%  # Adjust the main content width
+    padding-left: 0
+---
+
+# Information de l'angle des avis en fonction de la profession
+
+On a construit 3 tableaux pour voir si on peut lier l'angle des avis (mesuré par le type de citation ou le type de personnalité humaine évoquée) :
+
+- Tableau **des citations par professions** : On y compte pour les avis ayant au moins une des professions en tant que rapporteurs, le pourcentage de ces avis qui citent une des catégories établies.
+
+- Tableau **des catégories BERT par professions** : On y compte pour les avis ayant au moins une des professions en tant que rapporteurs, le pourcentage de ces avis qui utilisent au moins une fois une des catégories établies.
+
+- Tableau **des catégories GPT par professions**: On y compte pour les avis ayant au moins une des professions en tant que rapporteurs, le pourcentage de ces avis qui utilisent au moins une fois une des catégories établies.
+
+## Tableau croisé des pourcentages des avis qui ont au moins un type de citation, et une profession dans leurs rapporteurs 
+
+```{r}
+library(DT)
+library(jsonlite)
+library(tidyverse)
+data <- as.data.frame(fromJSON("../data/intermediate/site/citations_by_professions.json"))
+# Create the interactive table with horizontal scrolling, without row numbers
+datatable(data, 
+          options = list(
+            pageLength = 11,  # Number of rows per page
+            autoWidth = TRUE, 
+            searching = TRUE, 
+            ordering = TRUE,
+            scrollX = TRUE    # Enable horizontal scrolling
+          ),
+          rownames = FALSE,   # Remove row numbers
+          class = 'cell-border stripe', # CSS class for styling
+)
+```
+
+## Tableau croisé des pourcentages des avis qui ont au moins un type de phrase associée à une certaine personnalité humaine (classification BERT, 2 classes) dans leurs phrases, et une profession dans leurs rapporteurs
+
+```{r}
+library(DT)
+library(jsonlite)
+library(tidyverse)
+data <- as.data.frame(fromJSON("../data/intermediate/site/bert_by_professions.json"))
+# Create the interactive table with horizontal scrolling, without row numbers
+datatable(data, 
+          options = list(
+            pageLength = 10,  # Number of rows per page
+            autoWidth = TRUE, 
+            searching = TRUE, 
+            ordering = TRUE,
+            scrollX = TRUE    # Enable horizontal scrolling
+          ),
+          rownames = FALSE,   # Remove row numbers
+          class = 'cell-border stripe', # CSS class for styling
+)
+```
+
+## Tableau croisé des pourcentages des avis qui ont au moins un type de phrase associée à une certaine personnalité humaine (classification GPT, 7 classes) dans leurs phrases, et une profession dans leurs rapporteurs
+
+```{r}
+library(DT)
+library(jsonlite)
+library(tidyverse)
+data <- as.data.frame(fromJSON("../data/intermediate/site/gpt_by_professions.json"))
+# Create the interactive table with horizontal scrolling, without row numbers
+datatable(data, 
+          options = list(
+            pageLength = 10,  # Number of rows per page
+            autoWidth = TRUE, 
+            searching = TRUE, 
+            ordering = TRUE,
+            scrollX = TRUE    # Enable horizontal scrolling
+          ),
+          rownames = FALSE,   # Remove row numbers
+          class = 'cell-border stripe', # CSS class for styling
+)
+```
