@@ -43,6 +43,12 @@ Liens utiles :
 
 # Graphiques interactifs, dont les résultats sont présentés succintement dans le mémoire
 
+[Citations les plus présentes dans les avis du CCNE](top_citations.qmd)
+
+[Réseau ego des citations autour de chaque avis du CCNE](reseau_ego.qmd)
+
+[Réseau entre les citations des avis du CCNE](mesonetwork.qmd)
+
 # Analyses et annexes numériques
 
 [Quelques informations sur les avis du CCNE](description_avis.qmd)

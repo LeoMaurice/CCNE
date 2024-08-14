@@ -12,8 +12,13 @@ project:
     - "liste_avis.qmd"
     - "tableaux_croises.qmd"
     - "avis"
+    - "top_citations.qmd"
+    - "network_data.RData"
+    - "reseau_ego.qmd"
+    - 'mesonetwork.qmd'
   resources: pdfjs
   type: website
+  output-dir: ../docs
     
 
 website:
@@ -42,6 +47,9 @@ website:
       - "personne_across_avis.qmd"
       - 'reseau_citations.qmd'
       - 'tableaux_croises.qmd'
+      - "top_citations.qmd"
+      - "ego_citations.qmd"
+      - "mesonetwork.qmd"
   page-navigation: false
   page-footer: "Copyright 2024, Léopold MAURICE" 
 format:

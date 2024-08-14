@@ -6,6 +6,10 @@ format:
   html:
     toc: true
     toc-location: left
+    toc-width: 20%     # Adjust the TOC width
+    margin-left: 0px   # Remove any left margin if it's present
+    main-content-width: 80%  # Adjust the main content width
+    padding-left: 0
 ---
 
 # Information de l'angle des avis en fonction de la profession

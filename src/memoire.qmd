@@ -29,5 +29,5 @@ resources:
 editor: source
 ---
 
-{{< pdf memoire.pdf width=100% image=memoire.png>}}
 
+{{< pdf memoire.pdf width=100% height=800 >}}

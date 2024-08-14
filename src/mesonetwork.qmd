@@ -1,0 +1,190 @@
+---
+format: 
+  live-html:
+    toc: true
+engine: knitr
+title: "Réseau entre les citations des avis du CCNE"
+author: "Léopold MAURICE, ENSAE"
+execute: 
+  echo: false
+---
+
+{{< include ./_extensions/r-wasm/live/_knitr.qmd >}}
+
+# Paramètres
+
+## Sélectionnez un président pour avoir les avis publiés sous sa présidence
+
+Quand le choix est *changé*, l'intervalle des avis séléctionné est mis à jour.
+
+```{ojs}
+viewof president = Inputs.radio(["Bernard (83-91)", "Changeux (92-99)", "Sicard (00-08)", "Grimfeld (09-11)", "Ameisen (12-15)", "Delfraissy (16-)"], {
+  label: "Présent",
+  value: "Delfraissy (16-)"
+})
+
+```
+
+## Sélectionner l'intervalle des avis à afficher (par numéro de publication, dans l'ordre chronologique):
+
+```{ojs}
+
+president_data = await d3.json("data/max_min_par_president.json");
+
+// Trouver la plage correspondant au président sélectionné
+selected_president_data = president_data.find(d => d.president === president);
+
+// Définir la plage des avis en fonction du président sélectionné
+import {interval} from '@mootari/range-slider'
+viewof avis_range = interval([1, 144], {
+  step: 1,
+  value: [selected_president_data.avis_min, selected_president_data.avis_max],
+  label: "Plage avis",
+})
+
+```
+
+## Choisir les catégories à afficher
+
+```{ojs}
+// Choisir les catégories à afficher
+list_all_categories = ["Auteurs","Autorités","CCNE","Comité d'éthique","Comparaison pays","Etat","Forums","Loi","Org Internationales","Presse", "Science, littérature","Société"];
+viewof categories = Inputs.checkbox(
+  list_all_categories, 
+  {label: "Catégories", value: ["Loi", "CCNE"]}
+);
+
+```
+
+# Réseau entre les citations (avec noms simplifiés)
+
+```{ojs}
+viewof graph_mode = Inputs.radio(
+  [false], 
+  {label: "Noms", value: false,format: (x) => x ? "complets":"simplifiés"}
+)
+```
+
+```{ojs}
+// Charger les fichiers JSON en fonction de "graph_mode"
+nodes = graph_mode
+  ? await d3.json("data/mesograph_nodes.json")
+  : await d3.json("data/micrograph_nodes.json");
+
+edges = graph_mode
+  ? await d3.json("data/mesograph_edgelist.json")
+  : await d3.json("data/micrograph_edgelist.json");
+
+```
+
+## Afficher ou cacher le réseau
+
+```{ojs}
+// Afficher ou cacher le réseau
+viewof toggle_network = Inputs.toggle({label: "Afficher le réseau", value: true});
+```
+
+```{webr}
+#| edit: false
+#| echo: false
+#| warning: false
+#| message: false
+#| input:
+#|   - nodes
+#|   - edges
+#|   - toggle_network
+#|   - categories
+#|   - avis_range
+library(dplyr, quietly = TRUE)
+library(tidyr, quietly = TRUE)
+library(igraph, quietly = TRUE)
+library(visNetwork, quietly = TRUE)
+category_colors <- c(
+  "Auteurs" = "#6CC7B3",
+  "Autorités" = "#285291",
+  "CCNE" = "#9D3A5E",
+  "Comité d'éthique" = "#579125",
+  "Comparaison pays" = "#0F0F5C",
+  "Etat" = "#91188F",
+  "Forums" = "#0E405C",
+  "Loi" = "#915B11",
+  "Org Internationales" = "#4F2B91",
+  "Presse" = "#91181E",
+  "Science, littérature" = "#0B5C2D",
+  "Société" = "#BD6345",
+  "Avis étudié" = "#4269A0"
+)
+
+if (toggle_network) {
+
+
+  # Filtrer les noeuds par catégories sélectionnées et plage d'avis
+  selected_nodes <- nodes %>%
+    filter(Categorie %in% categories & 
+           as.numeric(name) >= avis_range[1] & 
+           as.numeric(name) <= avis_range[2])
+
+  # Filtrer les edges
+  selected_edges <- edges %>%
+    filter(Categorie %in% categories &
+           ((as.numeric(from) >= avis_range[1] & as.numeric(from) <= avis_range[2]) |
+            (as.numeric(to) >= avis_range[1] & as.numeric(to) <= avis_range[2])))
+
+  linked_nodes <- unique(c(selected_edges$from, selected_edges$to))
+  selected_nodes <- nodes %>%
+    filter(name %in% linked_nodes & Categorie %in% categories)
+
+  nodes <- selected_nodes %>%
+    mutate(id = name,
+           label = name,
+           group = Categorie,
+           color = category_colors[Categorie]) %>%
+    select(id, label, group, color)
+
+  edges <- selected_edges %>%
+    rename(from = from, to = to) %>%
+    select(from, to)
+
+  nb_avis = avis_range[2] - avis_range[1] + 1
+  font_size = 0.17 * nb_avis + 16.7
+
+  visNetwork(nodes, edges) %>%
+    visEdges(arrows = 'to', color = list(inherit = "to")) %>%
+    visNodes(scaling = list(min = 20, max = 2 * font_size),
+             font = list(size = font_size)) %>%
+    visOptions(highlightNearest = list(enabled = TRUE, degree = 1, hideColor = "rgba(200,200,200,0.0005)", labelOnly = FALSE, algorithm = "hierarchical"), 
+               nodesIdSelection = TRUE, collapse = TRUE) %>%
+    visPhysics(solver = "forceAtlas2Based", 
+               forceAtlas2Based = list(gravitationalConstant = -25)) %>%
+    visGroups(groupname = "Auteurs", color = "#6CC7B3", shape = "square") %>%
+    visGroups(groupname = "Autorités", color = "#285291", shape = "square") %>%
+    visGroups(groupname = "CCNE", color = "#9D3A5E", shape = "circle") %>%
+    visGroups(groupname = "Comité d'éthique", color = "#579125", shape = "square") %>%
+    visGroups(groupname = "Comparaison pays", color = "#0F0F5C", shape = "square") %>%
+    visGroups(groupname = "Etat", color = "#91188F", shape = "square") %>%
+    visGroups(groupname = "Forums", color = "#0E405C", shape = "square") %>%
+    visGroups(groupname = "Loi", color = "#915B11", shape = "square") %>%
+    visGroups(groupname = "Org Internationales", color = "#4F2B91", shape = "square") %>%
+    visGroups(groupname = "Presse", color = "#91181E", shape = "square") %>%
+    visGroups(groupname = "Science, littérature", color = "#0B5C2D", shape = "square") %>%
+    visGroups(groupname = "Société", color = "#BD6345", shape = "square")
+}
+
+```
+
+# Explication de l'application
+
+Cette application permet de visualiser le graphe des citations des avis émis par le Comité Consultatif National d'Éthique (CCNE). Voici les fonctionnalités principales :
+
+- **Plage des avis** : Ajustez le slider pour sélectionner la plage des avis que vous souhaitez analyser.
+- **Sélection du président** : Choisissez un président pour ajuster automatiquement la plage des avis à ceux publiés sous son mandat.
+- **Catégories** : Sélectionnez les catégories de citations à inclure dans le réseau.
+- **Affichage du réseau** : Activez ou désactivez l'affichage du réseau de citations.
+- **Légende des flèches** : Citations directes sont représentées par des flèches pleines et les citations indirectes par des flèches en pointillés.
+
+Explorez les relations entre les avis à l'aide de cette interface interactive et ajustez les paramètres selon vos besoins.
+
+
+# Standalone app
+
+[**Réseau entre les citations, en application standalone**](https://leopoldmaurice.shinyapps.io/Mesonetwork/)
