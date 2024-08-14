@@ -17,6 +17,7 @@ project:
     - "reseau_ego.qmd"
     - 'mesonetwork.qmd'
     - "data"
+    - "_extensions"
   resources: pdfjs
   type: website
   output-dir: ../docs

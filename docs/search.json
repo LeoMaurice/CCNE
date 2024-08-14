@@ -212,49 +212,77 @@
     "href": "reseau_ego.html",
     "title": "Réseau ego des citations autour de chaque avis du CCNE",
     "section": "",
-    "text": "// Créer l'input select avec les numéros d'avis triés\nviewof node_id = Inputs.range([1, 144], {value: 1, step: 1, label: \"Numéro\"})\n\n\n\n\n\n\n\n\n\n\nlist_all_categories = [\"Auteurs\",\"Autorités\",\"CCNE\",\"Comité d'éthique\",\"Comparaison pays\",\"Etat\",\"Forums\",\"Loi\",\"Org Internationales\",\"Presse\", \"Science, littérature\",\"Société\"]\nviewof categories = Inputs.checkbox(\n  list_all_categories, \n  {label: \"Catégories\", value: list_all_categories}\n)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nviewof non_direct_links = Inputs.radio(\n  [true, false], \n  {label: \"Liens\", value: true,format: (x) =&gt; x ? \"Directs et indirects\":\"Directs uniquements\"}\n)\n\n\n\n\n\n\n\n\n\n Citations directes\n\n\n Citations indirectes\n\n\n\n\n\n\nviewof graph_mode = Inputs.radio(\n  [true, false], \n  {label: \"Noms\", value: false,format: (x) =&gt; x ? \"complets\":\"simplifiés\"}\n)\n\n\n\n\n\n\n\nnodes = graph_mode\n  ? await d3.json(\"data/mesograph_nodes.json\")\n  : await d3.json(\"data/micrograph_nodes.json\");\n\nedges = graph_mode\n  ? await d3.json(\"data/mesograph_edgelist.json\")\n  : await d3.json(\"data/micrograph_edgelist.json\");"
+    "text": "// Créer l'input select avec les numéros d'avis triés\nviewof node_id = Inputs.range([1, 144], {value: 1, step: 1, label: \"Numéro\"})\n\n\n\n\n\n\n\n\n\n\nlist_all_categories = [\"Auteurs\",\"Autorités\",\"CCNE\",\"Comité d'éthique\",\"Comparaison pays\",\"Etat\",\"Forums\",\"Loi\",\"Org Internationales\",\"Presse\", \"Science, littérature\",\"Société\"]\nviewof categories = Inputs.checkbox(\n  list_all_categories, \n  {label: \"Catégories\", value: list_all_categories}\n)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nviewof non_direct_links = Inputs.radio(\n  [true, false], \n  {label: \"Liens\", value: true,format: (x) =&gt; x ? \"Directs et indirects\":\"Directs uniquements\"}\n)\n\n\n\n\n\n\n\n\n\n Citations directes\n\n\n Citations indirectes\n\n\n\n\n\n\nviewof graph_mode = Inputs.radio(\n  [true, false], \n  {label: \"Noms\", value: false,format: (x) =&gt; x ? \"complets\":\"simplifiés\"}\n)\n\n\n\n\n\n\n\nnodes = graph_mode\n  ? await d3.json(\"data/mesograph_nodes.json\")\n  : await d3.json(\"data/micrograph_nodes.json\");\n\nedges = graph_mode\n  ? await d3.json(\"data/mesograph_edgelist.json\")\n  : await d3.json(\"data/micrograph_edgelist.json\");",
+    "crumbs": [
+      "Accueil",
+      "Réseau ego des citations autour de chaque avis du CCNE"
+    ]
   },
   {
     "objectID": "reseau_ego.html#sélectionner-le-numéro-de-lavis",
     "href": "reseau_ego.html#sélectionner-le-numéro-de-lavis",
     "title": "Réseau ego des citations autour de chaque avis du CCNE",
     "section": "",
-    "text": "// Créer l'input select avec les numéros d'avis triés\nviewof node_id = Inputs.range([1, 144], {value: 1, step: 1, label: \"Numéro\"})"
+    "text": "// Créer l'input select avec les numéros d'avis triés\nviewof node_id = Inputs.range([1, 144], {value: 1, step: 1, label: \"Numéro\"})",
+    "crumbs": [
+      "Accueil",
+      "Réseau ego des citations autour de chaque avis du CCNE"
+    ]
   },
   {
     "objectID": "reseau_ego.html#choisir-les-catégories-à-afficher-dans-le-réseau",
     "href": "reseau_ego.html#choisir-les-catégories-à-afficher-dans-le-réseau",
     "title": "Réseau ego des citations autour de chaque avis du CCNE",
     "section": "",
-    "text": "list_all_categories = [\"Auteurs\",\"Autorités\",\"CCNE\",\"Comité d'éthique\",\"Comparaison pays\",\"Etat\",\"Forums\",\"Loi\",\"Org Internationales\",\"Presse\", \"Science, littérature\",\"Société\"]\nviewof categories = Inputs.checkbox(\n  list_all_categories, \n  {label: \"Catégories\", value: list_all_categories}\n)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nviewof non_direct_links = Inputs.radio(\n  [true, false], \n  {label: \"Liens\", value: true,format: (x) =&gt; x ? \"Directs et indirects\":\"Directs uniquements\"}\n)\n\n\n\n\n\n\n\n\n\n Citations directes\n\n\n Citations indirectes"
+    "text": "list_all_categories = [\"Auteurs\",\"Autorités\",\"CCNE\",\"Comité d'éthique\",\"Comparaison pays\",\"Etat\",\"Forums\",\"Loi\",\"Org Internationales\",\"Presse\", \"Science, littérature\",\"Société\"]\nviewof categories = Inputs.checkbox(\n  list_all_categories, \n  {label: \"Catégories\", value: list_all_categories}\n)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nviewof non_direct_links = Inputs.radio(\n  [true, false], \n  {label: \"Liens\", value: true,format: (x) =&gt; x ? \"Directs et indirects\":\"Directs uniquements\"}\n)\n\n\n\n\n\n\n\n\n\n Citations directes\n\n\n Citations indirectes",
+    "crumbs": [
+      "Accueil",
+      "Réseau ego des citations autour de chaque avis du CCNE"
+    ]
   },
   {
     "objectID": "reseau_ego.html#choisir-le-mode-du-graphe-noms-simplifiés-citations-fortement-regroupées-noms-complets-citations-peu-regroupées",
     "href": "reseau_ego.html#choisir-le-mode-du-graphe-noms-simplifiés-citations-fortement-regroupées-noms-complets-citations-peu-regroupées",
     "title": "Réseau ego des citations autour de chaque avis du CCNE",
     "section": "",
-    "text": "viewof graph_mode = Inputs.radio(\n  [true, false], \n  {label: \"Noms\", value: false,format: (x) =&gt; x ? \"complets\":\"simplifiés\"}\n)\n\n\n\n\n\n\n\nnodes = graph_mode\n  ? await d3.json(\"data/mesograph_nodes.json\")\n  : await d3.json(\"data/micrograph_nodes.json\");\n\nedges = graph_mode\n  ? await d3.json(\"data/mesograph_edgelist.json\")\n  : await d3.json(\"data/micrograph_edgelist.json\");"
+    "text": "viewof graph_mode = Inputs.radio(\n  [true, false], \n  {label: \"Noms\", value: false,format: (x) =&gt; x ? \"complets\":\"simplifiés\"}\n)\n\n\n\n\n\n\n\nnodes = graph_mode\n  ? await d3.json(\"data/mesograph_nodes.json\")\n  : await d3.json(\"data/micrograph_nodes.json\");\n\nedges = graph_mode\n  ? await d3.json(\"data/mesograph_edgelist.json\")\n  : await d3.json(\"data/micrograph_edgelist.json\");",
+    "crumbs": [
+      "Accueil",
+      "Réseau ego des citations autour de chaque avis du CCNE"
+    ]
   },
   {
     "objectID": "reseau_ego.html#paramètres-1",
     "href": "reseau_ego.html#paramètres-1",
     "title": "Réseau ego des citations autour de chaque avis du CCNE",
     "section": "Paramètres",
-    "text": "Paramètres\n\nSélection du numéro de l’avis : Ce paramètre vous permet de choisir l’avis que vous souhaitez analyser.\nChoix des catégories à afficher : Sélectionnez les catégories de citations que vous souhaitez inclure dans le graphe. Les catégories disponibles sont les suivantes :\n\nScience, littérature\nPresse\nEtat\nAuteurs\nLoi\nForums\nComité d’éthique\nOrg Internationales\nComparaison pays\nSociété\nAutorités\nCCNE\n\nLiens non directs : Vous pouvez choisir d’afficher ou de masquer les liens non directs, c’est-à-dire les citations qui ne sont pas directement liées au nœud central sélectionné.\nMode du graphe : Ce paramètre vous permet de basculer entre les noms complets et une version simplifiée des noms dans le graphe.\n\nLe graphe interactif est généré à partir de ces paramètres, et vous permet de visualiser les relations entre les différents avis et les catégories sélectionnées."
+    "text": "Paramètres\n\nSélection du numéro de l’avis : Ce paramètre vous permet de choisir l’avis que vous souhaitez analyser.\nChoix des catégories à afficher : Sélectionnez les catégories de citations que vous souhaitez inclure dans le graphe. Les catégories disponibles sont les suivantes :\n\nScience, littérature\nPresse\nEtat\nAuteurs\nLoi\nForums\nComité d’éthique\nOrg Internationales\nComparaison pays\nSociété\nAutorités\nCCNE\n\nLiens non directs : Vous pouvez choisir d’afficher ou de masquer les liens non directs, c’est-à-dire les citations qui ne sont pas directement liées au nœud central sélectionné.\nMode du graphe : Ce paramètre vous permet de basculer entre les noms complets et une version simplifiée des noms dans le graphe.\n\nLe graphe interactif est généré à partir de ces paramètres, et vous permet de visualiser les relations entre les différents avis et les catégories sélectionnées.",
+    "crumbs": [
+      "Accueil",
+      "Réseau ego des citations autour de chaque avis du CCNE"
+    ]
   },
   {
     "objectID": "reseau_ego.html#visualisation-du-graphe",
     "href": "reseau_ego.html#visualisation-du-graphe",
     "title": "Réseau ego des citations autour de chaque avis du CCNE",
     "section": "Visualisation du Graphe",
-    "text": "Visualisation du Graphe\nLe graphe est interactif et vous permet de survoler les nœuds pour voir les détails, ainsi que de zoomer et de déplacer le graphe pour une meilleure visualisation."
+    "text": "Visualisation du Graphe\nLe graphe est interactif et vous permet de survoler les nœuds pour voir les détails, ainsi que de zoomer et de déplacer le graphe pour une meilleure visualisation.",
+    "crumbs": [
+      "Accueil",
+      "Réseau ego des citations autour de chaque avis du CCNE"
+    ]
   },
   {
     "objectID": "reseau_ego.html#légende",
     "href": "reseau_ego.html#légende",
     "title": "Réseau ego des citations autour de chaque avis du CCNE",
     "section": "Légende",
-    "text": "Légende\nLes couleurs des nœuds correspondent aux différentes catégories sélectionnées. Le nœud représentant l’avis étudié est mis en avant avec une couleur et une forme distinctes (étoile)."
+    "text": "Légende\nLes couleurs des nœuds correspondent aux différentes catégories sélectionnées. Le nœud représentant l’avis étudié est mis en avant avec une couleur et une forme distinctes (étoile).",
+    "crumbs": [
+      "Accueil",
+      "Réseau ego des citations autour de chaque avis du CCNE"
+    ]
   },
   {
     "objectID": "description_avis.html#selon-le-thème",
