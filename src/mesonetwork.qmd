@@ -11,6 +11,12 @@ execute:
 
 {{< include ./_extensions/r-wasm/live/_knitr.qmd >}}
 
+# Standalone app
+
+Si l'application ne fonctionne pas directement sur ce site, veuillez utiliser :
+
+[**Réseau entre les citations, en application standalone**](https://leopoldmaurice.shinyapps.io/Mesonetwork/)
+
 # Paramètres
 
 ## Sélectionnez un président pour avoir les avis publiés sous sa présidence
@@ -183,10 +189,3 @@ Cette application permet de visualiser le graphe des citations des avis émis pa
 - **Légende des flèches** : Citations directes sont représentées par des flèches pleines et les citations indirectes par des flèches en pointillés.
 
 Explorez les relations entre les avis à l'aide de cette interface interactive et ajustez les paramètres selon vos besoins.
-
-
-# Standalone app
-
-Si l'application ne fonctionne pas directement sur ce site, veuillez utiliser :
-
-[**Réseau entre les citations, en application standalone**](https://leopoldmaurice.shinyapps.io/Mesonetwork/)

@@ -9,6 +9,12 @@ execute:
 
 {{< include ./_extensions/r-wasm/live/_knitr.qmd >}}
 
+# Standalone app
+
+Si l'application ne fonctionne pas directement sur ce site, veuillez utiliser :
+
+[**Réseau égo des citations, en application standalone**](https://leopoldmaurice.shinyapps.io/Ego_Citation_avis/)
+
 # Paramètres
 ## Sélectionner le numéro de l'avis
 ```{ojs}
@@ -206,10 +212,3 @@ Le graphe est interactif et vous permet de survoler les nœuds pour voir les dé
 ## Légende
 
 Les couleurs des nœuds correspondent aux différentes catégories sélectionnées. Le nœud représentant l'avis étudié est mis en avant avec une couleur et une forme distinctes (étoile).
-
-
-# Standalone app
-
-Si l'application ne fonctionne pas directement sur ce site, veuillez utiliser :
-
-[**Réseau égo des citations, en application standalone**](https://leopoldmaurice.shinyapps.io/Ego_Citation_avis/)

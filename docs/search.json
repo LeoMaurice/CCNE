@@ -212,7 +212,7 @@
     "href": "reseau_ego.html",
     "title": "Réseau ego des citations autour de chaque avis du CCNE",
     "section": "",
-    "text": "// Créer l'input select avec les numéros d'avis triés\nviewof node_id = Inputs.range([1, 144], {value: 1, step: 1, label: \"Numéro\"})\n\n\n\n\n\n\n\n\n\n\nlist_all_categories = [\"Auteurs\",\"Autorités\",\"CCNE\",\"Comité d'éthique\",\"Comparaison pays\",\"Etat\",\"Forums\",\"Loi\",\"Org Internationales\",\"Presse\", \"Science, littérature\",\"Société\"]\nviewof categories = Inputs.checkbox(\n  list_all_categories, \n  {label: \"Catégories\", value: list_all_categories}\n)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nviewof non_direct_links = Inputs.radio(\n  [true, false], \n  {label: \"Liens\", value: true,format: (x) =&gt; x ? \"Directs et indirects\":\"Directs uniquements\"}\n)\n\n\n\n\n\n\n\n\n\n Citations directes\n\n\n Citations indirectes\n\n\n\n\n\n\nviewof graph_mode = Inputs.radio(\n  [true, false], \n  {label: \"Noms\", value: false,format: (x) =&gt; x ? \"complets\":\"simplifiés\"}\n)\n\n\n\n\n\n\n\nnodes = graph_mode\n  ? await d3.json(\"data/mesograph_nodes.json\")\n  : await d3.json(\"data/micrograph_nodes.json\");\n\nedges = graph_mode\n  ? await d3.json(\"data/mesograph_edgelist.json\")\n  : await d3.json(\"data/micrograph_edgelist.json\");",
+    "text": "Si l’application ne fonctionne pas directement sur ce site, veuillez utiliser :\nRéseau égo des citations, en application standalone",
     "crumbs": [
       "Accueil",
       "Réseau ego des citations autour de chaque avis du CCNE"
@@ -222,8 +222,8 @@
     "objectID": "reseau_ego.html#sélectionner-le-numéro-de-lavis",
     "href": "reseau_ego.html#sélectionner-le-numéro-de-lavis",
     "title": "Réseau ego des citations autour de chaque avis du CCNE",
-    "section": "",
-    "text": "// Créer l'input select avec les numéros d'avis triés\nviewof node_id = Inputs.range([1, 144], {value: 1, step: 1, label: \"Numéro\"})",
+    "section": "Sélectionner le numéro de l’avis",
+    "text": "Sélectionner le numéro de l’avis\n\n// Créer l'input select avec les numéros d'avis triés\nviewof node_id = Inputs.range([1, 144], {value: 1, step: 1, label: \"Numéro\"})",
     "crumbs": [
       "Accueil",
       "Réseau ego des citations autour de chaque avis du CCNE"
@@ -233,8 +233,8 @@
     "objectID": "reseau_ego.html#choisir-les-catégories-à-afficher-dans-le-réseau",
     "href": "reseau_ego.html#choisir-les-catégories-à-afficher-dans-le-réseau",
     "title": "Réseau ego des citations autour de chaque avis du CCNE",
-    "section": "",
-    "text": "list_all_categories = [\"Auteurs\",\"Autorités\",\"CCNE\",\"Comité d'éthique\",\"Comparaison pays\",\"Etat\",\"Forums\",\"Loi\",\"Org Internationales\",\"Presse\", \"Science, littérature\",\"Société\"]\nviewof categories = Inputs.checkbox(\n  list_all_categories, \n  {label: \"Catégories\", value: list_all_categories}\n)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nviewof non_direct_links = Inputs.radio(\n  [true, false], \n  {label: \"Liens\", value: true,format: (x) =&gt; x ? \"Directs et indirects\":\"Directs uniquements\"}\n)\n\n\n\n\n\n\n\n\n\n Citations directes\n\n\n Citations indirectes",
+    "section": "Choisir les catégories à afficher dans le réseau",
+    "text": "Choisir les catégories à afficher dans le réseau\n\nlist_all_categories = [\"Auteurs\",\"Autorités\",\"CCNE\",\"Comité d'éthique\",\"Comparaison pays\",\"Etat\",\"Forums\",\"Loi\",\"Org Internationales\",\"Presse\", \"Science, littérature\",\"Société\"]\nviewof categories = Inputs.checkbox(\n  list_all_categories, \n  {label: \"Catégories\", value: list_all_categories}\n)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nviewof non_direct_links = Inputs.radio(\n  [true, false], \n  {label: \"Liens\", value: true,format: (x) =&gt; x ? \"Directs et indirects\":\"Directs uniquements\"}\n)\n\n\n\n\n\n\n\nLégende des flèches\n\n Citations directes\n\n\n Citations indirectes",
     "crumbs": [
       "Accueil",
       "Réseau ego des citations autour de chaque avis du CCNE"
@@ -244,8 +244,8 @@
     "objectID": "reseau_ego.html#choisir-le-mode-du-graphe-noms-simplifiés-citations-fortement-regroupées-noms-complets-citations-peu-regroupées",
     "href": "reseau_ego.html#choisir-le-mode-du-graphe-noms-simplifiés-citations-fortement-regroupées-noms-complets-citations-peu-regroupées",
     "title": "Réseau ego des citations autour de chaque avis du CCNE",
-    "section": "",
-    "text": "viewof graph_mode = Inputs.radio(\n  [true, false], \n  {label: \"Noms\", value: false,format: (x) =&gt; x ? \"complets\":\"simplifiés\"}\n)\n\n\n\n\n\n\n\nnodes = graph_mode\n  ? await d3.json(\"data/mesograph_nodes.json\")\n  : await d3.json(\"data/micrograph_nodes.json\");\n\nedges = graph_mode\n  ? await d3.json(\"data/mesograph_edgelist.json\")\n  : await d3.json(\"data/micrograph_edgelist.json\");",
+    "section": "Choisir le mode du graphe : noms simplifiés (citations fortement regroupées), noms complets (citations peu regroupées)",
+    "text": "Choisir le mode du graphe : noms simplifiés (citations fortement regroupées), noms complets (citations peu regroupées)\n\nviewof graph_mode = Inputs.radio(\n  [true, false], \n  {label: \"Noms\", value: false,format: (x) =&gt; x ? \"complets\":\"simplifiés\"}\n)\n\n\n\n\n\n\n\nnodes = graph_mode\n  ? await d3.json(\"data/mesograph_nodes.json\")\n  : await d3.json(\"data/micrograph_nodes.json\");\n\nedges = graph_mode\n  ? await d3.json(\"data/mesograph_edgelist.json\")\n  : await d3.json(\"data/micrograph_edgelist.json\");",
     "crumbs": [
       "Accueil",
       "Réseau ego des citations autour de chaque avis du CCNE"
