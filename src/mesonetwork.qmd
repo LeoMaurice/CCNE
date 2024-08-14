@@ -187,4 +187,6 @@ Explorez les relations entre les avis à l'aide de cette interface interactive e
 
 # Standalone app
 
+Si l'application ne fonctionne pas directement sur ce site, veuillez utiliser :
+
 [**Réseau entre les citations, en application standalone**](https://leopoldmaurice.shinyapps.io/Mesonetwork/)

@@ -209,4 +209,7 @@ Les couleurs des nœuds correspondent aux différentes catégories sélectionné
 
 
 # Standalone app
+
+Si l'application ne fonctionne pas directement sur ce site, veuillez utiliser :
+
 [**Réseau égo des citations, en application standalone**](https://leopoldmaurice.shinyapps.io/Ego_Citation_avis/)
