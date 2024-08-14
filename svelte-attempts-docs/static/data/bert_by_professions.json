@@ -1,0 +1,26 @@
+[
+  {
+    "Type de phrase": "Personne/Individu",
+    "Avis avec au moins un(e) médecin PUPH dans ses rapporteurs": 85.1,
+    "Avis avec au moins un(e) chercheur bio dans ses rapporteurs": 92.3,
+    "Avis avec au moins un(e) autres professions santé dans ses rapporteurs": 100,
+    "Avis avec au moins un(e) politicien ou militant dans ses rapporteurs": 80,
+    "Avis avec au moins un(e) cadre public/privé dans ses rapporteurs": 100,
+    "Avis avec au moins un(e) théologien dans ses rapporteurs": 100,
+    "Avis avec au moins un(e) profession du droit dans ses rapporteurs": 90,
+    "Avis avec au moins un(e) chercheur droit dans ses rapporteurs": 50,
+    "Avis avec au moins un(e) chercheur SHS dans ses rapporteurs": 89.3
+  },
+  {
+    "Type de phrase": "Vivant",
+    "Avis avec au moins un(e) médecin PUPH dans ses rapporteurs": 80.9,
+    "Avis avec au moins un(e) chercheur bio dans ses rapporteurs": 92.3,
+    "Avis avec au moins un(e) autres professions santé dans ses rapporteurs": 100,
+    "Avis avec au moins un(e) politicien ou militant dans ses rapporteurs": 60,
+    "Avis avec au moins un(e) cadre public/privé dans ses rapporteurs": 100,
+    "Avis avec au moins un(e) théologien dans ses rapporteurs": 100,
+    "Avis avec au moins un(e) profession du droit dans ses rapporteurs": 80,
+    "Avis avec au moins un(e) chercheur droit dans ses rapporteurs": 50,
+    "Avis avec au moins un(e) chercheur SHS dans ses rapporteurs": 89.3
+  }
+]

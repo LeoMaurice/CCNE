@@ -4,10 +4,11 @@ author: "Léopold MAURICE"
 date: "2024-07-16"
 project: CCNE
 supervision: Pr. Emmanuel Didier, CMH/ENS/EHESS
+output-ext: html
 format:
   html:
     toc: true
-    number-sections: true
+    number-sections: false
     colorlinks: true
     geometry:
       - top=10mm
@@ -20,25 +21,15 @@ format:
     documentclass: report
     fig-width: 12
     fig-height: 9
-  pdf:
-    documentclass: article
-    geometry: [left=1in, right=1in, top=1in, bottom=1in]
-    fontsize: 11pt
-    keep-tex: true
-    toc: true
-    toc-depth: 2
-    number-sections: true
 execute:
   eval: true
   message: false
   warning: false
   echo: false
   output: true
-  error: true
+  error: false
 editor: source
 ---
-
-# [Retour aux choix](https://leopoldmaurice.shinyapps.io/CCNE/)
 
 ```{r}
 require(pacman,quietly = T)

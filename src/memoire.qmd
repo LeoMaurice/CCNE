@@ -1,0 +1,33 @@
+---
+title: "Mémoire (pdf) Léopold Maurice sur les avis du CCNE"
+supervision: Pr. Emmanuel Didier, CMH/ENS/EHESS
+format:
+  html:
+    toc: true
+    number-sections: false
+    colorlinks: true
+    geometry:
+      - top=10mm
+      - left=20mm
+      - right=20mm
+      - bottom=10mm  
+      - heightrounded
+    highlight-style: github
+    fontfamily: libertinus
+    documentclass: report
+    fig-width: 12
+    fig-height: 9
+execute:
+  eval: true
+  message: false
+  warning: false
+  echo: false
+  output: true
+  error: false
+resources:
+  - memoire.pdf
+editor: source
+---
+
+{{< pdf memoire.pdf width=100% image=memoire.png>}}
+

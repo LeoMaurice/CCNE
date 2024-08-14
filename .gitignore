@@ -82,6 +82,10 @@ rsconnect/
 !docs/**/*.min.js
 !docs/**/*.png
 
+!src/memoire.pdf
+!src/memoire.png
+!src/avis/*.pdf
+
 # tex
 *.tex
 

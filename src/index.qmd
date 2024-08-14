@@ -1,0 +1,57 @@
+---
+title: "Accueil, Mémoire CCNE"
+author: "Léopold MAURICE, ENSAE"
+date: "2024-08-14"
+supervision: Pr. Emmanuel Didier, CMH/ENS/EHESS
+format:
+  html:
+    toc: true
+    number-sections: false
+    colorlinks: true
+    geometry:
+      - top=10mm
+      - left=20mm
+      - right=20mm
+      - bottom=10mm  
+      - heightrounded
+    highlight-style: github
+    fontfamily: libertinus
+    documentclass: report
+    fig-width: 12
+    fig-height: 9
+execute:
+  eval: true
+  message: false
+  warning: false
+  echo: false
+  output: true
+  error: false
+editor: source
+---
+
+# Bienvenue sur le site de mon mémoire sur le CCNE
+
+Ce site présente les graphiques interactifs et annexe numérique créés dans le cadre de mon mémoire de sociologie  
+sous la direction d'Emmanuel Didier et de Samuel Coavoux sur le Comité Consultatif National d'Ethique (CCNE),  
+par Léopold MAURICE.
+
+Liens utiles :
+
+- [Répertoire Github, avec les codes et les données à l'adresse](https://github.com/LeoMaurice/CCNE)
+- [Mémoire, au format PDF](memoire.qmd)
+- [Liste des avis analysés, avec métadonnées et liens téléchargeables](liste_avis.qmd)
+
+# Graphiques interactifs, dont les résultats sont présentés succintement dans le mémoire
+
+# Analyses et annexes numériques
+
+[Quelques informations sur les avis du CCNE](description_avis.qmd)
+
+[Description des professions des membres du CCNE](description_membres.qmd)
+
+[Personnalité humaine au sein des avis du CCNE](personne_across_avis.qmd)
+
+[Résumé des citations des avis du CCNE](reseau_citations.qmd)
+
+[Information de l'angle des avis en fonction de la profession](tableaux_croises.qmd)
+
