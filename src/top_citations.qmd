@@ -64,7 +64,7 @@ viewof avis_range = interval([1, 144], {
 ## Choisir une catégorie de citations pour le calcul du top (parmi cette catégorie)
 
 ```{ojs}
-viewof top_category = Inputs.select(["Science", "Presse", "Etat", "Auteurs", "Loi", "Forums", "Comité d'éthique", "Org Internationales", "Comparaison pays", "Société", "Autorités", "CCNE"], {
+viewof top_category = Inputs.select(["Auteurs","Autorités","CCNE","Comité d'éthique","Comparaison pays","Etat","Forums","Loi","Org Internationales","Presse", "Science, littérature","Société"], {
   label: "Catégorie",
   value: "Loi"
 })
