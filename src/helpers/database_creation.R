@@ -52,7 +52,7 @@ president_CCNE_by_year <- Vectorize(function(year){
 open_avis <- function(rescrap_texte=FALSE){
   if(rescrap_texte){
     # Définir le chemin vers le dossier contenant les fichiers PDF
-    dossier_avis <- "../data/raw/avis"
+    dossier_avis <- "./data/raw/avis"
     
     # Liste des fichiers PDF dans le dossier
     liste_fichiers <- list.files(path = dossier_avis, pattern = "\\.pdf$", full.names = TRUE)
@@ -86,9 +86,9 @@ open_avis <- function(rescrap_texte=FALSE){
                              nb_pages = nombre_page,
                              stringsAsFactors = FALSE))
     }
-    saveRDS(base_avis_ccne, "../data/intermediate/base_avis_ccne.rds")
+    saveRDS(base_avis_ccne, "./data/intermediate/base_avis_ccne.rds")
   } else {
-    readRDS("../data/intermediate/base_avis_ccne.rds") -> base_avis_ccne
+    readRDS("./data/intermediate/base_avis_ccne.rds") -> base_avis_ccne
   }
   return(base_avis_ccne)
 }
@@ -96,7 +96,7 @@ open_avis <- function(rescrap_texte=FALSE){
 open_corrected_avis <- function(rescrap_texte=TRUE){
   if(rescrap_texte){
     # Définir le chemin vers le dossier contenant les fichiers PDF
-    dossier_avis <- "../data/raw/avis_corrected"
+    dossier_avis <- "./data/raw/avis_corrected"
     
     # Liste des fichiers PDF dans le dossier
     liste_fichiers <- list.files(path = dossier_avis, pattern = "\\.pdf$", full.names = TRUE)
@@ -126,9 +126,9 @@ open_corrected_avis <- function(rescrap_texte=TRUE){
                              nb_pages = nombre_page,
                              stringsAsFactors = FALSE))
     }
-    saveRDS(base_avis_ccne, "../data/intermediate/base_corrected_avis_ccne.rds")
+    saveRDS(base_avis_ccne, "./data/intermediate/base_corrected_avis_ccne.rds")
   } else {
-    readRDS("../data/intermediate/base_corrected_avis_ccne.rds") -> base_avis_ccne
+    readRDS("./data/intermediate/base_corrected_avis_ccne.rds") -> base_avis_ccne
   }
   return(base_avis_ccne)
 }
@@ -149,7 +149,7 @@ open_metadata <- function(){
     "MILDT" # Mission Interministérielle de luttes contre la dépendance et la toxicomanie
   )
   
-  return(read_excel("../data/raw/collected_metadata/metadata_avis.xlsx", 
+  return(read_excel("./data/raw/collected_metadata/metadata_avis.xlsx", 
              col_types = c("numeric", "date", "text", 
                            "text", "text", "text", 
                            "logical", "text", "text", 

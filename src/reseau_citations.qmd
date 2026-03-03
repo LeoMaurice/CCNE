@@ -70,8 +70,8 @@ pacman::p_load(arrow,
                
                openxlsx)
 
-source("helpers/database_creation.R")
-source("helpers/figures.R")
+source("./src/helpers/database_creation.R")
+source("./src/helpers/figures.R")
 
 save_figures = T
 cutpoints = c(0, 1e-04, 0.001, 0.01, 0.05, 0.1, 1)
@@ -110,7 +110,7 @@ if (type == "classic") {
 
 metadata_avis <- open_metadata()
 
-metadata_citation <- read.xlsx("../data/raw/collected_metadata/metadata_citation.xlsx", 
+metadata_citation <- read.xlsx("./data/raw/collected_metadata/metadata_citation.xlsx", 
                                colNames = TRUE,
                                cols = c(1, 2, 4, 5, 6))%>%
   separate_rows(cité_dans_avis_num, sep = ";")%>%
@@ -126,7 +126,7 @@ metadata_citation <- read.xlsx("../data/raw/collected_metadata/metadata_citation
          Désignation = designation_recoding(type,Auteur_Institution, Institution_Domaine, freq_auteur,freq_institution)
          )
 
-recat <- read_excel("../data/intermediate/reseau/recategorize_designation.xlsx")
+recat <- read_excel("./data/intermediate/reseau/recategorize_designation.xlsx")
 
 metadata_citation <- metadata_citation%>%
   left_join(recat, by = "Désignation")%>%
@@ -440,26 +440,219 @@ all_combinations %>%
               group_by(num, Catégorie) %>%
               summarise(nb_citation = n())) %>%
   left_join(metadata_avis, by = "num") -> plot_data_nb_citations
+
 plot_data_nb_citations%>%
   group_by(Catégorie) %>%
   mutate(rank = dense_rank(desc(nb_citation))) %>%
   ungroup() %>%
   mutate(label = ifelse(rank <= 3, as.character(num), ""))%>%
   filter(Catégorie != "Science, littérature") %>%
-  ggscatter(x = "date", y = "nb_citation", facet.by = "Catégorie", color = "president",size = 2.5, xlab = "Temps",ylab = "Nombre de citations (multiple par avis)", caption= "Graphique de l'auteur.\nChamps : Tous les avis numérotés publiés par le CCNE jusqu'au 144.\nDonnées collectées par l'auteur.\nLecture: Le nombre de citations dans les avis du CCNE\nsemblent augmenter dans le cas où ces citations renvoient\naux institutions gouvernementales, aux autorités indépendantes et dans une moindre mesure à la société civile.\nLe fait le plus notable est la citation devient quasiment systématique dans toutes les catégories, en particulier sous Delfraissy.\nLa loi est le domaine d'exception qui a quasiment toujours été cité dès le tout premier avis.") +
-  scale_color_prism("colorblind_safe")+
-  theme_ready(text_size = 27)+
-  geom_text_repel(aes(label = label, color = president), max.overlaps = Inf, size = 8)
+  ggscatter(x = "date", y = "nb_citation", facet.by = "Catégorie", color = "president",size = 2.5, xlab = "Temps",ylab = "Nombre de citations") +
+  scale_color_prism("black_and_white")+
+  theme_ready(text_size = 27)
+```
+# BW
+
+```{r}
+# # Ajouter une colonne président à metadata_avis
+# metadata_avis <- metadata_avis %>%
+#   mutate(president = case_when(
+#     num >= 1 & num <= 28 ~ "Bernard (1983-1991)",
+#     num >= 29 & num <= 60 ~ "Changeux (1992-1999)",
+#     num >= 61 & num <= 103 ~ "Sicard (2000-2008)",
+#     num >= 104 & num <= 115 ~ "Grimfeld (2009-2011)",
+#     num >= 116 & num <= 124 ~ "Ameisen (2012-2015)",
+#     num >= 125 & num <= 144 ~ "Delfraissy (2016-)"
+#   ))
+# 
+# # Assurez-vous que les présidents sont dans le bon ordre
+# metadata_avis$president <- factor(metadata_avis$president, levels = c(
+#   "Bernard (1983-1991)", "Changeux (1992-1999)", "Sicard (2000-2008)", "Grimfeld (2009-2011)", "Ameisen (2012-2015)", "Delfraissy (2016-)"
+# ))
+# 
+# all_combinations <- expand.grid(
+#   num = 1:144,
+#   Catégorie = unique(metadata_citation$Groupe)
+# )%>%
+#   mutate(num = as.numeric(num))
+# 
+# # Graphique
+# all_combinations %>%
+#   left_join(metadata_citation %>%
+#               rename(num = cité_dans_avis_num, Catégorie = Groupe) %>%
+#               group_by(num, Catégorie) %>%
+#               mutate(num = as.numeric(num)) %>%
+#               summarise(nb_citation = n(), .groups = 'drop'),
+#             by = c("num", "Catégorie")) %>%
+#   replace_na(list(nb_citation = 0))%>%
+#   bind_rows(metadata_avis %>%
+#               # filter(!is.na(citations_autres_avis)) %>%
+#               separate_rows(citations_autres_avis , sep = ";") %>%
+#               mutate(Catégorie = "CCNE") %>%
+#               group_by(num, Catégorie) %>%
+#               summarise(nb_citation = n())) %>%
+#   left_join(metadata_avis, by = "num") -> plot_data_nb_citations
+# 
+# plot1 <- plot_data_nb_citations%>%
+#   filter(Catégorie %in% c("Autorités", "Etat", "Comparaison pays", "Société", "CCNE")) %>%
+#   mutate(Catégorie = ifelse(Catégorie == "Comparaison pays", "Comparaison\npays", Catégorie)) %>%
+#   ggboxplot(x = "Catégorie", y = "nb_citation", fill = "president", xlab = "", ylab = "") +
+#   labs(fill = "Président") +
+#   # ggscatter(x = "date", y = "nb_citation", facet.by = "Catégorie", color = "president",size = 2.5, xlab = "Temps",ylab = "Nombre de citations") +
+#   scale_fill_manual(values = c("grey10", "gray50", "gray30", "gray80", "gray70", "gray100")) +
+#   theme_ready(text_size = 28)
+```
+```{r}
+# plot2 <- plot_data_nb_citations%>%
+#   filter(Catégorie %in% c("Comité d'éthique", "Forums", "Loi", "Org Internationales", "Presse")) %>%
+#   mutate(Catégorie = ifelse(Catégorie == "Comité d'éthique", "Comité\nd'éthique", Catégorie)) %>%
+#   mutate(Catégorie = ifelse(Catégorie == "Org Internationales", "Organisations\ninternationales", Catégorie)) %>%
+#   ggboxplot(x = "Catégorie", y = "nb_citation", fill = "president", xlab = "Type de citation", ylab = "") +
+#   labs(fill = "Président") +
+#   # ggscatter(x = "date", y = "nb_citation", facet.by = "Catégorie", color = "president",size = 2.5, xlab = "Temps",ylab = "Nombre de citations") +
+#   scale_fill_manual(values = c("grey10", "gray50", "gray30", "gray80", "gray70", "gray100")) +
+#   theme_ready(text_size = 30) +
+#   theme(legend.position="none")
 ```
 
+```{r}
+# plot1 / plot2
+# 
+# ggsave("./output/descriptive_citations/BW_citations_catégorie.png", width = 15, height = 12)
+```
+# BW BIS
+```{r}
+# Ajouter une colonne président à metadata_avis
+metadata_avis <- metadata_avis %>%
+  mutate(president = case_when(
+    num >= 1 & num <= 28 ~ "Bernard (1983-1991)",
+    num >= 29 & num <= 60 ~ "Changeux (1992-1999)",
+    num >= 61 & num <= 103 ~ "Sicard (2000-2008)",
+    num >= 104 & num <= 115 ~ "Grimfeld (2009-2011)",
+    num >= 116 & num <= 124 ~ "Ameisen (2012-2015)",
+    num >= 125 & num <= 144 ~ "Delfraissy (2016-)"
+  )) %>%
+  filter(num <= 144)
+
+# Assurez-vous que les présidents sont dans le bon ordre
+metadata_avis$president <- factor(metadata_avis$president, levels = c(
+  "Bernard (1983-1991)", "Changeux (1992-1999)", "Sicard (2000-2008)", "Grimfeld (2009-2011)", "Ameisen (2012-2015)", "Delfraissy (2016-)"
+))
+
+all_combinations <- expand.grid(
+  num = 1:144,
+  Catégorie = unique(metadata_citation$Groupe)
+)%>%
+  mutate(num = as.numeric(num))
+
+# Graphique
+all_combinations %>%
+  left_join(metadata_citation %>%
+              rename(num = cité_dans_avis_num, Catégorie = Groupe) %>%
+              group_by(num, Catégorie) %>%
+              mutate(num = as.numeric(num)) %>%
+              summarise(nb_citation = n(), .groups = 'drop'),
+            by = c("num", "Catégorie")) %>%
+  replace_na(list(nb_citation = 0))%>%
+  bind_rows(metadata_avis %>%
+              # filter(!is.na(citations_autres_avis)) %>%
+              separate_rows(citations_autres_avis , sep = ";") %>%
+              mutate(Catégorie = "CCNE") %>%
+              group_by(num, Catégorie) %>%
+              summarise(nb_citation = n())) %>%
+  left_join(metadata_avis, by = "num") -> plot_data_nb_citations
+
+plot1 <- plot_data_nb_citations%>%
+  filter(Catégorie %in% c("Autorités", "Etat", "Comparaison pays", "Société", "CCNE")) %>%
+  mutate(Catégorie = ifelse(Catégorie == "Comparaison pays", "Comparaison\npays", Catégorie)) %>%
+  
+ggplot(aes(
+    x = Catégorie,
+    y = nb_citation,
+    fill = president,
+    pattern = president,
+    pattern_angle = president,
+    pattern_size = president,
+    pattern_density = president
+  )) +
+  
+  geom_boxplot_pattern(
+    position = position_dodge(width = 0.8),
+    color = "black",
+    pattern_fill = "white",
+    pattern_color = "white",
+    alpha = 0.8,
+  ) +
+  
+  ## Vos palettes
+  scale_fill_manual(values = c("grey20", "grey10", "grey10", "grey50", "grey10", "white")) +
+  scale_pattern_manual(values = c("none","circle","stripe","none","stripe","none")) +
+  scale_pattern_angle_manual(values = c(0, 45, 135, 0, 45, 0)) +
+  scale_pattern_size_manual(values = c(0, 0.5, 0.5, 0, 0.5, 0)) +
+  scale_pattern_density_manual(values = c(0, 0.7, 0.5, 0, 0.5, 0)) +
+  
+  labs(fill = "Président", pattern = "Président", 
+       pattern_angle = "Président", pattern_size = "Président",
+       pattern_density = "Président",
+       x = "", y = "") +
+  theme_ready(text_size = 28)
+```
+```{r}
+plot2 <- plot_data_nb_citations%>%
+  filter(Catégorie %in% c("Comité d'éthique", "Forums", "Loi", "Org Internationales", "Presse")) %>%
+  mutate(Catégorie = ifelse(Catégorie == "Comité d'éthique", "Comité\nd'éthique", Catégorie)) %>%
+  mutate(Catégorie = ifelse(Catégorie == "Org Internationales", "Organisations\ninternationales", Catégorie)) %>%
+  ggplot(aes(
+    x = Catégorie,
+    y = nb_citation,
+    fill = president,
+    pattern = president,
+    pattern_angle = president,
+    pattern_size = president,
+    pattern_density = president
+  )) +
+  
+  geom_boxplot_pattern(
+    position = position_dodge(width = 0.8),
+    color = "black",
+    pattern_fill = "white",
+    pattern_color = "white",
+    alpha = 0.8,
+  ) +
+  
+  ## Vos palettes
+  scale_fill_manual(values = c("grey20", "grey10", "grey10", "grey50", "grey10", "white")) +
+  scale_pattern_manual(values = c("none","circle","stripe","none","stripe","none")) +
+  scale_pattern_angle_manual(values = c(0, 45, 135, 0, 45, 0)) +
+  scale_pattern_size_manual(values = c(0, 0.5, 0.5, 0, 0.5, 0)) +
+  scale_pattern_density_manual(values = c(0, 0.7, 0.5, 0, 0.5, 0)) +
+  
+  labs(fill = "Président", pattern = "Président", 
+       pattern_angle = "Président", pattern_size = "Président",
+       pattern_density = "Président", y = "", x = "Type de citations") +
+  theme_ready(text_size = 28) +
+  theme(legend.position = "none")
+
+```
+
+```{r}
+plot1
+ggsave("./output/descriptive_citations/BW_citations_catégorie1.png", width = 15, height = 7)
+```
+```{r}
+plot2
+ggsave("./output/descriptive_citations/BW_citations_catégorie2.png", width = 15, height = 6)
+```
+# BW 
 ```{r, fig.width=21, fig.height=9.9}
 plot_data_nb_citations%>%
   mutate(label = ifelse(nb_citation>50,num,""))%>%
   filter(Catégorie== "Science, littérature")%>%
-  ggscatter(x = "date", y = "nb_citation", facet.by = "Catégorie", color = "president",size = 4, xlab = "Temps",ylab = "Nombre de citations (multiple par avis)", caption= "Graphique de l'auteur.\nChamps : Tous les avis numérotés publiés par le CCNE jusqu'au 144.\nDonnées collectées par l'auteur.\nLecture: En moyenne deux pics d'inflations du nombre de citations scientifiques peuvent être identifier :\nà la fin de la présidence Changeux et au cours de la présidence Delfraissy.") +
-  scale_color_prism("colorblind_safe")+
-  theme_ready(text_size = 27)+
-  geom_text_repel(aes(label = label, color = president), max.overlaps = Inf, size = 8)
+  ggscatter(x = "date", y = "nb_citation", shape = "president",size = 6, xlab = "Date de publication",ylab = "") +
+  theme_ready(text_size = 36)+
+  labs(shape = "Président") +
+  scale_shape_manual(values = c(1, 17, 0, 16, 2, 15)) +
+  geom_text_repel(aes(label = label, fill = "black"), max.overlaps = Inf, size = 8)
 ```
 
 ```{r, fig.width=21, fig.height=9.9}
